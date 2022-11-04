@@ -1,0 +1,87 @@
+{
+  "pluginAlias": "TelldusToo",
+  "pluginType": "platform",
+  "headerDisplay": "Telldus control platform for Homebridge, for local API",
+  "footerDisplay": "For more information see the [README](https://github.com/kernie66/homebridge-telldus-too#readme)",
+  "singular": true,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "description": "Plugin name as displayed in the homebridge log.",
+        "type": "string",
+        "required": true,
+        "default": "TelldusLocal"
+      },
+      "ipAddress": {
+        "title": "IP address of Telldus device.",
+        "type": "string",
+        "placeholder": "192.168.1.100",
+        "required": true
+      },
+      "accessToken": {
+        "title": "Telldus access token.",
+        "type": "string",
+        "placeholder": "Enter access token"
+      },
+      "locale": {
+        "title": "Locale used for time and date notation",
+        "type": "string",
+        "placeholder": "Enter two character locale"
+      },
+      "delay": {
+        "title": "Max delay",
+        "description": "The maximum delay in seconds before a switch is updated.",
+        "type": "integer",
+        "default": 300
+      },
+      "random": {
+        "title": "Random Delay",
+        "description": "Set to enable random delays before switches are updated.",
+        "type": "boolean",
+        "default": false
+      },
+      "heartrate": {
+        "title": "Heartrate",
+        "type": "integer",
+        "default": 60,
+        "description": "Heartrate interval of the status check"
+      }
+    }
+  },
+  "form": [
+    {
+      "type": "help",
+      "helpvalue": "<div class=\"alert alert-info\">Homebridge Telldus Plugin</div>"
+    },
+    {
+      "key": "name",
+      "type": "text"
+    },
+    {
+      "key": "ipAddress",
+      "type": "text"
+    },
+    {
+      "key": "accessToken",
+      "type": "text"
+    },
+    {
+      "key": "random",
+      "type": "boolean"
+    },
+    {
+      "key": "delay",
+      "condition": "random",
+      "type": "integer"
+    },
+    {
+      "key": "heartrate",
+      "type": "integer"
+    },
+    {
+      "key": "locale",
+      "type": "text"
+    }
+  ]
+}

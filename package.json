@@ -1,0 +1,39 @@
+{
+  "name": "homebridge-telldus-too",
+  "version": "0.1.0",
+  "description": "Alternative Telldus plugin for Homebridge: https://github.com/nfarina/homebridge",
+  "license": "MIT",
+  "keywords": [
+    "homebridge-plugin",
+    "telldus",
+    "random",
+    "automation"
+  ],
+  "dependencies": {
+    "events": "^3.3.0",
+    "homebridge-lib": "^5.7.1",
+    "luxon": "^3.0.4",
+    "telldus-api": "^1.0.3",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.24.0",
+    "np": "^7.6.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kernie66/homebridge-telldus-too.git"
+  },
+  "bugs": {
+    "url": "http://github.com/kernie66/homebridge-telldus-too/issues"
+  },
+  "engines": {
+    "node": "^18.12.0",
+    "homebridge": "^1.5.1"
+  },
+  "scripts": {
+    "test": "echo \"No test specified\""
+  },
+  "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
+  "author": "Kenneth Jagenheim, rewritten from plugin by John Lemón"
+}
