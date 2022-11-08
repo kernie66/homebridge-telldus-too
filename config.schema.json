@@ -41,6 +41,11 @@
         "type": "boolean",
         "default": false
       },
+      "ignore": {
+        "title": "Ignored devices and sensors",
+        "description": "Enter the IDs that are to be ignored by Homebridge, separated by commas",
+        "type": "string"
+      },
       "heartrate": {
         "title": "Heartrate",
         "type": "integer",
@@ -74,6 +79,10 @@
       "key": "delay",
       "condition": "random",
       "type": "integer"
+    },
+    {
+      "key": "ignore",
+      "type": "text"
     },
     {
       "key": "heartrate",
