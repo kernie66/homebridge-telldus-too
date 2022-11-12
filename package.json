@@ -13,6 +13,7 @@
     "events": "^3.3.0",
     "homebridge-lib": "^5.7.1",
     "luxon": "^3.0.4",
+    "node-cache": "^5.1.2",
     "telldus-api": "^1.0.3",
     "uuid": "^9.0.0"
   },
