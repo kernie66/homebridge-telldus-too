@@ -41,8 +41,20 @@
         "type": "boolean",
         "default": false
       },
+      "ignoreUnnamedSwitches": {
+        "title": "Ignore unnamed switches",
+        "description": "Select to ignore all unnamed switches",
+        "type": "boolean",
+        "default": false
+      },
+      "ignoreUnnamedSensors": {
+        "title": "Ignore unnamed sensors",
+        "description": "Select to ignore all unnamed sensors",
+        "type": "boolean",
+        "default": false
+      },
       "ignore": {
-        "title": "Ignored devices and sensors",
+        "title": "Ignore specific switches and sensors",
         "description": "Enter the IDs that are to be ignored by Homebridge, separated by commas",
         "type": "string"
       },
@@ -79,6 +91,14 @@
       "key": "delay",
       "condition": "random",
       "type": "integer"
+    },
+    {
+      "key": "ignoreUnnamedSwitches",
+      "type": "boolean"
+    },
+    {
+      "key": "ignoreUnnamedSensors",
+      "type": "boolean"
     },
     {
       "key": "ignore",
