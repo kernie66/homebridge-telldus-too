@@ -11,14 +11,14 @@
   ],
   "dependencies": {
     "events": "^3.3.0",
-    "homebridge-lib": "^5.7.1",
-    "luxon": "^3.0.4",
+    "homebridge-lib": "^6.0.1",
+    "luxon": "^3.1.0",
     "node-cache": "^5.1.2",
     "telldus-api": "^1.0.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.24.0",
+    "eslint": "^8.28.0",
     "np": "^7.6.2"
   },
   "repository": {
