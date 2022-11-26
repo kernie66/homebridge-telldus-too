@@ -41,6 +41,12 @@
         "type": "boolean",
         "default": false
       },
+      "repeats": {
+        "title": "Repetitions",
+        "description": "The number of repetitions (0-5) for switch commands on/off.",
+        "type": "integer",
+        "default": 0
+      },
       "ignoreUnnamedSwitches": {
         "title": "Ignore unnamed switches",
         "description": "Select to ignore all unnamed switches",
@@ -90,6 +96,10 @@
     {
       "key": "delay",
       "condition": "random",
+      "type": "integer"
+    },
+    {
+      "key": "repeats",
       "type": "integer"
     },
     {
