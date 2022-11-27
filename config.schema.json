@@ -64,11 +64,17 @@
         "description": "Enter the IDs that are to be ignored by Homebridge, separated by commas",
         "type": "string"
       },
-      "heartrate": {
+      "configHeartrate": {
         "title": "Heartrate",
         "type": "integer",
-        "default": 60,
-        "description": "Heartrate interval of the status check"
+        "default": 300,
+        "description": "Heartrate interval of the sensor status check"
+      },
+      "randomize": {
+        "title": "Randomize sensor heartrate",
+        "description": "Randomize the actual heartrate for the sensors +/-20%",
+        "type": "boolean",
+        "default": false
       }
     }
   },
@@ -115,8 +121,12 @@
       "type": "text"
     },
     {
-      "key": "heartrate",
+      "key": "configHeartrate",
       "type": "integer"
+    },
+    {
+      "key": "randomize",
+      "type": "boolean"
     },
     {
       "key": "locale",
