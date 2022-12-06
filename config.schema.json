@@ -33,7 +33,7 @@
         "title": "Max delay",
         "description": "The maximum delay in seconds before a switch is updated.",
         "type": "integer",
-        "default": 300
+        "default": 60
       },
       "random": {
         "title": "Random Delay",
