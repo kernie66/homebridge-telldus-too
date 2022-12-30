@@ -1,0 +1,8 @@
+{
+    "autoHide.autoHidePanel": false,
+    "remote.extensionKind": {
+      "alefragnani.project-manager": [
+        "workspace"
+      ]
+    },
+}
