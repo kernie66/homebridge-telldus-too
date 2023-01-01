@@ -1,22 +1,22 @@
-[![npm](https://badgen.net/npm/v/homebridge-random-delay-switches)](https://www.npmjs.com/package/homebridge-random-delay-switches)
-[![npm](https://badgen.net/npm/dw/homebridge-random-delay-switches)](https://www.npmjs.com/package/homebridge-random-delay-switches)
-[![npm](https://badgen.net/npm/dt/homebridge-random-delay-switches)](https://www.npmjs.com/package/homebridge-random-delay-switches)
+[![npm](https://badgen.net/npm/v/homebridge-telldus-too)](https://www.npmjs.com/package/homebridge-telldus-too)
+[![npm](https://badgen.net/npm/dw/homebridge-telldus-too)](https://www.npmjs.com/package/homebridge-telldus-too)
+[![npm](https://badgen.net/npm/dt/homebridge-telldus-too)](https://www.npmjs.com/package/homebridge-telldus-too)
 
-# Homebridge-Random-Delay-Switches
+# Homebridge-Telldus-Too
 
 With this plugin, you can create any number of fake switches that will start a timer, which can be a random duration too (between two configured values), when turned ON. When the delay time is reached the switch will automatically turn OFF and trigger a dedicated motion sensor for 3 seconds. This can be very useful for advanced automation with HomeKit scenes - when delayed actions are required.
 
-The random duration is very useful if you want an automation which simulates your presence at home by switching the lights at a random time. This looks more realisitic than a statically configured on/off-time. 
+The random duration is very useful if you want an automation which simulates your presence at home by switching the lights at a random time. This looks more realisitic than a statically configured on/off-time.
 
 By using the minimum delay, you can make sure that there is a delay for at least the minimum time. This is useful for temporary switching on a light, e.g. when a camera or sensor detects motion.
 
 It is also possible to create a stateful switch, with or without the motion sensor, which stays in the current state until commanded to the other state.
 
-*(New in v1.1.0)* The switches can be scheduled to turn on automatically by using a **cron** syntax. The delay will start at the scheduled times, which can be useful to trigger other advanced automations, e.g. to check the state of a sensor during specific times or dates.  
+*(New in v1.1.0)* The switches can be scheduled to turn on automatically by using a **cron** syntax. The delay will start at the scheduled times, which can be useful to trigger other advanced automations, e.g. to check the state of a sensor during specific times or dates.
 
-*(New in v1.2.0)* Increased the max delay to almost 10 days and added infinite repeats.  
+*(New in v1.2.0)* Increased the max delay to almost 10 days and added infinite repeats.
 
-*(New in v1.2.1)* Added config parameter to select if config values or user changes will be used when Homebridge restarts for each switch. For convenience, delay and minimum delay can be configured in the format `D:HH:MM:SS` for days, hours, minutes and seconds, or just (a lot of) seconds. 
+*(New in v1.2.1)* Added config parameter to select if config values or user changes will be used when Homebridge restarts for each switch. For convenience, delay and minimum delay can be configured in the format `D:HH:MM:SS` for days, hours, minutes and seconds, or just (a lot of) seconds.
 
 ## How to install
 
@@ -126,7 +126,7 @@ Repetitions (total) | Corresponds to the `repeats` parameter. The switch will be
 Restore default | Restores the configuration parameters to the default values from the configuration file.
 Time left of timer | The time left before the delay time is up. Decremented by the heartbeat value. Used to continue the delay after a restart, if the delay was active.
 Heartrate   | Internal heartbeat rate used e.g. to keep track of the time left of the timer. The heartbeat and the timers are not synced, so the time left may be off by up to the heartrate value. The default value of 15 s is recommended for most cases, unless the delay time is long. Corresponds to the `heartrate` parameter.
-Log Level   | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2. 
+Log Level   | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2.
 
 ## Advanced usage
 
