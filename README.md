@@ -4,24 +4,20 @@
 
 # Homebridge-Telldus-Too
 
-With this plugin, you can create any number of fake switches that will start a timer, which can be a random duration too (between two configured values), when turned ON. When the delay time is reached the switch will automatically turn OFF and trigger a dedicated motion sensor for 3 seconds. This can be very useful for advanced automation with HomeKit scenes - when delayed actions are required.
+[Homebridge](https://www.npmjs.com/package/homebridge) plugin for Telldus TellStick ZNet Lite local access.
 
-The random duration is very useful if you want an automation which simulates your presence at home by switching the lights at a random time. This looks more realisitic than a statically configured on/off-time.
+This plugin is an alternative to the excellent [homebridge-telldus](https://github.com/johnlemonse/homebridge-telldus) plugin. I missed some functions so I decided to write my own version, with much help and inspiration from the original plugin. In fact, the [homebridge-telldus](https://github.com/johnlemonse/homebridge-telldus) plugin is the main reason that I bought my first Raspberry Pi, because I wanted to control my Telldus devices from HomeKit. And then I started to learn JavaScript and Node JS, and rediscovered the fun in programming.
 
-By using the minimum delay, you can make sure that there is a delay for at least the minimum time. This is useful for temporary switching on a light, e.g. when a camera or sensor detects motion.
+The plugin exposes the Telldus switches and sensors to HomeKit. It automatically detects on/off and dimmer switches, and temperature, temperature/humidity, rain and wind sensors. Switches and sensors can be ignored by their ID, to get rid of e.g. sensors that Telldus finds but you don't want to expose in HomeKit. It is also possible to disable switches in HomeKit, e.g. to ignore them during the Christmas season without the need to change the automations.
 
-It is also possible to create a stateful switch, with or without the motion sensor, which stays in the current state until commanded to the other state.
+Sensors are updated from Telldus at a configurable interval, which makes it possible to use e.g. a temperature sensor in automations for alerts of too high/low temperatures.
 
-*(New in v1.1.0)* The switches can be scheduled to turn on automatically by using a **cron** syntax. The delay will start at the scheduled times, which can be useful to trigger other advanced automations, e.g. to check the state of a sensor during specific times or dates.
-
-*(New in v1.2.0)* Increased the max delay to almost 10 days and added infinite repeats.
-
-*(New in v1.2.1)* Added config parameter to select if config values or user changes will be used when Homebridge restarts for each switch. For convenience, delay and minimum delay can be configured in the format `D:HH:MM:SS` for days, hours, minutes and seconds, or just (a lot of) seconds.
 
 ## How to install
 
-* ```sudo npm install -g homebridge-random-delay-switches```
-* Create a platform and a delay switch in your config.json file, or use the Homebridge UI
+* ```sudo npm install -g homebridge-telldus-too```
+* Get your personal Telldus local access token, see below
+* Create a platform in your config.json file, or use the Homebridge UI (recommended)
 * Restart homebridge
 
 ## Example config.json:
@@ -29,67 +25,30 @@ It is also possible to create a stateful switch, with or without the motion sens
  ```
     "platforms": [
       {
-        "platform": "RandomDelaySwitches"
-        "name": "Randomly",
-        "delaySwitches": [
-          {
-            "name": "RDS-Test",
-            "delay": 60,
-            "minDelay": 30,
-            "random": true,
-            "disableSensor": false,
-            "startOnReboot": false,
-            "repeats": 0
-          }
-        ]
+        "platform": "TelldusToo"
+        "name": "TelldusLocal",
+        "ipAddress": "<IP address of your TellStick ZNet Lite>",
+        "accessToken": "<Access token for TellStick local authentication>"
        }
      ]
 ```
-This gives you a switch which will trigger the motion sensor after a random delay of 30 to 60 seconds.
+This exposes all detectable Telldus switches and sensors to HomeKit. There are more configuration options available, see below.
 
-## Why adding motion sensor?
+## Local access
 
-A motion sensor is created for each accessory in order to be able to cancel the timer and the attached automations.
-How it works? You can set the automation to be triggered from the motion sensor instead of the switch OFF command and therefore
-you can turn OFF the switch and prevent the motion sensor from being triggered or any attached automations.
-If you have no use of the sensor you can remove it by adding `"disableSensor": true` to your config.
+This plugin doesn't support the online access to Telldus Live cloud servers, only the local network access. This means that only the Telldus ZNet versions are supported, as far as I know. The rationale is that the plugin should work in your home even without WAN access. If requested, the Telldus Live access may be added.
 
-## How it works
+## Get Telldus local access token
 
-Basically, all you need to do is:
-1. Set the desired delay time in the config file (in seconds).
-2. If you want to have a random delay, you can also set the minimum delay.
-3. The plugin will create one switch and one motion sensor for this accessory.
-4. Use this switch in any scene or automation.
-5. Set an automation to trigger when this switch is turned ON or the motion sensor is triggered - The "EVE" app is very recommended to set these kind of automations.
+How to get the Telldus token is described [here](https://tellstick-server.readthedocs.io/en/latest/api/authentication.html), but the process is implemented in [telldus-local-auth](https://github.com/mifi/telldus-local-auth).
+* Find the LAN IP address of your TellStick device
+* Install telldus-local-auth: ```npm i -g telldus-local-auth``` (or run it directly with ```npx telldus-local-auth```)
+* Run in a terminal ```telldus-local-auth <IP OF YOUR DEVICE> homebridge-telldus-too```. This will open a browser window. See further instructions in the terminal.
+* Note the returned token. This is the ```accessToken``` value used in the configuration.
 
-The characteristics of the switch are visible in the Eve app. These characteristics can be updated and used in automation conditions. The updates will be valid until the `Restore default` control is activated. The "Controller for Homekit" app is also a good way of controlling your automations.
+## Recommended usage
 
-### Scheduling with cron
-
-The plugin uses the [cron](https://github.com/kelektiv/node-cron) package for the scheduling. A cron string consists of five or six fields. Six fields are used to schedule down to seconds, and five fields gives control down to minutes. The basic syntax is shown below:
-```
- # ┌────────────── second (0-59, optional)
- # │ ┌──────────── minute (0-59)
- # │ │ ┌────────── hour (0-23)
- # │ │ │ ┌──────── day of month (1-31)
- # │ │ │ │ ┌────── month (0-11 or Jan-Dec)
- # │ │ │ │ │ ┌──── day of week (0-6 or Sun-Sat)
- # │ │ │ │ │ │
- # │ │ │ │ │ │
- # * * * * * *
-```
-
-A cron string of `* * * * * *` (six fields) will trigger every second, while a cron string of `* * * * *` (five fields) will trigger every minute. Several cron strings can be combined by separating them with a `;` (semicolon), to get different scheduled triggers for a switch. Some examples:
-* `*/15 * * * Sat,Sun` will trigger every 15th minute on Saturdays and Sundays
-* `30 15 16-19 * */3 *` will trigger 15th minutes and 30 seconds past the hour from 16:15:30 to 19:15:30 every third month
-* `5/20 16-19 * * Mon-Fri; 5/20 14-20 * * Sat,Sun` will trigger every 20th minute, starting 5 minutes past the hour between 16:05 and 19:45 on weekdays and between 14:05 and 20:45 on weekends
-
-Read more about the available cron patterns [here](https://github.com/kelektiv/node-cron#available-cron-patterns).
-
-Note that Sunday is weekday 0, so if Sunday is used in a range it must come first.
-
-It is not always so easy to get the cron strings right, and they may not be implemented the same way by different libraries or plugins. The selected [cron](https://github.com/kelektiv/node-cron) package seems to work as intended, but to check that you get the intended schedule please check the Homebridge log. When the cron string is set, the log will include a human readable interpretation of the cron string, as well as the five next scheduled times. The readable interpretation is also shown in the [control values](#control-values), but it is limited to 64 characters.
+HomeKit does not support viewing the custom characteristics of this plugin. The characteristics of the switches and sensors are visible in the free Eve app. These custom characteristics can be updated and used in automation conditions. The updates will be valid until the `Restore default` control is activated. The "Controller for Homekit" app is also a good way of controlling your automations.
 
 ## Configuration options
 
