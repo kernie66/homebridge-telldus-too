@@ -10,17 +10,19 @@
     "automation"
   ],
   "dependencies": {
+    "axios": "^1.2.2",
     "events": "^3.3.0",
     "homebridge-lib": "^6.0.2",
     "luxon": "^3.1.1",
     "node-cache": "^5.1.2",
+    "qs": "^6.11.0",
     "telldus-api": "^1.0.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^8.28.0",
-    "telldus-local-auth": "^1.0.2",
-    "np": "^7.6.2"
+    "np": "^7.6.2",
+    "telldus-local-auth": "^1.0.2"
   },
   "repository": {
     "type": "git",
