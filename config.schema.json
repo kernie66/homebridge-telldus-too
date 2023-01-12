@@ -27,7 +27,7 @@
       "locale": {
         "title": "Locale used for time and date notation",
         "type": "string",
-        "placeholder": "Enter two character locale"
+        "placeholder": "Enter two (en) or five (en-US) character locale"
       },
       "delay": {
         "title": "Max delay",
