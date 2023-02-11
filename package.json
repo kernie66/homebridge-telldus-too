@@ -10,8 +10,6 @@
     "automation"
   ],
   "dependencies": {
-    "axios": "^1.2.2",
-    "axios-multi-api": "^1.4.2",
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
     "homebridge-lib": "^6.0.2",
@@ -23,8 +21,7 @@
   },
   "devDependencies": {
     "eslint": "^8.28.0",
-    "np": "^7.6.2",
-    "telldus-local-auth": "^1.0.2"
+    "np": "^7.6.2"
   },
   "repository": {
     "type": "git",
