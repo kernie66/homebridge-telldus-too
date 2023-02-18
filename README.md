@@ -8,30 +8,30 @@
 
 This plugin is an alternative to the excellent [homebridge-telldus](https://github.com/johnlemonse/homebridge-telldus) plugin. I missed some functions so I decided to write my own version, with much help and inspiration from the original plugin. In fact, the [homebridge-telldus](https://github.com/johnlemonse/homebridge-telldus) plugin is the main reason that I bought my first Raspberry Pi, because I wanted to control my Telldus devices from HomeKit. And then I started to learn JavaScript and Node JS, and rediscovered the fun in programming.
 
-The plugin exposes the Telldus switches and sensors to HomeKit. It automatically detects on/off and dimmer switches, and temperature, temperature/humidity, rain and wind sensors. Switches and sensors can be ignored by their ID, to get rid of e.g. sensors that Telldus finds but you don't want to expose in HomeKit. It is also possible to disable switches in HomeKit, e.g. to ignore them during the Christmas season without the need to change the automations.
+The plugin exposes the Telldus switches and sensors to HomeKit. It automatically detects on/off and dimmer switches, bell switches, as well as temperature, temperature/humidity, rain and wind sensors. Switches and sensors can be ignored by their ID, to get rid of e.g. sensors that Telldus finds but you don't want to expose in HomeKit. It is also possible to forcefully disable and enable switches in HomeKit, e.g. to ignore them during the Christmas season without the need to change the automations.
 
 Sensors are updated from Telldus at a configurable interval, which makes it possible to use e.g. a temperature sensor in automations for alerts of too high/low temperatures.
 
-
 ## How to install
 
-* ```sudo npm install -g homebridge-telldus-too```
+* ```sudo npm install -g homebridge-telldus-too``` or use the Config UI to search for "homebridge-telldus-too"
 * Get your personal Telldus local access token, see below
 * Create a platform in your config.json file, or use the Homebridge UI (recommended)
 * Restart homebridge
 
 ## Example config.json:
 
- ```
-    "platforms": [
-      {
-        "platform": "TelldusToo"
-        "name": "TelldusLocal",
-        "ipAddress": "<IP address of your TellStick ZNet Lite>",
-        "accessToken": "<Access token for TellStick local authentication>"
-       }
-     ]
 ```
+   "platforms": [
+     {
+       "platform": "TelldusToo"
+       "name": "TelldusLocal",
+       "ipAddress": "<IP address of your TellStick ZNet Lite>",
+       "accessToken": "<Access token for TellStick local authentication>"
+      }
+    ]
+```
+
 This exposes all detectable Telldus switches and sensors to HomeKit. There are more configuration options available, see below.
 
 ## Local access
@@ -41,6 +41,7 @@ This plugin doesn't support the online access to Telldus Live cloud servers, onl
 ## Get Telldus local access token
 
 How to get the Telldus token is described [here](https://tellstick-server.readthedocs.io/en/latest/api/authentication.html), but the process is implemented in [telldus-local-auth](https://github.com/mifi/telldus-local-auth).
+
 * Find the LAN IP address of your TellStick device
 * Install telldus-local-auth: ```npm i -g telldus-local-auth``` (or run it directly with ```npx telldus-local-auth```)
 * Run in a terminal ```telldus-local-auth <IP OF YOUR DEVICE> homebridge-telldus-too```. This will open a browser window. See further instructions in the terminal.
@@ -48,44 +49,50 @@ How to get the Telldus token is described [here](https://tellstick-server.readth
 
 ## Recommended usage
 
-HomeKit does not support viewing the custom characteristics of this plugin. The characteristics of the switches and sensors are visible in the free Eve app. These custom characteristics can be updated and used in automation conditions. The updates will be valid until the `Restore default` control is activated. The "Controller for Homekit" app is also a good way of controlling your automations.
+HomeKit does not support viewing the custom characteristics of this plugin. The characteristics of the switches and sensors are visible in the free Eve app. These custom characteristics can be updated and used in automation conditions. The "Controller for Homekit" app is also a good way of controlling your automations.
 
 ## Configuration options
 
-The possible configuration parameters are shown in the table below. I find them useful, but maybe I am a control freak :-). The parameters can be changed dynamically in Eve and Controller for HomeKit, see [Control values](#control-values), and will keep the settings when the plugin is restarted.
+The possible configuration parameters are shown in the table below. As the switches and sensors are autodetected, it would be a lot of manual configuration options to use all the features of this plugin from the configuration file. The majority of the parameters can be changed manually or programmatically by using Eve and Controller for HomeKit, see [Control values](#control-values), and will keep the settings when the plugin is restarted. The configuration parameters below will be the default for new discovered switches.
 
-Parameter | Default | Description
-----------|---------|----------------
-`delay`   | 60      | (Maximum) delay in seconds, max value = 823999 (9 days, 23:59:59). Can also be given on the format `D:HH:MM:SS`, where D and HH are optional (e.g. 5:00 means 5 minutes = 300 seconds)
-`minDelay` | 1      | Minimum delay in seconds or `D:HH:MM:SS`. Only valid when `random` is `true`. Will be set to `delay` if greater than `delay`.
-`random`   | `false` | Enables random delays between `minDelay` and `delay` seconds (boolean).
-`disableSensor`| `false` | Disables the motion sensor, i.e. only the switch will be available in HomeKit (boolean).
-`startOnReboot` | `false` | Enables the delay switch when the plugin is restarted. Can be used e.g. to turn things on after power outage. Hint: Combine with a time of day condition, so your lights don't turn on while you sleep (boolean).
-`singleActivation` | `false` | Disables the extension of the timer if the switch is activated repeatedly while on. Default is to restart the delay switch for each activation while on.
-`repeats`   | 0      | The number of additional activations of the switch. Can be used to control different lights with several consecutive delays, see below (0 - 10, where 0 gives one activation of the switch, 1 gives two activations and so on). Set to -1 for infinite repeats.
-`cron`      | Empty | Schedules the switch activation with a cron syntax. Add several schedules by separating the cron strings with ";".
-`useConfig` | `true` | Use the values from the config file when Homebridge restarts. Set this to `false` to keep any changes to the parameters made in e.g. Eve or Controller for Homekit when Homebridge restarts.
-`heartrate` | 15     | The time in seconds between polls in the plugin, see below.
+
+| Parameter               | Default | Description                                                                                                                                                                                                                                                                                                                 |
+| ------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ipAddress`             | -       | IP address or local host name of your Telldus device.                                                                                                                                                                                                                                                                       |
+| `accessToken`           | -       | Local access token for your Telldus device, obtained as described above.                                                                                                                                                                                                                                                    |
+| `delay`                 | 60      | Maximum random delay in seconds, max value = 300 (5 minutes). The minimum delay is automatically set to 20% of this value. This will be the default value for all new switches.                                                                                                                                             |
+| `random`                | `false` | Enables random delays between 20% of`delay` and `delay` seconds (boolean). Affects all new switches.                                                                                                                                                                                                                        |
+| `repeats`               | 0       | Sets the number of repetitions (0 - 5) of each on/off command to the switches. Use this for switches in places where they may need several activations before they react. First repeat occurs 4 seconds after the first command, which increases by 1 second for each repetition. A new command will abort the repetitions. |
+| `ignoreUnnamedSwitches` | `false` | Ignores switches without names in Telldus (boolean).                                                                                                                                                                                                                                                                        |
+| `ignoreUnnamedSensors`  | `false` | Ignores sensors without names in Telldus (boolean).                                                                                                                                                                                                                                                                         |
+| `ignore`                | -       | A string of local Telldus switch and sensor IDs that you don't want to see in Homebridge, separated by commas. Use this for named switches and sensors that can't be removed in Telldus.                                                                                                                                    |
+| `configHeartrate`       | 300     | Heartrate interval for the sensor status checks. This is the rate at which the sensors are read from Telldus in seconds. Note that Telldus updates the values independent from this plug-in.                                                                                                                                |
+| `randomize`             | `false` | When set to`true`, the heartrate of the sensor reading will be randomized +/-20% from the `configHeartrate` value. This is to spread the access to the Telldus device so that not all sensors are read at the same time.                                                                                                    |
 
 ## Control values
 
-The plugin provides some control values that can be viewed and used in Eve and Controller for HomeKit. The control values can be used in conditions for automations and set in scenes. Each switch can be controlled individually and dynamically through these values, without restarting Homebridge. Note that numerical values in Eve are set using sliders, while Controller for Homekit gives options for manual input.
+The plugin provides a lot of control values that can be viewed and used in Eve and Controller for HomeKit. The control values can be used in conditions for automations and set in scenes. Each switch and sensor can be controlled individually and dynamically through these values, without restarting Homebridge. Note that most numerical values in Eve are set using sliders, while Controller for Homekit gives options for manual input.
 
-Value | Description
-------|-------------
-Last Motion  | The time that the motion sensor was last triggered by the delay switch. Includes a history graph when viewed in Eve.
-Cron         | A text field where a new cron string can be entered. Eve remembers the string and is recommended to try out new schedules. Controller for Homekit shows the current string as a placeholder, but you cannot edit an existing string.
-Cron schedule | Shows a readable interpretation of the cron string, limited to 64 characters. Use this to check that your cron strings gives the intended schedule.
-Current timeout value | The actual delay value used by the switch. Only valid when the switch is On. Shows the calculated random delay or the fixed value.
-Delay time (d/h/m/s) | Corresponds to the `delay` parameter, but separated in days,hours, minutes and seconds for better control using Eve sliders.
-Delay time minimum (%) | Corresponds to the `minDelay` parameter, but given as a percentage of the maximum time. 0% = 1 second, 100% = `delay`.
-Random enabled | Corresponds to the `random` parameter.
-Repetition (current) | The current repetition count, only valid when the switch is active. The initial activation of the switch is 0. Can be used in automations to control different lights at different repetition cycles.
-Repetitions (total) | Corresponds to the `repeats` parameter. The switch will be turned Off during the motion activation, then turned On again for the number of repetition times.
-Restore default | Restores the configuration parameters to the default values from the configuration file.
-Time left of timer | The time left before the delay time is up. Decremented by the heartbeat value. Used to continue the delay after a restart, if the delay was active.
-Heartrate   | Internal heartbeat rate used e.g. to keep track of the time left of the timer. The heartbeat and the timers are not synced, so the time left may be off by up to the heartrate value. The default value of 15 s is recommended for most cases, unless the delay time is long. Corresponds to the `heartrate` parameter.
-Log Level   | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2.
+
+| Value                                 | Description                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Last activation<br />*(Switch, Bell)* | The time that the switch was last commanded on or off, from the last restart of the plugin.                                                                                                                                                                                                                                   |
+| Brightness<br />*(Dimmer)*            | In addition to on/off and the other values of a normal switch, a dimmer switch also has a brightness value that can be set. If the switch is off when the brightness is changed, the switch will be turned on. There is a delay of 1 second before the dim level is sent to the switch, to ensure that it is turned on first. |
+| Disable random once<br />*(Switch)*   | Disables the random delay for the next activation (on or off), i.e. the switch will be controlled immediately (boolean).                                                                                                                                                                                                      |
+| Enable random once<br />*(Switch)*    | Enables the random delay for the next activation (on or off), i.e. the switch will be controlled after a random delay (boolean).                                                                                                                                                                                              |
+| Random<br />*(Switch)*                | Selects if the switch will use a random delay for on/off activations or a direct activation. Corresponds to the `random` parameter.<br />Note that activations have a slight delay, to allow other parameters to take effect before the switch is controlled.                                                                  |
+| Delay<br />*(Switch)*                 | Corresponds to the `delay` parameter, but can be set individually for each switch (0 - 300 seconds).                                                                                                                                                                                                                           |
+| Repetitions (total)<br />*(Switch)*   | Set the number of repetitions (0 - 10) for the commands (on/off), in addition to the first activation. Corresponds to the `repeats` parameter.                                                                                                                                                                                 |
+| Repetition (current)<br />*(Switch)*  | Shows the current repetition, when repeats are active after a command.                                                                                                                                                                                                                                                        |
+| Repetition (current)                  | The current repetition count, only valid when the switch is active. The initial activation of the switch is 0. Can be used in automations to control different lights at different repetition cycles.                                                                                                                         |
+| Repetitions (total)                   | Corresponds to the `repeats` parameter. The switch will be turned Off during the motion activation, then turned On again for the number of repetition times.                                                                                                                                                                   |
+| Disabled<br />*(Switch, Bell)*        | Disables the control of the switch and sets it to constantly **off**. Can be used to temporarily disable automations without the need to change the scenes.                                                                                                                                                                    |
+| Enabled<br />*(Switch)*               | Disables the control of the switch and sets it to constantly **on**. Can be used to temporarily disable automations without the need to change the scenes.                                                                                                                                                                     |
+| Status<br />*(Switch)*                | Shows the current status of the switch automation; "Delaying", "Repeating", "Automation done" or "Manual control".                                                                                                                                                                                                            |
+| Observation time<br />*(Sensor)*      | Shows the time when the sensor was last updated by Telldus.                                                                                                                                                                                                                                                                   |
+| Temperature offset<br />*(Sensor)*    | Used to adjust the temperature value shown in Homekit and used in automations. Use this when the Telldus sensor is not showing the correct temperature.                                                                                                                                                                       |
+| Heartrate                             | Internal heartbeat rate used e.g. to keep track of the time left of the timer. The heartbeat and the timers are not synced, so the time left may be off by up to the heartrate value. The default value of 15 s is recommended for most cases, unless the delay time is long. Corresponds to the `heartrate` parameter.        |
+| Log Level                             | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2.                                                                                                                                                                                       |
 
 ## Advanced usage
 
@@ -121,14 +128,12 @@ I also found that I used another plugin to trigger the delay switches by schedul
 ## Good to know
 
 * **When manually turning OFF the switch, the timer will stop and the motion sensor will NOT be triggered.**
-
 * **When the delay switch is getting ON command while it's already ON, the timer will restart and the motion sensor trigger will be delayed. This can be disabled by the `singleActivation` configuration.**
-
 * **If Homebridge or the plugin is restarted while a switch is active, the switch will continue the delay after the restart. This will override the `startOnReboot` configuration.**
-
 * **If the switch delay is changed while the switch is on, the new delay value will be used the next time the switch is (re)started.**
 
 ## Thanks
+
 This plugin is based on [homebridge-random-delay-switch](https://github.com/lisanet/homebridge-random-delay-switch), which in turn is based on [homebridge-delay-switch](https://github.com/nitaybz/homebridge-delay-switch) and [homebridge-automation-switches](https://github.com/grover/homebridge-automation-switches).
 
 My purpose with this plugin was to turn it into a platform plugin by using [Homebridge-Lib](https://github.com/ebaauw/homebridge-lib) by Eric Baauw, and to learn how to write a plugin with a configuration schema.
