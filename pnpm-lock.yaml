@@ -4,7 +4,7 @@ specifiers:
   cli-color: ^2.0.3
   eslint: ^8.34.0
   events: ^3.3.0
-  homebridge-lib: ^6.3.8
+  homebridge-lib: ^6.3.10
   luxon: ^3.2.1
   node-cache: ^5.1.2
   np: ^7.6.3
@@ -14,7 +14,7 @@ specifiers:
 dependencies:
   cli-color: 2.0.3
   events: 3.3.0
-  homebridge-lib: 6.3.8
+  homebridge-lib: 6.3.10
   luxon: 3.2.1
   node-cache: 5.1.2
   qs: 6.11.0
@@ -1320,9 +1320,9 @@ packages:
     dependencies:
       function-bind: 1.1.1
 
-  /hb-lib-tools/1.0.2:
-    resolution: {integrity: sha512-l0yf3WDElDwovyM7eAGPzzibXCYZfutQVNVPUbbPUk8R8+TzVGpNlyx8wlNDwm/CEwIOhyYHFs0V1vBAAyOtJg==}
-    engines: {node: ^18.14.0}
+  /hb-lib-tools/1.0.3:
+    resolution: {integrity: sha512-u+nenat/JSCwD7lVOSbyan7Yunm10FxyCA++udOrVkuKoRteaCJoLQD7hAtPAiRrVWI2IA6xakusl+hF6TGawg==}
+    engines: {node: ^18.14.1}
     hasBin: true
     dependencies:
       bonjour-hap: 3.6.4
@@ -1330,13 +1330,13 @@ packages:
       semver: 7.3.8
     dev: false
 
-  /homebridge-lib/6.3.8:
-    resolution: {integrity: sha512-uzyGSZrBbhva+0MsN6YJje7YlTtysK74XIZyRkdb9ymHq+rv7fBKF4f3K2AshYsUfdxrBrxg5SwFSZVFLL/I7g==}
-    engines: {homebridge: ^1.6.0, node: ^18.14.0}
+  /homebridge-lib/6.3.10:
+    resolution: {integrity: sha512-wxzd0OhPxouAtnViMfJ+zhF3bsApLOyjmvPSltB9jygh5FTNN/N6wei+nIk4svADCcSN8SYUzJ84l6EN5mD6Bw==}
+    engines: {homebridge: ^1.6.0, node: ^18.14.1}
     hasBin: true
     dependencies:
       '@homebridge/plugin-ui-utils': 0.0.19
-      hb-lib-tools: 1.0.2
+      hb-lib-tools: 1.0.3
     dev: false
 
   /hosted-git-info/2.8.9:
