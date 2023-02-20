@@ -9,6 +9,10 @@
     "random",
     "automation"
   ],
+  "main": "./lib/index.js",
+  "files": [
+    "/lib"
+  ],
   "dependencies": {
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
