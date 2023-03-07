@@ -17,9 +17,9 @@
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
     "homebridge-lib": "^6.3.11",
-    "luxon": "^3.2.1",
+    "luxon": "^3.3.0",
     "node-cache": "^5.1.2",
-    "qs": "^6.11.0",
+    "qs": "^6.11.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
