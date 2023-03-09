@@ -47,6 +47,12 @@
         "type": "integer",
         "default": 0
       },
+      "lightbulb": {
+        "title": "Switches as lightbulbs",
+        "description": "Select to identify switches as lightbulbs",
+        "type": "boolean",
+        "default": false
+      },
       "ignoreUnnamedSwitches": {
         "title": "Ignore unnamed switches",
         "description": "Select to ignore all unnamed switches",
@@ -107,6 +113,10 @@
     {
       "key": "repeats",
       "type": "integer"
+    },
+    {
+      "key": "lightbulb",
+      "type": "boolean"
     },
     {
       "key": "ignoreUnnamedSwitches",

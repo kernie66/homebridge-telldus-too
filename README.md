@@ -49,7 +49,7 @@ It is recommended to use a one year access token. But the plug-in will refresh t
 
 ## Recommended usage
 
-HomeKit does not support viewing the custom characteristics of this plugin. The characteristics of the switches and sensors are visible in the free Eve app. These custom characteristics can be updated and used in automation conditions. The "Controller for Homekit" app is also a good way of controlling your automations.
+HomeKit does not support viewing the custom characteristics of this plugin. The characteristics of the switches and sensors are visible in e.g. the free Eve app. These custom characteristics can be updated and used in automation conditions. The "Controller for Homekit" app is also a good way of controlling your automations.
 
 ## Configuration options
 
@@ -63,6 +63,7 @@ The possible configuration parameters are shown in the table below. As the switc
 | `delay`                 | 60      | Maximum random delay in seconds, max value = 300 (5 minutes). The minimum delay is automatically set to 20% of this value. This will be the default value for all new switches.                                                                                                                                             |
 | `random`                | `false` | Enables random delays between 20% of`delay` and `delay` seconds (boolean). Affects all new switches.                                                                                                                                                                                                                        |
 | `repeats`               | 0       | Sets the number of repetitions (0 - 5) of each on/off command to the switches. Use this for switches in places where they may need several activations before they react. First repeat occurs 4 seconds after the first command, which increases by 1 second for each repetition. A new command will abort the repetitions. |
+| `lightbulb` | `false` | Sets all switches to be presented as lightbulbs instead of switches in Homekit. Set this if you prefer the way it looks in the original homebridge-telldus plug-in. This makes the switches appear as lamps. |
 | `ignoreUnnamedSwitches` | `false` | Ignores switches without names in Telldus (boolean).                                                                                                                                                                                                                                                                        |
 | `ignoreUnnamedSensors`  | `false` | Ignores sensors without names in Telldus (boolean).                                                                                                                                                                                                                                                                         |
 | `ignore`                | -       | A string of local Telldus switch and sensor IDs that you don't want to see in Homebridge, separated by commas. Use this for named switches and sensors that can't be removed in Telldus.                                                                                                                                    |
@@ -96,7 +97,7 @@ The plugin provides a lot of control values that can be viewed and used in Eve a
 
 The following Telldus types of devices are supported:
 
-* On/off switches. Appears as switches in Homekit. This differs from the original [homebridge-telldus][10] plug-in, where they appear as lights.
+* On/off switches. Appears as switches in Homekit, unless the `lightbulb` parameter is set. This differs from the original [homebridge-telldus][10] plug-in, where they appear as lights.
 * Dimmers. Not very useful anymore, with low-power lights that doesn't seem to work very well with the dimmer. Can be used as a normal on/off switch at 100% brightness. Appears as lights in Homekit, to be able to set the brightness.
 * Bell switches. These have different behaviour depending on what it is in Telldus. A doorbell will trigger the doorbell action in Telldus when activated. A chime will play the configured sound when activated. Maybe not that useful, but they are there if you find a use for them.
 * Temperature and combined temperature/humidity sensors. These also generate history in Eve, so you can keep track of e.g. the temperature in the fridge over time.
@@ -127,7 +128,7 @@ Another purpose is to use the sensor values as conditions in automations, e.g. t
 
 * **At each restart, the plug-in will get the current states of the switches from Telldus, to ensure that Homekit reflects the state that Telldus thinks the switches are in.**
 * **When a switch is commanded from Homekit, there is a mute period of 15 seconds before the plug-in will start to check the states from the Telldus gateway again. It is assumed that the automation will be performed using Homekit, but manual and automatic control from the Telldus app is also supported and reflected in Homekit.**
-* **Migrating from [homebridge-telldus][11] to this plug-in is unfortunately a manual job. Since the switches are now shown as switches, they are easy to distinguish from the old light switches. Both plug-ins can be active at the same time, so use both until everything is migrated. Use Controller for Homekit to take a backup of your home before you begin. Use Eve to find the automations that uses the old switches and change them to the new switches.**
+* **Migrating from [homebridge-telldus][11] to this plug-in is unfortunately a manual job. Since the switches are now shown as switches, they are easy to distinguish from the old light switches. Both plug-ins can be active at the same time, so use both until everything is migrated. Use Controller for Homekit to take a backup of your home before you begin. Use Eve to find the automations that uses the old switches and change them to the new switches. If you use Controller for Homekit, it might be possible to restore the lights if you set `lightbulb` to `true`, but this is untested.**
 * **Use the terminal to check the logs, e.g. `cat /var/lib/homebridge/homebridge.log | grep '[Tt]elldus'`. They contain a lot of information at start-up, like checks of the configuration values and lists of the names and IDs of the switches and sensors found. Especially useful if the plug-in doesn't behave as expected.**
 * **Use the debug mode to get even more information from the plug-in. Or lower the log level to get less information.**
 
@@ -135,7 +136,7 @@ Another purpose is to use the sensor values as conditions in automations, e.g. t
 
 A big thanks to John Lemón and the other contributors for the original [homebridge-telldus][12] plug-in. As I mentioned earlier, this is the reason I got my first Raspberry Pi and started coding again.
 
-The plug-in uses [Homebridge-Lib][13] by Eric Baauw, which was also used to create the Telldus API used. While this might be a bigger code base than the original plug-in, I had fun coding it and learning more about Node.js. Probably not the best coding practices, but it works for me as a hobby programmer.
+The plug-in uses [Homebridge-Lib][13] by Eric Baauw, which was also used to create the Telldus API used in the plug-in. While this might be a bigger code base than the original plug-in, I had fun coding it and learning more about Node.js. Probably not the best coding practices, but it works for me as a hobby programmer.
 
 [1]:	https://www.npmjs.com/package/homebridge-telldus-too
 [2]:	https://www.npmjs.com/package/homebridge-telldus-too
