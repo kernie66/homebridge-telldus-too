@@ -53,6 +53,12 @@
         "type": "boolean",
         "default": false
       },
+      "dimmerAsSwitch": {
+        "title": "Dimmers as switches",
+        "description": "Select to make dimmers behave as switches",
+        "type": "boolean",
+        "default": false
+      },
       "ignoreUnnamedSwitches": {
         "title": "Ignore unnamed switches",
         "description": "Select to ignore all unnamed switches",
@@ -116,6 +122,10 @@
     },
     {
       "key": "lightbulb",
+      "type": "boolean"
+    },
+    {
+      "key": "dimmerAsSwitch",
       "type": "boolean"
     },
     {
