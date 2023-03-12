@@ -23,8 +23,7 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.36.0",
-    "np": "^7.6.3"
+    "eslint": "^8.36.0"
   },
   "repository": {
     "type": "git",
@@ -34,8 +33,8 @@
     "url": "http://github.com/kernie66/homebridge-telldus-too/issues"
   },
   "engines": {
-    "node": "^18.15.0",
-    "homebridge": "^1.5.1"
+    "node": ">=18.15.0",
+    "homebridge": ">=1.6.0"
   },
   "scripts": {
     "test": "echo \"No test specified\""
