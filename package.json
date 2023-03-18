@@ -11,11 +11,9 @@
   ],
   "main": "./lib/index.js",
   "files": [
-    "/lib"
+    "lib",
+    "config.schema.json"
   ],
-  "np": {
-    "contents": "lib"
-  },
   "dependencies": {
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
