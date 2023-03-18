@@ -1,6 +1,6 @@
 {
   "name": "homebridge-telldus-too",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Alternative Telldus plugin for Homebridge: https://github.com/nfarina/homebridge",
   "license": "MIT",
   "keywords": [
