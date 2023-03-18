@@ -13,6 +13,9 @@
   "files": [
     "/lib"
   ],
+  "np": {
+    "contents": "lib"
+  },
   "dependencies": {
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
