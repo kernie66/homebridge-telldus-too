@@ -17,7 +17,7 @@
   "dependencies": {
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
-    "homebridge-lib": "^6.3.12",
+    "homebridge-lib": "^6.3.16",
     "luxon": "^3.3.0",
     "node-cache": "^5.1.2",
     "qs": "^6.11.1",
@@ -34,8 +34,8 @@
     "url": "http://github.com/kernie66/homebridge-telldus-too/issues"
   },
   "engines": {
-    "node": ">=18.15.0",
-    "homebridge": ">=1.6.0"
+    "node": ">=18.16.0",
+    "homebridge": ">=1.6.1"
   },
   "scripts": {
     "test": "echo \"No test specified\""

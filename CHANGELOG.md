@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.2
+
+### Fixes
+- Corrected dimmer operation, incorrectly turned off after 60 s
+
+### Bump dependencies
+- NodeJS 18.16.0
+- Homebridge 1.6.1
+- homebridge-lib 6.3.16
+
 ## 1.0.1
 
 - Corrected errors when Telldus gateway is offline
