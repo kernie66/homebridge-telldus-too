@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.4
+
+### Fixes
+- Ensures that dimmer brightness is sent when dimmer is turned on
+- Corrected the brightness value sent to Telldus
+
 ## 1.0.3
 
 ### Fixes
