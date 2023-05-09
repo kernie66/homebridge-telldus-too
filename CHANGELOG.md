@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.5
+
+### Fixes
+- Ensure that dimmer brightness is **not** sent when dimmer is turned off :-)
+
 ## 1.0.4
 
 ### Fixes
