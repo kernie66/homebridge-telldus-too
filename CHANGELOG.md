@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.0.6
+
+### Fixes
+- Corrected auth token check
+- Fixed error in error handler
+- Retries if connection to Telldus device fails
+
 ## 1.0.5
 
 ### Fixes
