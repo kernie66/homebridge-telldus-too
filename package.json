@@ -17,14 +17,14 @@
   "dependencies": {
     "cli-color": "^2.0.3",
     "events": "^3.3.0",
-    "homebridge-lib": "^6.7.1",
+    "homebridge-lib": "^6.7.2",
     "luxon": "^3.4.4",
     "node-cache": "^5.1.2",
-    "qs": "^6.11.1",
+    "qs": "^6.11.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "eslint": "^8.36.0"
+    "eslint": "^8.55.0"
   },
   "repository": {
     "type": "git",
@@ -34,7 +34,7 @@
     "url": "http://github.com/kernie66/homebridge-telldus-too/issues"
   },
   "engines": {
-    "node": ">=20.10.0",
+    "node": ">=18.16.0",
     "homebridge": ">=1.7.0"
   },
   "scripts": {
