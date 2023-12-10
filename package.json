@@ -34,8 +34,8 @@
     "url": "http://github.com/kernie66/homebridge-telldus-too/issues"
   },
   "engines": {
-    "node": ">=18.16.0",
-    "homebridge": ">=1.6.1"
+    "node": ">=20.10.0",
+    "homebridge": ">=1.7.0"
   },
   "scripts": {
     "test": "echo \"No test specified\""
