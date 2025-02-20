@@ -4,7 +4,7 @@
 
 # Homebridge-Telldus-Too
 
-[Homebridge][4] plugin for Telldus TellStick ZNet Lite local access.
+[Homebridge][4] plugin for Telldus TellStick ZNet Lite, local access only.
 
 This plugin is an alternative to the excellent [homebridge-telldus][5] plugin. I missed some functions so I decided to write my own version, with much help and inspiration from the original plugin. In fact, the [homebridge-telldus][6] plugin is the main reason that I bought my first Raspberry Pi, because I wanted to control my Telldus devices from HomeKit. And then I started to learn JavaScript and Node JS, and rediscovered the fun in programming.
 
@@ -21,19 +21,21 @@ Sensors are updated from Telldus at a configurable interval, which makes it poss
 
 ## Example config.json:
 
-   "platforms": [
-     {
-       "platform": "TelldusToo"
-       "name": "TelldusLocal",
-       "ipAddress": "<IP address of your TellStick ZNet Lite>",
-       "accessToken": "<Access token for TellStick local authentication>"
-      }
-    ]
+```javascript
+"platforms": [
+  {
+    "platform": "TelldusToo"
+    "name": "TelldusLocal",
+    "ipAddress": "<IP address of your TellStick ZNet Lite>",
+    "accessToken": "<Access token for TellStick local authentication>"
+  }
+]
+```
 This exposes all detectable Telldus switches and sensors to HomeKit. There are more configuration options available, see below.
 
 ## Local access
 
-This plugin doesn't support the online access to Telldus Live cloud servers, only the local network access. This means that only the Telldus ZNet versions are supported, as far as I know. The rationale is that the plugin should work in your home even without WAN access. If requested, the Telldus Live access may be added.
+This plugin doesn't support the online access to Telldus Live cloud servers, only the local network access. This means that only the Telldus ZNet versions are supported, as far as I know. The rationale is that the plugin should work in your home even without WAN access. This also mean that it works without any additional subscriptions.
 
 ## Get Telldus local access token
 
@@ -45,6 +47,8 @@ How to get the Telldus token is described [here][7], but the process is implemen
 * Note the returned token. This is the `accessToken` value used in the configuration.
 
 It is recommended to use a one year access token. But the plug-in will refresh the access token every restart, and also well before the access token expires (if no restarts occur 😄).
+
+Note: I found it difficult to get/update the access token with the above method on my MacBook when tested December 2024. There seems to be some problem with the Telldus web access. I had to try a fresh installed browser (that I hadn't used before) to be able to log in to get the access token.
 
 ## Recommended usage
 
@@ -58,7 +62,7 @@ The possible configuration parameters are shown in the table below. As the switc
 | Parameter               | Default | Description                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------------------------- | :-------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ipAddress`             |    -    | IP address or local host name of your Telldus device.                                                                                                                                                                                                                                                                                                                                                         |
-| `accessToken`           |    -    | Local access token for your Telldus device, obtained as described above.                                                                                                                                                                                                                                                                                                                                      |
+| `accessToken`           |    -    | Local access token for your Telldus device, obtained as described above. This access token will be remembered by the plugin to allow detection of updated user entered access token. Otherwise the access token will be refreshed and persisted automatically by the plugin.                                                                                                                             |
 | `delay`                 |   60   | Maximum random delay in seconds, max value = 300 (5 minutes). The minimum delay is automatically set to 20% of this value. This will be the default value for all new switches.                                                                                                                                                                                                                               |
 | `random`                | `false` | Enables random delays between 20% of `delay` and `delay` seconds (boolean). Affects all new switches.                                                                                                                                                                                                                                                                                                          |
 | `repeats`               |    0    | Sets the number of repetitions (0 - 5) of each on/off command to the switches. Use this for switches in places where they may need several activations before they react. First repeat occurs 4 seconds after the first command, which increases by 1 second for each repetition. A new command will abort the repetitions.                                                                                   |
@@ -83,15 +87,30 @@ The plugin provides a lot of control values that can be viewed and used in Eve a
 | Enable random once<br />*(Switch)*    | Enables the random delay for the next activation (on or off), i.e. the switch will be controlled after a random delay (boolean).                                                                                                                                                                                              |
 | Random<br />*(Switch)*                | Selects if the switch will use a random delay for on/off activations or a direct activation. Corresponds to the `random` parameter.<br />Note that activations have a slight delay even without random delay, to allow other parameters to take effect before the switch is controlled.                                        |
 | Delay<br />*(Switch)*                 | Corresponds to the `delay` parameter, but can be set individually for each switch (0 - 300 seconds).                                                                                                                                                                                                                           |
-| Repetitions (total)<br />*(Switch)*   | Set the number of repetitions (0 - 10) for the commands (on/off), in addition to the first activation. Corresponds to the`repeats` parameter.                                                                                                                                                                                 |
+| Repetitions (total)<br />*(Switch)*   | Set the number of repetitions (0 - 10) for the commands (on/off), in addition to the first activation. Corresponds to the `repeats` parameter.                                                                                                                                                                                 |
 | Repetition (current)<br />*(Switch)*  | Shows the current repetition, when repeats are active after a command.                                                                                                                                                                                                                                                        |
 | Disabled<br />*(Switch, Bell)*        | Disables the control of the switch and sets it to constantly **off**. Can be used to temporarily disable automations without the need to change the scenes.                                                                                                                                                                    |
 | Enabled<br />*(Switch)*               | Disables the control of the switch and sets it to constantly **on**. Can be used to temporarily disable automations without the need to change the scenes.                                                                                                                                                                     |
 | Status<br />*(Switch)*                | Shows the current status of the switch automation; "Delaying", "Repeating", "Automation done" or "Manual control".                                                                                                                                                                                                            |
 | Observation time<br />*(Sensor)*      | Shows the time when the sensor was last updated by Telldus.                                                                                                                                                                                                                                                                   |
 | Temperature offset<br />*(Sensor)*    | Used to adjust the temperature value shown in Homekit and used in automations. Use this when the Telldus sensor is not showing the correct temperature.                                                                                                                                                                       |
+| Last Updated<br />*(Tellstick)* | Shows the date of the last update of the access token, which also may be the date of the last restart of the plugin. |
+| Next Refresh<br />*(Tellstick)* | Shows the date of the next planned refresh of the access token, which depends on the expiration date for the current access token. |
+| Token Expires<br />*(Tellstick)* | Shows the date when the current access token expires. |
 | Heartrate                             | Internal heartbeat rate used to check for updated values of each switch and sensor. For switches, it is used to check if the switch has been changed from e.g. the Telldus app outside the plug-in.                                                                                                                           |
-| Log Level                             | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2.                                                                                                                                                                                       |
+| Log Level                             | Controls the amount of log entries in the Homebridge log. Set to 0 to only show warnings, if you feel your log is spammed. Default = 2. The `Log Level` is set individually for each switch and sensor. The `Log Level` of the *Tellstick* also controls the log level for the platform, e.g., the logs at startup of the plugin.      |
+
+## Tellstick accessory
+
+The plugin exposes a Tellstick accessory, which is used to persist the refreshed access token between restarts. So the access token in the configuration file is actually only used to get a new, refreshed, access token.
+
+The access token is also stored in the Tellstick accessory to be able to determine if a new access token has been written in the config file. If so, this will be used to get a refreshed access token, in case something has gone wrong.
+
+## Identification
+
+All accessories supports the `Identify/ID` command, found in Eve and Controller for Homekit. Pressing this for a sensor or switch will print the ID of the accessory in the log.
+
+In the Tellstick accessory, it will print the current access token in the log. This can be useful, e.g., to update the config file with a new access token before the old expires or if moving Homebridge to a new installation.
 
 ## Supported devices
 
@@ -101,7 +120,7 @@ The following Telldus types of devices are supported:
 * Dimmers. Depending on the type, they may not be very useful any more, with low-power lights that doesn't seem to work very well. At least not with my dimmer. Can be used as a normal on/off switch at 100% brightness. Appears as lights in Homekit, to be able to set the brightness. Changing the brightness automatically turns the switch on immediately. Use the `dimmerAsSwitch` configuration to force it to be defined as a normal on/off switch.
 * Bell switches. These have different behaviour depending on what it is in Telldus. A doorbell will trigger the doorbell action in Telldus when activated. A chime will play the configured sound when activated. Maybe not that useful, but they are there if you find a use for them.
 * Temperature and combined temperature/humidity sensors. These also generate history in Eve, so you can keep track of e.g. the temperature in the fridge over time.
-* Rain sensors. At the moment, these just show the rain for last 1 hour and last 24 hours and a boolean to show if it is raining. These functions are in testing phase, so there is no guarantee for any kind of correctness (I haven't tested them yet).
+* Rain sensors. At the moment, these just show the rain for last 1 hour and last 24 hours, and a boolean to show if it is raining. These functions are in testing phase, so there is no guarantee for any kind of correctness (I haven't tested them yet).
 * Wind sensors. Shows the wind direction, current average wind speed and gust. Also in testing phase.
 
 Other devices are not supported for now. Mostly because I don't have them.
