@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 1.1.0
+
+### Fixes
+- Added `Tellstick` accessory to persist gateway values
+- Corrected use of refreshed access token, which is now persisted correctly
+- Only uses access token from config file if it is updated, otherwise the refreshed access token is used
+- Added information about last update, next refresh and expiration for the access token, visible in e.g. Eve.
+- Added `Identify` support in e.g. Eve, which logs the current access token in the console for the `Tellstick` accessory, and the Telldus ID for sensors and switches.
+- Probably last release supporting Node.js 18.
+
 ## 1.0.6
 
 ### Fixes
