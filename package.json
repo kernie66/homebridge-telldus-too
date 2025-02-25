@@ -26,7 +26,8 @@
   },
   "devDependencies": {
     "@babel/plugin-syntax-import-assertions": "^7.26.0",
-    "eslint": "^8.55.0"
+    "eslint": "^8.55.0",
+    "vitest": "^3.0.6"
   },
   "repository": {
     "type": "git",
@@ -40,7 +41,7 @@
     "homebridge": ">=1.7.0"
   },
   "scripts": {
-    "test": "echo \"No test specified\""
+    "test": "vitest"
   },
   "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
   "author": "Kenneth Jagenheim, rewritten from plugin by John Lemón"
