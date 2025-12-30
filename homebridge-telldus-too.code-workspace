@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+  ],
+  "settings": {
+    "autoHide.autoHidePanel": false,
+    "remote.extensionKind": {
+      "alefragnani.project-manager": [
+        "workspace"
+      ]
+    },
+    "typescript.validate.enable": false,
+    "javascript.validate.enable": false
+  }
+}

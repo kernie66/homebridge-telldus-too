@@ -43,46 +43,30 @@ class TdSensorAccessory extends AccessoryDelegate {
 
     // Check if we have a temperature sensor
     if (this.temperatureSensor) {
-      this.tempSensorServices.temperature =
-        new TempSensorService.Temperature(this);
+      this.tempSensorServices.temperature = new TempSensorService.Temperature(this);
       // Check if we also have a humidity sensor
       if (this.humiditySensor) {
-        this.tempSensorServices.humidity =
-          new TempSensorService.Humidity(this);
+        this.tempSensorServices.humidity = new TempSensorService.Humidity(this);
       }
       // Generate history for temperature and/or humidity
       this.historyService = new History(this, {
         temperatureDelegate: this.temperatureSensor
-          ? this.tempSensorServices.temperature.characteristicDelegate(
-              'temperature'
-            )
+          ? this.tempSensorServices.temperature.characteristicDelegate('temperature')
           : null,
         humidityDelegate: this.humiditySensor
-          ? this.tempSensorServices.humidity.characteristicDelegate(
-              'humidity'
-            )
+          ? this.tempSensorServices.humidity.characteristicDelegate('humidity')
           : null,
       });
-      this.manageLogLevel(
-        this.tempSensorServices.temperature.characteristicDelegate(
-          'logLevel'
-        ),
-        false
-      );
+      this.manageLogLevel(this.tempSensorServices.temperature.characteristicDelegate('logLevel'), false);
     }
+
     // Check if we have a rain sensor
     else if (this.rainSensor) {
       this.rainSensorService = new RainSensorService.Rain(this);
-      this.manageLogLevel(
-        this.rainSensorService.characteristicDelegate('logLevel'),
-        false
-      );
+      this.manageLogLevel(this.rainSensorService.characteristicDelegate('logLevel'), false);
     } else if (this.windSensor) {
       this.windSensorService = new WindSensorService.Wind(this);
-      this.manageLogLevel(
-        this.windSensorService.characteristicDelegate('logLevel'),
-        false
-      );
+      this.manageLogLevel(this.windSensorService.characteristicDelegate('logLevel'), false);
     } else {
       this.warn('No sensor included, this plugin needs it.');
     }
@@ -113,8 +97,7 @@ class TdSensorAccessory extends AccessoryDelegate {
   async heartbeat(beat) {
     let heartrate = 300;
     if (this.temperatureSensor) {
-      heartrate =
-        this.tempSensorServices.temperature.values.heartrate;
+      heartrate = this.tempSensorServices.temperature.values.heartrate;
     } else if (this.rainSensor) {
       heartrate = this.rainSensorService.values.heartrate;
     } else if (this.windSensor) {
@@ -129,9 +112,7 @@ class TdSensorAccessory extends AccessoryDelegate {
 
   async getSensorData() {
     try {
-      const response = await this.telldusApi.getSensorInfo(
-        this.sensorId
-      );
+      const response = await this.telldusApi.getSensorInfo(this.sensorId);
       if (!response.ok) {
         checkStatusCode(response, this);
       } else {
@@ -148,11 +129,7 @@ class TdSensorAccessory extends AccessoryDelegate {
         }
       }
     } catch (error) {
-      this.warn(
-        'Error getting sensor data:',
-        error.name,
-        error.message
-      );
+      this.warn('Error getting sensor data:', error.name, error.message);
     }
   }
 }

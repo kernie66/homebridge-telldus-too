@@ -23,6 +23,6 @@
     "editor.rulers": [
       140
     ],
-    "eslint.enable": true,
+    "eslint.enable": false,
     "prettier.singleQuote": true
 }
