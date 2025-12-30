@@ -2,8 +2,6 @@
 // Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
 //
 
-'use strict';
-
 export function errorHandler(error) {
   this.warn('Telldus request %d: Error = %s %s', error.request.id, error.request.method, error.request.resource);
   this.warn('Telldus request %d: Error = %d, %s', error.request.id, error.statusCode, error.statusMessage);

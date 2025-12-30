@@ -2,8 +2,6 @@
 // Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
 //
 
-'use strict';
-
 // const homebridgeLib = require('homebridge-lib');
 // const querystring = require('qs');
 import { HttpClient } from 'homebridge-lib/HttpClient';

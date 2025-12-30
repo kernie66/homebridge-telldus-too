@@ -2,8 +2,6 @@
 // Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
 //
 
-'use strict';
-
 // Function to check the HTTP status code when Telldus responds with an error
 // Return true if the error is identified, else false
 export default function checkStatusCode(response, context) {

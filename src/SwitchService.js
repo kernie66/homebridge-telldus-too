@@ -3,7 +3,6 @@
 //
 // Homebridge plugin for Telldus switches.
 
-'use strict';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import colors from 'yoctocolors';
 import { FULL_COMMANDS } from './TdConstants.js';

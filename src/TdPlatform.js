@@ -3,8 +3,6 @@
 //
 // Homebridge plugin for Telldus.
 
-'use strict';
-
 import events from 'events';
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';

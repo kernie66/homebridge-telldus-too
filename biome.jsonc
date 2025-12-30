@@ -92,6 +92,7 @@
         "noNonNullAssertedOptionalChain": "error",
         "noPrototypeBuiltins": "error",
         "noRedeclare": "error",
+        "noRedundantUseStrict": "error",
         "noShadowRestrictedNames": "error",
         "noSparseArray": "error",
         "noTsIgnore": "error",

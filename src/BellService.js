@@ -3,8 +3,6 @@
 //
 // Homebridge plugin for Telldus bell switches.
 
-'use strict';
-
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';

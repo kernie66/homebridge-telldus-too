@@ -3,8 +3,6 @@
 //
 // Homebridge plugin for Telldus.
 
-'use strict';
-
 import { createRequire } from 'node:module';
 import TdPlatform from './TdPlatform.js';
 

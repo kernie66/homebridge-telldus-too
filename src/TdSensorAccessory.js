@@ -3,8 +3,6 @@
 //
 // Homebridge plugin for Telldus sensors.
 
-'use strict';
-
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import RainSensorService from './RainSensorService.js';

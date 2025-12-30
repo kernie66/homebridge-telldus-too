@@ -3,8 +3,6 @@
 //
 // Homebridge plugin for Telldus switch devices.
 
-'use strict';
-
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
