@@ -7,16 +7,8 @@ import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import colors from 'yoctocolors';
 import TelldusApi from './api/TelldusApi.js';
 import TellstickService from './TdTellstickService.js';
-import {
-  errorHandler,
-  requestHandler,
-  responseHandler,
-} from './utils/apiHandlers.js';
-import {
-  getTimestamp,
-  timestampToIntl,
-  toEveDate,
-} from './utils/dateTimeHelpers.js';
+import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
+import { getTimestamp, timestampToIntl, toEveDate } from './utils/dateTimeHelpers.js';
 import uuid from './utils/uuid.js';
 /*
 const AccessoryDelegate = require('homebridge-lib/lib/AccessoryDelegate.js');
@@ -81,21 +73,12 @@ class TdTellstickAccessory extends AccessoryDelegate {
       silent: true,
     });
 
-    this.debug(
-      'Found access token for IP:',
-      colors.green(platform.config.ipAddress)
-    );
+    this.debug('Found access token for IP:', colors.green(platform.config.ipAddress));
 
     // Try to initialise the gateway
     try {
-      this.telldusApi = new TelldusApi(
-        platform.config.ipAddress,
-        this.values.accessToken
-      );
-      this.log(
-        'Telldus API URL:',
-        colors.green(this.telldusApi.getUrl)
-      );
+      this.telldusApi = new TelldusApi(platform.config.ipAddress, this.values.accessToken);
+      this.log('Telldus API URL:', colors.green(this.telldusApi.getUrl));
       this.telldusApi.setRequestHandler(requestHandler.bind(this));
       this.telldusApi.setResponseHandler(responseHandler.bind(this));
       this.telldusApi.setErrorHandler(errorHandler.bind(this));
@@ -106,10 +89,7 @@ class TdTellstickAccessory extends AccessoryDelegate {
         primaryService: true,
       });
 
-      this.manageLogLevel(
-        this.service.characteristicDelegate('logLevel'),
-        true
-      );
+      this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
       this.debug('Full error:\n', error);
       this.error('Error initialising the plug-in, suspending...');
@@ -125,10 +105,7 @@ class TdTellstickAccessory extends AccessoryDelegate {
     });
     this.on('identify', async () => {
       this.warn(colors.yellow('Identifying Tellstick'));
-      this.warn(
-        'Current access token:',
-        colors.green(this.values.accessToken)
-      );
+      this.warn('Current access token:', colors.green(this.values.accessToken));
     });
   }
 
@@ -137,33 +114,19 @@ class TdTellstickAccessory extends AccessoryDelegate {
     if (newToken.expires) {
       this.lastRefresh = getTimestamp();
       this.accessTokenExpires = newToken.expires;
-      this.nextRefresh =
-        this.lastRefresh +
-        (newToken.expires - this.lastRefresh) * 0.8;
-      this.log(
-        'Telldus access token expires:',
-        colors.green(timestampToIntl(newToken.expires, this.locale))
-      );
-      this.log(
-        'Next scheduled token refresh:',
-        colors.blueBright(
-          timestampToIntl(this.nextRefresh, this.locale)
-        )
-      );
+      this.nextRefresh = this.lastRefresh + (newToken.expires - this.lastRefresh) * 0.8;
+      this.log('Telldus access token expires:', colors.green(timestampToIntl(newToken.expires, this.locale)));
+      this.log('Next scheduled token refresh:', colors.blueBright(timestampToIntl(this.nextRefresh, this.locale)));
       this.values.accessToken = newToken.token;
       this.telldusApi.setAccessToken(newToken.token);
       this.values.tokenExpires = newToken.expires;
       this.values.nextRefresh = this.nextRefresh;
-      this.service.values.tokenExpiration = toEveDate(
-        newToken.expires
-      );
+      this.service.values.tokenExpiration = toEveDate(newToken.expires);
       this.service.values.lastUpdated = toEveDate(this.lastRefresh);
       this.service.values.nextRefresh = toEveDate(this.nextRefresh);
       return true;
     } else {
-      this.warn(
-        "Telldus access token couldn't be refreshed, maybe it already expired"
-      );
+      this.warn("Telldus access token couldn't be refreshed, maybe it already expired");
       return false;
     }
   }
