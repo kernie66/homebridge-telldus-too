@@ -7,10 +7,11 @@
 
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import TempSensorService from './TempSensorService.js';
 import RainSensorService from './RainSensorService.js';
-import WindSensorService from './WindSensorService.js';
+import TempSensorService from './TempSensorService.js';
 import checkStatusCode from './utils/checkStatusCode.js';
+import WindSensorService from './WindSensorService.js';
+
 /*
 const homebridgeLib = require('homebridge-lib');
 const TempSensorService = require('./TempSensorService');

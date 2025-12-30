@@ -9,6 +9,7 @@ import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { wait } from './utils/utils.js';
+
 /*
 const homebridgeLib = require('homebridge-lib');
 const checkStatusCode = require('./utils/checkStatusCode');
@@ -43,9 +44,7 @@ class BellService extends ServiceDelegate {
         this.bellOn = value;
         this.setBell(switchAccessory);
       } else {
-        this.log(
-          'Bell disabled, enable it to be able to turn it on!'
-        );
+        this.log('Bell disabled, enable it to be able to turn it on!');
       }
     });
 
@@ -92,9 +91,7 @@ class BellService extends ServiceDelegate {
   async setBell(switchAccessory) {
     if (this.bellOn) {
       // Send bell command to device if switch activated
-      const response = await this.telldusApi.bellDevice(
-        switchAccessory.deviceId
-      );
+      const response = await this.telldusApi.bellDevice(switchAccessory.deviceId);
       if (!response.ok) {
         checkStatusCode(response, this);
       }

@@ -6,8 +6,9 @@
 'use strict';
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import { windDirection } from './utils/utils.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
+import { windDirection } from './utils/utils.js';
+
 /*
 const homebridgeLib = require('homebridge-lib');
 const { toEveDate } = require('./utils/dateTimeHelpers');
@@ -74,17 +75,13 @@ class Wind extends WindSensorService {
           this.values.wind = windDirection(data.value);
         }
         if (data.name === 'wavg') {
-          this.values.windSpeed =
-            Math.round(observation.data[1].value * 10) / 10;
+          this.values.windSpeed = Math.round(observation.data[1].value * 10) / 10;
         }
         if (data.name === 'wgust') {
-          this.values.maximumWindSpeed =
-            Math.round(observation.data[2].value * 10) / 10;
+          this.values.maximumWindSpeed = Math.round(observation.data[2].value * 10) / 10;
         }
       }
-      this.values.observationTime = toEveDate(
-        observation.lastUpdated
-      );
+      this.values.observationTime = toEveDate(observation.lastUpdated);
     } else {
       this.warn('Wind data not found for sensor');
     }

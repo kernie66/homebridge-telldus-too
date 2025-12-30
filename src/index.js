@@ -15,10 +15,5 @@ const packageJson = require('../package.json');
 // const packageJson = require('../package.json');
 
 export default function (homebridge) {
-  TdPlatform.loadPlatform(
-    homebridge,
-    packageJson,
-    'TelldusToo',
-    TdPlatform,
-  );
+  TdPlatform.loadPlatform(homebridge, packageJson, 'TelldusToo', TdPlatform);
 }

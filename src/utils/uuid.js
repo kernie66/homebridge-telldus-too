@@ -2,15 +2,14 @@
 // Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
 //
 
-import { v5 as uuidv5, NIL as NIL_UUID } from 'uuid';
+import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
 
 const UUID_NAMESPACE = uuidv5('homebridge-telldus-too', NIL_UUID);
 
 const regExp = {
   uuid: /^[0-9A-F]{8}-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/,
   uuidPrefix: /^[0-9A-F]{1,8}$/,
-  uuidSuffix:
-    /^-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/,
+  uuidSuffix: /^-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/,
 };
 
 export default function uuid(name) {

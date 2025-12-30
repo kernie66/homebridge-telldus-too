@@ -10,9 +10,7 @@ export function getTimestamp() {
 }
 
 export function getObservationTime(timestamp) {
-  return DateTime.fromSeconds(timestamp).toLocaleString(
-    DateTime.DATETIME_MED_WITH_WEEKDAY
-  );
+  return DateTime.fromSeconds(timestamp).toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY);
 }
 
 // Convert Unix timestamp in seconds to Eve display format
@@ -39,16 +37,10 @@ export function isoDateTimeToIntl(isoDateTime, locales) {
     isoDateTime = isoDateTime + 'Z';
   }
   const dateTime = new Date(isoDateTime);
-  const localDateTime = new Intl.DateTimeFormat(
-    locales,
-    options
-  ).format(dateTime);
+  const localDateTime = new Intl.DateTimeFormat(locales, options).format(dateTime);
   return localDateTime;
 }
 
 export function timestampToIntl(timestamp, locales) {
-  return isoDateTimeToIntl(
-    new Date(timestamp * 1000).toISOString(),
-    locales
-  );
+  return isoDateTimeToIntl(new Date(timestamp * 1000).toISOString(), locales);
 }

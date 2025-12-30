@@ -32,15 +32,11 @@ class TelldusApi extends HttpClient {
   constructor(host, accessToken) {
     super();
     if (!regExp.ip.test(host) && !regExp.host.test(host)) {
-      throw new TypeError(
-        `TelldusAPI: host ${host} is not a valid value`,
-      );
+      throw new TypeError(`TelldusAPI: host ${host} is not a valid value`);
     }
 
     if (!regExp.token.test(accessToken)) {
-      throw new TypeError(
-        'TelldusAPI: given access token not a valid value',
-      );
+      throw new TypeError('TelldusAPI: given access token not a valid value');
     }
 
     this.host = host;
@@ -56,7 +52,12 @@ class TelldusApi extends HttpClient {
         keepAlive: false,
         path: '/api/',
         timeout: 15, //this.config.timeout,
-        validStatusCodes: [200, 401, 403, 404],
+        validStatusCodes: [
+          200,
+          401,
+          403,
+          404,
+        ],
       });
       this.apiClient
         .on('error', (error) => {
@@ -78,9 +79,7 @@ class TelldusApi extends HttpClient {
         });
     } catch (error) {
       // console.log('Error:', error);
-      throw new TypeError(
-        `TelldusAPI: Error initialising API client (${error.name}: ${error.message})`,
-      );
+      throw new TypeError(`TelldusAPI: Error initialising API client (${error.name}: ${error.message})`);
     }
   }
 
@@ -106,7 +105,9 @@ class TelldusApi extends HttpClient {
 
   setAccessToken(token) {
     this.accessToken = token;
-    this.headers = { Authorization: `Bearer ${token}` };
+    this.headers = {
+      Authorization: `Bearer ${token}`,
+    };
   }
 
   getLastResponse() {
@@ -128,46 +129,42 @@ class TelldusApi extends HttpClient {
   }
 
   async getSystemInfo() {
-    const response = await this.apiClient.get(
-      'system/info',
-      this.headers,
-    );
+    const response = await this.apiClient.get('system/info', this.headers);
     return this._checkResponseOk(response);
   }
 
   async listSensors() {
-    const response = await this.apiClient.get(
-      'sensors/list',
-      this.headers,
-    );
+    const response = await this.apiClient.get('sensors/list', this.headers);
     return this._checkResponseOk(response);
   }
 
   async getSensorInfo(id) {
     const response = await this.apiClient.get(
-      setPath('sensor/info', { id }),
+      setPath('sensor/info', {
+        id,
+      }),
       this.headers,
     );
     return this._checkResponseOk(response);
   }
 
-  async listDevices(
-    supportedMethods = setSupportedMethods(COMMANDS),
-  ) {
+  async listDevices(supportedMethods = setSupportedMethods(COMMANDS)) {
     const response = await this.apiClient.get(
-      setPath('devices/list', { supportedMethods }),
+      setPath('devices/list', {
+        supportedMethods,
+      }),
       this.headers,
     );
     return this._checkResponseOk(response);
   }
 
-  async getDeviceInfo(
-    id,
-    supportedMethods = setSupportedMethods(COMMANDS),
-  ) {
+  async getDeviceInfo(id, supportedMethods = setSupportedMethods(COMMANDS)) {
     if (supportedMethods) {
       const response = await this.apiClient.get(
-        setPath('device/info', { id, supportedMethods }),
+        setPath('device/info', {
+          id,
+          supportedMethods,
+        }),
         this.headers,
       );
       return this._checkResponseOk(response);
@@ -189,7 +186,9 @@ class TelldusApi extends HttpClient {
 
   async bellDevice(id) {
     const response = await this.apiClient.get(
-      setPath('device/bell', { id }),
+      setPath('device/bell', {
+        id,
+      }),
       this.headers,
     );
     return this._checkResponseOk(response);
@@ -197,7 +196,10 @@ class TelldusApi extends HttpClient {
 
   async dimDevice(id, level) {
     const response = await this.apiClient.get(
-      setPath('device/dim', { id, level }),
+      setPath('device/dim', {
+        id,
+        level,
+      }),
       this.headers,
     );
     return this._checkResponseOk(response);
@@ -205,7 +207,9 @@ class TelldusApi extends HttpClient {
 
   async onOffDevice(id, on) {
     const response = await this.apiClient.get(
-      setPath(`device/turn${on ? 'On' : 'Off'}`, { id }),
+      setPath(`device/turn${on ? 'On' : 'Off'}`, {
+        id,
+      }),
       this.headers,
     );
     return this._checkResponseOk(response);
@@ -235,14 +239,14 @@ class TelldusApi extends HttpClient {
   async refreshAccessToken() {
     const token = this.accessToken;
     const response = await this.apiClient.get(
-      setPath('refreshToken', { token }),
+      setPath('refreshToken', {
+        token,
+      }),
       this.headers,
     );
 
     if (!response.body.expires) {
-      throw new Error(
-        `Unable to refresh access token: ${response.body.error}`,
-      );
+      throw new Error(`Unable to refresh access token: ${response.body.error}`);
     }
 
     return response.body;

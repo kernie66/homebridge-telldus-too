@@ -8,8 +8,9 @@
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
-import { stateToText } from './utils/utils.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import { stateToText } from './utils/utils.js';
+
 /*
 const homebridgeLib = require('homebridge-lib');
 const BellService = require('./BellService');
@@ -45,10 +46,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
         primaryService: true,
       });
     }
-    this.manageLogLevel(
-      this.switchService.characteristicDelegate('logLevel'),
-      false
-    );
+    this.manageLogLevel(this.switchService.characteristicDelegate('logLevel'), false);
 
     this.debug('Accessory initialised');
     this.heartbeatEnabled = true;
@@ -89,10 +87,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
       const tdState = this.stateCache.get('td' + key);
       this.debug('tdState:', tdState);
       if (tdState === undefined) {
-        this.warn(
-          'Cached value from Telldus does not exist for',
-          key
-        );
+        this.warn('Cached value from Telldus does not exist for', key);
         return;
       }
       // Check each correct state to avoid undefined values
@@ -107,10 +102,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
       const piState = this.stateCache.get('pi' + key);
       this.debug('piState:', piState);
       if (piState === undefined) {
-        this.warn(
-          'Cached value from Plug-in does not exist for',
-          key
-        );
+        this.warn('Cached value from Plug-in does not exist for', key);
         return;
       }
       // Check each correct state to avoid undefined values
@@ -122,21 +114,13 @@ class TdSwitchAccessory extends AccessoryDelegate {
         piCachedValue = false;
       }
 
-      this.debug(
-        'Cached Telldus state is [%s] for %s',
-        stateToText(tdState),
-        key
-      );
-      this.debug(
-        'Cached Plug-in state is [%s] for %s',
-        stateToText(piState),
-        key
-      );
+      this.debug('Cached Telldus state is [%s] for %s', stateToText(tdState), key);
+      this.debug('Cached Plug-in state is [%s] for %s', stateToText(piState), key);
       if (tdCachedValue !== piCachedValue) {
         this.log(
           'Current state [%s] from Telldus is not the same as the set value [%s], updating',
           tdCachedValue,
-          piCachedValue
+          piCachedValue,
         );
         this.switchService.values.on = tdCachedValue;
       }

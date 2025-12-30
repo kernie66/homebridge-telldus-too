@@ -7,6 +7,7 @@
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import { toEveDate } from './utils/dateTimeHelpers.js';
+
 // const homebridgeLib = require('homebridge-lib');
 // const { toEveDate } = require('./utils/dateTimeHelpers');
 
@@ -42,8 +43,7 @@ class Temperature extends TempSensorService {
 
     this.addCharacteristicDelegate({
       key: 'temperatureUnit',
-      Characteristic:
-        this.Characteristics.hap.TemperatureDisplayUnits,
+      Characteristic: this.Characteristics.hap.TemperatureDisplayUnits,
       value: this.Characteristics.hap.TemperatureDisplayUnits.CELSIUS,
     });
 
@@ -80,22 +80,16 @@ class Temperature extends TempSensorService {
     const heartrateRange = this.configHeartrate * 0.2;
     const minHeartrate = this.configHeartrate - heartrateRange;
     const maxHeartrate = this.configHeartrate + heartrateRange;
-    const heartrateVariation = Math.floor(
-      heartrateRange * 2 * Math.random()
-    );
+    const heartrateVariation = Math.floor(heartrateRange * 2 * Math.random());
     if (this.randomize) {
-      this.newHeartrate =
-        this.configHeartrate - heartrateRange + heartrateVariation;
+      this.newHeartrate = this.configHeartrate - heartrateRange + heartrateVariation;
       this.debug(
         'Heartrates: config %s, new %s, current %s',
         this.configHeartrate,
         this.newHeartrate,
-        this.values.heartrate
+        this.values.heartrate,
       );
-      if (
-        this.values.heartrate > minHeartrate &&
-        this.values.heartrate < maxHeartrate
-      ) {
+      if (this.values.heartrate > minHeartrate && this.values.heartrate < maxHeartrate) {
         this.values.heartrate = this.newHeartrate;
       }
     }
@@ -103,12 +97,8 @@ class Temperature extends TempSensorService {
 
   checkObservation(observation) {
     if (observation.data[0] && observation.data[0].name === 'temp') {
-      this.values.temperature =
-        Math.round(observation.data[0].value * 10) / 10 +
-        this.values.temperatureOffset;
-      this.values.observationTime = toEveDate(
-        observation.data[0].lastUpdated
-      );
+      this.values.temperature = Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset;
+      this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
     } else {
       this.warn('Temperature data not found for sensor');
     }
@@ -123,17 +113,13 @@ class Humidity extends TempSensorService {
 
     this.addCharacteristicDelegate({
       key: 'humidity',
-      Characteristic:
-        this.Characteristics.hap.CurrentRelativeHumidity,
+      Characteristic: this.Characteristics.hap.CurrentRelativeHumidity,
       unit: '%',
     });
   }
 
   checkObservation(observation) {
-    if (
-      observation.data[1] &&
-      observation.data[1].name === 'humidity'
-    ) {
+    if (observation.data[1] && observation.data[1].name === 'humidity') {
       this.values.humidity = Math.round(observation.data[1].value);
     } else {
       this.warn('Humidity data not found for sensor');
@@ -175,9 +161,7 @@ class Settings extends TempSensorService {
 
   checkObservation(observation) {
     if (observation.data[0].lastUpdated) {
-      this.values.observationTime = toEveDate(
-        observation.data[0].lastUpdated
-      );
+      this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
     } else {
       this.warn('Observation time not found for sensor');
     }

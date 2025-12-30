@@ -6,10 +6,11 @@
 'use strict';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import colors from 'yoctocolors';
+import { FULL_COMMANDS } from './TdConstants.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { stateToText, wait } from './utils/utils.js';
-import { FULL_COMMANDS } from './TdConstants.js';
+
 /*
 const clc = require('cli-color');
 const homebridgeLib = require('homebridge-lib');
@@ -50,7 +51,7 @@ class SwitchService extends ServiceDelegate {
     this.addCharacteristicDelegate({
       key: 'on',
       Characteristic: this.Characteristics.hap.On,
-      value: this.state == FULL_COMMANDS.TURNON,
+      value: this.state === FULL_COMMANDS.TURNON,
     })
       .on('didSet', (value) => {
         this.values.repetition = 0;
@@ -58,10 +59,7 @@ class SwitchService extends ServiceDelegate {
           this.switchOn = value;
           this.setOn(switchAccessory);
         } else {
-          this.log(
-            'Switch constantly disabled/enabled,',
-            colors.green('deactivate it to turn it on/off!')
-          );
+          this.log('Switch constantly disabled/enabled,', colors.green('deactivate it to turn it on/off!'));
         }
       })
       .on('didTouch', (value) => {
@@ -75,10 +73,7 @@ class SwitchService extends ServiceDelegate {
             this.log("Skipping repeat 'setOn' for dimmer");
           }
         } else {
-          this.log(
-            'Switch constantly disabled/enabled (touched),',
-            colors.green('deactivate it to turn it on/off!')
-          );
+          this.log('Switch constantly disabled/enabled (touched),', colors.green('deactivate it to turn it on/off!'));
         }
       });
 
@@ -272,14 +267,15 @@ class SwitchService extends ServiceDelegate {
       const delayRange = this.values.delay - minDelay;
       let delay = 100;
       if (randomDelay) {
-        delay =
-          Math.floor(minDelay + Math.random() * delayRange) * 1000;
+        delay = Math.floor(minDelay + Math.random() * delayRange) * 1000;
       }
       this.log('Waiting for %d seconds', delay / 1000);
       // Prepare abort controller
       this.acDelay = new AbortController();
       try {
-        await wait(delay, { signal: this.acDelay.signal });
+        await wait(delay, {
+          signal: this.acDelay.signal,
+        });
       } catch (err) {
         this.debug('Delay timer aborted:', err);
         return;
@@ -288,17 +284,12 @@ class SwitchService extends ServiceDelegate {
       this.log('Delay performed');
     }
 
-    const telldusState = this.switchOn
-      ? FULL_COMMANDS.TURNON
-      : FULL_COMMANDS.TURNOFF;
+    const telldusState = this.switchOn ? FULL_COMMANDS.TURNON : FULL_COMMANDS.TURNOFF;
 
     let repetition = 0;
     do {
       // Control Telldus switch on/off
-      const response = await this.telldusApi.onOffDevice(
-        switchAccessory.deviceId,
-        this.switchOn
-      );
+      const response = await this.telldusApi.onOffDevice(switchAccessory.deviceId, this.switchOn);
       if (response.ok) {
         this.log('Switch set to', stateToText(telldusState));
       } else {
@@ -307,11 +298,7 @@ class SwitchService extends ServiceDelegate {
       this.values.lastActivation = toEveDate(getTimestamp());
       // If it is a dimmer and it is on, then send the current brightness value
       if (this.modelType === 'dimmer' && this.switchOn) {
-        this.setDimmerLevel(
-          switchAccessory,
-          this.values.brightness,
-          true
-        );
+        this.setDimmerLevel(switchAccessory, this.values.brightness, true);
       }
 
       repetition += 1;
@@ -319,11 +306,7 @@ class SwitchService extends ServiceDelegate {
       if (this.values.repetition < this.values.repeats) {
         this.values.status = 'Repeating';
         this.values.repetition = repetition;
-        this.log(
-          'Repeat command, repetition number: %d of %d',
-          this.values.repetition,
-          this.values.repeats
-        );
+        this.log('Repeat command, repetition number: %d of %d', this.values.repetition, this.values.repeats);
         // Prepare abort controller
         this.acRepeat = new AbortController();
         // Wait 2 seconds + 1 second/repetition between repeats
@@ -341,16 +324,9 @@ class SwitchService extends ServiceDelegate {
 
     // Update the state cache with the new value
     const key = 'ID' + switchAccessory.deviceId;
-    const success = switchAccessory.stateCache.set(
-      'pi' + key,
-      telldusState
-    );
+    const success = switchAccessory.stateCache.set('pi' + key, telldusState);
     if (success) {
-      this.debug(
-        'Plug-in state cache updated for %s with value [%s]',
-        key,
-        stateToText(telldusState)
-      );
+      this.debug('Plug-in state cache updated for %s with value [%s]', key, stateToText(telldusState));
     } else {
       this.warn("Plug-in cache couldn't be updated for", key);
     }
@@ -373,11 +349,7 @@ class SwitchService extends ServiceDelegate {
   // used in Eve to set the dimmer.
   // The dimmer is turned on automatically if it was off, so the delay
   // ensures that the dim command will be sent after the on command.
-  async setDimmerLevel(
-    switchAccessory,
-    dimLevel,
-    immediately = false
-  ) {
+  async setDimmerLevel(switchAccessory, dimLevel, immediately = false) {
     // If a dim command is pending, abort it
     if (this.dimming) {
       this.acDim.abort();
@@ -391,13 +363,12 @@ class SwitchService extends ServiceDelegate {
       // Check if the dimmer should be changed after a delay
       if (!immediately) {
         // Start a timer for the new dim command
-        await wait(500, { signal: this.acDim.signal });
+        await wait(500, {
+          signal: this.acDim.signal,
+        });
       }
       this.debug('Setting dimmer level to %s%', dimLevel);
-      const response = await this.telldusApi.dimDevice(
-        switchAccessory.deviceId,
-        brightness
-      );
+      const response = await this.telldusApi.dimDevice(switchAccessory.deviceId, brightness);
       if (!response.ok) {
         checkStatusCode(response, this);
         this.warn('Error when setting dim level');

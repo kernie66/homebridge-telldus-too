@@ -1,4 +1,4 @@
-import { vi, describe, it, expect } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import TelldusApi from '../TelldusApi.js';
 
 vi.mock('homebridge-lib/HttpClient', () => {

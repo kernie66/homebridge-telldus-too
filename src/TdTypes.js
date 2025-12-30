@@ -5,6 +5,7 @@
 
 import { CustomHomeKitTypes } from 'homebridge-lib/CustomHomeKitTypes';
 import uuid from './utils/uuid.js';
+
 //const homebridgeLib = require('homebridge-lib');
 //const uuid = require('./utils/uuid');
 
@@ -20,9 +21,13 @@ class TdTypes extends CustomHomeKitTypes {
         unit: this.Units.SECONDS,
         minValue: 0,
         maxValue: 300,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Delay time'
+      'Delay time',
     );
 
     this.createCharacteristicClass(
@@ -39,7 +44,7 @@ class TdTypes extends CustomHomeKitTypes {
           this.Perms.HIDDEN,
         ],
       },
-      'Delay time (minimum)'
+      'Delay time (minimum)',
     );
 
     this.createCharacteristicClass(
@@ -50,9 +55,12 @@ class TdTypes extends CustomHomeKitTypes {
         unit: this.Units.SECONDS,
         minValue: 0,
         //      maxValue: 3600,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Current timeout value'
+      'Current timeout value',
     );
 
     this.createCharacteristicClass(
@@ -62,9 +70,13 @@ class TdTypes extends CustomHomeKitTypes {
         format: this.Formats.INT8,
         minValue: 0,
         maxValue: 10,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Repetitions (total)'
+      'Repetitions (total)',
     );
 
     this.createCharacteristicClass(
@@ -74,9 +86,12 @@ class TdTypes extends CustomHomeKitTypes {
         format: this.Formats.UINT8,
         minValue: 0,
         maxValue: 10,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Repetition (current)'
+      'Repetition (current)',
     );
 
     this.createCharacteristicClass(
@@ -84,9 +99,13 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('0A9'),
       {
         format: this.Formats.BOOL,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Random enabled'
+      'Random enabled',
     );
 
     this.createCharacteristicClass(
@@ -94,9 +113,13 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('EnableRandomOnce'),
       {
         format: this.Formats.BOOL,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Enable random once'
+      'Enable random once',
     );
 
     this.createCharacteristicClass(
@@ -104,9 +127,13 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('DisableRandomOnce'),
       {
         format: this.Formats.BOOL,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Disable random once'
+      'Disable random once',
     );
 
     this.createCharacteristicClass(
@@ -114,9 +141,13 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('Disabled'),
       {
         format: this.Formats.BOOL,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Disabled'
+      'Disabled',
     );
 
     this.createCharacteristicClass(
@@ -124,9 +155,13 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('Enabled'),
       {
         format: this.Formats.BOOL,
-        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+          this.Perms.WRITE,
+        ],
       },
-      'Enabled'
+      'Enabled',
     );
 
     this.createCharacteristicClass(
@@ -134,9 +169,12 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('Status'),
       {
         format: this.Formats.STRING,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Status'
+      'Status',
     );
 
     this.createCharacteristicClass(
@@ -144,9 +182,12 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('LastActivation'),
       {
         format: this.Formats.STRING,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Last activation'
+      'Last activation',
     );
 
     this.createCharacteristicClass(
@@ -154,9 +195,12 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('TokenExpires'),
       {
         format: this.Formats.STRING,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Token Expires'
+      'Token Expires',
     );
 
     this.createCharacteristicClass(
@@ -164,19 +208,18 @@ class TdTypes extends CustomHomeKitTypes {
       uuid('NextRefresh'),
       {
         format: this.Formats.STRING,
-        perms: [this.Perms.READ, this.Perms.NOTIFY],
+        perms: [
+          this.Perms.READ,
+          this.Perms.NOTIFY,
+        ],
       },
-      'Next Refresh'
+      'Next Refresh',
     );
 
-    this.createServiceClass(
-      'TelldusGateway',
-      uuid('TelldusGateway'),
-      [
-        this.Characteristics.LastUpdated,
-        this.hapCharacteristics.StatusActive,
-      ]
-    );
+    this.createServiceClass('TelldusGateway', uuid('TelldusGateway'), [
+      this.Characteristics.LastUpdated,
+      this.hapCharacteristics.StatusActive,
+    ]);
   }
 }
 

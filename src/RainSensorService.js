@@ -7,6 +7,7 @@
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import { toEveDate } from './utils/dateTimeHelpers.js';
+
 // const homebridgeLib = require('homebridge-lib');
 // const { toEveDate } = require('./utils/dateTimeHelpers');
 
@@ -75,9 +76,7 @@ class Rain extends RainSensorService {
           this.values.rain = rainRate > 0.2 ? true : false;
         }
       }
-      this.values.observationTime = toEveDate(
-        observation.lastUpdated
-      );
+      this.values.observationTime = toEveDate(observation.lastUpdated);
     } else {
       this.warn('Rain data not found for sensor');
     }

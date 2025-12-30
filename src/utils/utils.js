@@ -87,7 +87,12 @@ export function toTime(seconds) {
 // Convert DD:HH:MM:SS format to seconds
 export function toSeconds(timeArray) {
   let seconds = 0;
-  const multiplier = [1, 60, 60 * 60, 24 * 60 * 60]; // SS, MM, HH, DD
+  const multiplier = [
+    1,
+    60,
+    60 * 60,
+    24 * 60 * 60,
+  ]; // SS, MM, HH, DD
   for (let i = 0; i < timeArray.length; i++) {
     seconds += timeArray[i] * multiplier[i];
   }

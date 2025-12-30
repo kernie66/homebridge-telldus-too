@@ -5,24 +5,22 @@
 
 'use strict';
 
-import { Platform } from 'homebridge-lib/Platform';
+import events from 'events';
 import { OptionParser } from 'homebridge-lib/OptionParser';
+import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
-import TdTypes from './TdTypes.js';
 import colors from 'yoctocolors';
+import { FULL_COMMANDS } from './TdConstants.js';
+import TdSensorAccessory from './TdSensorAccessory.js';
+import TdSwitchAccessory from './TdSwitchAccessory.js';
 import TdTellstickAccessory from './TdTellstickAccessory.js';
+import TdTypes from './TdTypes.js';
+import checkSensorType from './utils/checkSensorType.js';
 import checkStatusCode from './utils/checkStatusCode.js';
+import { getTimestamp, isoDateTimeToIntl } from './utils/dateTimeHelpers.js';
 import { stateToText, wait } from './utils/utils.js';
 import uuid from './utils/uuid.js';
-import checkSensorType from './utils/checkSensorType.js';
-import TdSwitchAccessory from './TdSwitchAccessory.js';
-import TdSensorAccessory from './TdSensorAccessory.js';
-import {
-  getTimestamp,
-  isoDateTimeToIntl,
-} from './utils/dateTimeHelpers.js';
-import events from 'events';
-import { FULL_COMMANDS } from './TdConstants.js';
+
 /*
 const events = require('events');
 const homebridgeLib = require('homebridge-lib');
@@ -96,21 +94,12 @@ class TdPlatform extends Platform {
     } else if (!this.config.accessToken) {
       this.warn('Access token missing in config file, aborting...');
     } else {
-      this.debug(
-        'Found access token for IP:',
-        colors.green(this.config.ipAddress)
-      );
+      this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
 
       this.config.ignoreIds = [];
       if (this.config.ignore) {
-        this.config.ignoreIds = this.config.ignore
-          .split(',')
-          .map(Number);
-        this.log(
-          'Found %s IDs to be ignored',
-          this.config.ignoreIds.length,
-          this.config.ignore
-        );
+        this.config.ignoreIds = this.config.ignore.split(',').map(Number);
+        this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
       }
 
       this.once('heartbeat', this.init);
@@ -138,17 +127,10 @@ class TdPlatform extends Platform {
     this.telldusApi = this.tellstick.telldusApi;
 
     // Check if access token has been updated in the config file
-    if (
-      this.config.accessToken !==
-      this.tellstick.values.configAccessToken
-    ) {
-      this.warn(
-        'Access token updated in config, will use this as new access token'
-      );
+    if (this.config.accessToken !== this.tellstick.values.configAccessToken) {
+      this.warn('Access token updated in config, will use this as new access token');
     } else {
-      this.debug(
-        'Config access token not updated, will use existing access token'
-      );
+      this.debug('Config access token not updated, will use existing access token');
     }
 
     // Try to connect to Telldus device, and try again if not successful
@@ -160,29 +142,16 @@ class TdPlatform extends Platform {
         if (!sysInfo.ok) {
           if (!checkStatusCode(sysInfo, this)) {
             if (!sysInfo.body.product) {
-              this.error(
-                'Unknown response from Telldus, check if the host address is correct and restart'
-              );
+              this.error('Unknown response from Telldus, check if the host address is correct and restart');
               this.warn('Will retry in 1 minute...');
               await wait(60 * 1000);
             }
           }
         } else {
-          this.log(
-            'Telldus system type:',
-            colors.green(sysInfo.body.product)
-          );
-          this.log(
-            'Telldus system version:',
-            colors.green(sysInfo.body.version)
-          );
+          this.log('Telldus system type:', colors.green(sysInfo.body.product));
+          this.log('Telldus system version:', colors.green(sysInfo.body.version));
           this.tellstick.firmware = sysInfo.body.version;
-          this.log(
-            'Telldus system time:',
-            colors.green(
-              isoDateTimeToIntl(sysInfo.body.time, this.config.locale)
-            )
-          );
+          this.log('Telldus system time:', colors.green(isoDateTimeToIntl(sysInfo.body.time, this.config.locale)));
           this.tellstick.getNewAccessToken();
           connected = true;
         }
@@ -215,10 +184,7 @@ class TdPlatform extends Platform {
       const devices = deviceResponse.body.device;
       this.numberOfDevices = devices.length;
       if (this.numberOfDevices) {
-        this.log(
-          'Number of Telldus devices found:',
-          this.numberOfDevices
-        );
+        this.log('Number of Telldus devices found:', this.numberOfDevices);
         devices.forEach((element) => {
           deviceArray.push(element.id);
         });
@@ -243,10 +209,7 @@ class TdPlatform extends Platform {
       const sensors = sensorResponse.body.sensor;
       this.numberOfSensors = sensors.length;
       if (this.numberOfSensors) {
-        this.log(
-          'Number of Telldus sensors found:',
-          this.numberOfSensors
-        );
+        this.log('Number of Telldus sensors found:', this.numberOfSensors);
         sensors.forEach((element) => {
           sensorArray.push(element.id);
         });
@@ -272,10 +235,7 @@ class TdPlatform extends Platform {
         this.log('Supported methods:', infoResponse.supportedMethods);
         if (!infoResponse.ok) {
           checkStatusCode(infoResponse, this);
-          this.warn(
-            'No info from Telldus when parsing, skipping device ID:',
-            id
-          );
+          this.warn('No info from Telldus when parsing, skipping device ID:', id);
           continue;
         }
         info = infoResponse.body;
@@ -298,18 +258,13 @@ class TdPlatform extends Platform {
       config.manufacturer = modelSplit[1] || 'unknown';
       // Check type of switch, and if dimmers are to be used as switches
       if (info.methods & supportedCommands.dim) {
-        config.modelType = this.config.dimmerAsSwitch
-          ? 'switch'
-          : 'dimmer';
+        config.modelType = this.config.dimmerAsSwitch ? 'switch' : 'dimmer';
       } else if (info.methods & supportedCommands.bell) {
         config.modelType = 'bell';
       } else if (info.methods & supportedCommands.on) {
         config.modelType = 'switch';
       } else {
-        this.warn(
-          'Ignoring unsupported Telldus device with ID:',
-          info.id
-        );
+        this.warn('Ignoring unsupported Telldus device with ID:', info.id);
         continue;
       }
       config.methods = info.methods;
@@ -325,19 +280,9 @@ class TdPlatform extends Platform {
         config.category = this.Accessory.Categories.Switch;
       }
       if (this.config.ignoreIds.includes(config.id)) {
-        this.log(
-          'Ignoring %s: %s, ID: %s',
-          config.modelType,
-          config.name,
-          config.id
-        );
+        this.log('Ignoring %s: %s, ID: %s', config.modelType, config.name, config.id);
       } else {
-        this.log(
-          'Found %s: %s, ID: %s',
-          config.modelType,
-          config.name,
-          config.id
-        );
+        this.log('Found %s: %s, ID: %s', config.modelType, config.name, config.id);
         validSwitches.push(config);
       }
     }
@@ -354,10 +299,7 @@ class TdPlatform extends Platform {
         const infoResponse = await this.telldusApi?.getSensorInfo(id);
         if (!infoResponse.ok) {
           checkStatusCode(infoResponse, this);
-          this.warn(
-            'No info from Telldus when parsing ID: %d, skipping device...',
-            id
-          );
+          this.warn('No info from Telldus when parsing ID: %d, skipping device...', id);
           continue;
         }
         info = infoResponse.body;
@@ -395,25 +337,13 @@ class TdPlatform extends Platform {
         config.configHeartrate = this.config.configHeartrate;
         config.category = this.Accessory.Categories.Sensor;
         if (this.config.ignoreIds.includes(config.id)) {
-          this.log(
-            'Ignoring sensor: %s, ID: %s',
-            config.name,
-            config.id
-          );
+          this.log('Ignoring sensor: %s, ID: %s', config.name, config.id);
         } else {
-          this.log(
-            'Found sensor: %s, ID: %s',
-            config.name,
-            config.id
-          );
+          this.log('Found sensor: %s, ID: %s', config.name, config.id);
           validSensors.push(config);
         }
       } else {
-        this.warn(
-          'Ignoring unknown sensor type for ID %s: %s',
-          info.id,
-          info.model
-        );
+        this.warn('Ignoring unknown sensor type for ID %s: %s', info.id, info.model);
       }
     }
     this.log('Number of valid sensors', validSensors.length);
@@ -439,12 +369,9 @@ class TdPlatform extends Platform {
         'Processing %s %s, State: [%s]',
         switchParams.modelType,
         switchParams.name,
-        stateToText(switchParams.state)
+        stateToText(switchParams.state),
       );
-      const switchAccessory = new TdSwitchAccessory(
-        this,
-        switchParams
-      );
+      const switchAccessory = new TdSwitchAccessory(this, switchParams);
       this.setStateCache(tdSwitch);
       jobs.push(events.once(switchAccessory, 'initialised'));
       this.switchAccessories[tdSwitch] = switchAccessory;
@@ -467,10 +394,7 @@ class TdPlatform extends Platform {
         category: tdSensor.category,
       };
       this.debug('Processing sensor', sensorParams.name);
-      const sensorAccessory = new TdSensorAccessory(
-        this,
-        sensorParams
-      );
+      const sensorAccessory = new TdSensorAccessory(this, sensorParams);
       jobs.push(events.once(sensorAccessory, 'initialised'));
       this.sensorAccessories[tdSensor] = sensorAccessory;
     }
@@ -494,17 +418,12 @@ class TdPlatform extends Platform {
         const deviceResponse = await this.telldusApi.listDevices();
         if (!deviceResponse.ok) {
           checkStatusCode(deviceResponse, this);
-          this.warn(
-            'No response from Telldus, will retry next cycle...'
-          );
+          this.warn('No response from Telldus, will retry next cycle...');
         } else {
           const devices = deviceResponse.body.device;
           this.numberOfDevices = devices.length;
           if (this.numberOfDevices) {
-            this.debug(
-              'Updating cache for %s devices...',
-              this.numberOfDevices
-            );
+            this.debug('Updating cache for %s devices...', this.numberOfDevices);
             devices.forEach((device) => {
               this.updateStateCache(device);
             });
@@ -516,10 +435,8 @@ class TdPlatform extends Platform {
         if (getTimestamp() > this.tellstick.values.nextRefresh) {
           this.tellstick.getNewAccessToken();
         }
-      } catch (error) {
-        this.error(
-          'Error getting device state from Telldus, will retry'
-        );
+      } catch (_error) {
+        this.error('Error getting device state from Telldus, will retry');
       }
     }
   }
@@ -533,15 +450,9 @@ class TdPlatform extends Platform {
     let success = this.stateCache.set('td' + key, state);
     success = success && this.stateCache.set('pi' + key, state);
     if (success) {
-      this.debug(
-        'Stored Telldus state [%s] for key %s',
-        stateToText(device.state),
-        key
-      );
+      this.debug('Stored Telldus state [%s] for key %s', stateToText(device.state), key);
     } else {
-      this.warn(
-        "Couldn't set initial cache state for Telldus devices"
-      );
+      this.warn("Couldn't set initial cache state for Telldus devices");
     }
   }
 
@@ -555,15 +466,9 @@ class TdPlatform extends Platform {
     if (cachedValue !== state) {
       const success = this.stateCache.set('td' + key, state);
       if (success) {
-        this.debug(
-          'Updated Telldus state to [%s] for key %s',
-          stateToText(state),
-          key
-        );
+        this.debug('Updated Telldus state to [%s] for key %s', stateToText(state), key);
       } else {
-        this.warn(
-          "Couldn't update cache state for Telldus devices, will try again"
-        );
+        this.warn("Couldn't update cache state for Telldus devices, will try again");
       }
     }
   }
