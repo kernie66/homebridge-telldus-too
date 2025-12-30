@@ -16,4 +16,13 @@
     ],
     "typescript.validate.enable": false,
     "javascript.validate.enable": false,
+    "files.eol": "\n",
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "editor.rulers": [
+      140
+    ],
+    "eslint.enable": true,
+    "prettier.singleQuote": true
 }

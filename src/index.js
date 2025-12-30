@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 import TdPlatform from './TdPlatform.js';
 
 const require = createRequire(import.meta.url);
-const packageJson = require('./package.json');
+const packageJson = require('../package.json');
 
 // const TdPlatform = require('./TdPlatform');
 // const packageJson = require('../package.json');
@@ -19,6 +19,6 @@ export default function (homebridge) {
     homebridge,
     packageJson,
     'TelldusToo',
-    TdPlatform
+    TdPlatform,
   );
 }

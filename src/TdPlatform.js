@@ -203,7 +203,7 @@ class TdPlatform extends Platform {
       // Get devices from Telldus
       let deviceResponse;
       while (retry) {
-        deviceResponse = await this.telldusApi?.listDevices();
+        deviceResponse = await this.telldusApi.listDevices();
         if (!deviceResponse.ok) {
           checkStatusCode(deviceResponse, this);
           this.warn(colors.blueBright('Will retry in 1 minute...'));
@@ -231,7 +231,7 @@ class TdPlatform extends Platform {
       // Get sensors from Telldus
       let sensorResponse;
       while (retry) {
-        sensorResponse = await this.telldusApi?.listSensors();
+        sensorResponse = await this.telldusApi.listSensors();
         if (!sensorResponse.ok) {
           checkStatusCode(sensorResponse, this);
           this.warn(colors.blueBright('Will retry in 1 minute...'));
