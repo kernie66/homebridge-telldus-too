@@ -10,7 +10,8 @@
     "moduleResolution": "nodenext",
     "lib": [
       "DOM",
-      "ES2022"], // Specifies the library files to be included in the compilation.
+      "ES2022"
+    ], // Specifies the library files to be included in the compilation.
     "sourceMap": true, // Generates source maps for debugging
     "skipLibCheck": true, // Skips type checking of declaration files
     "noUnusedParameters": false, // Do not allow unused parameters in functions.
@@ -25,10 +26,9 @@
     "noFallthroughCasesInSwitch": true, // This option reports errors for switch statement cases that fall through without a break, return, or throw statement.
     "noErrorTruncation": true, // When enabled, this option prevents TypeScript from truncating error messages, providing full details about the error.
     "declaration": true, // Generates corresponding .d.ts file
-    "allowSyntheticDefaultImports": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
-    // "eslint.config.js",
     "homebridge-ui",
     "src"
   ]

@@ -26,15 +26,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
-    "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
-    "eslint": "^9.39.1",
     "homebridge": "^2.0.0-beta.55",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.4",
     "vitest": "^3.0.6"
   },
   "repository": {

@@ -1,28 +1,24 @@
 {
-    "autoHide.autoHidePanel": false,
-    "remote.extensionKind": {
-      "alefragnani.project-manager": [
-        "workspace"
-      ]
-    },
-    "cSpell.words": [
-      "rrate",
-      "rtot",
-      "selflearning",
-      "Tellstick",
-      "wavg",
-      "wdir",
-      "wgust"
-    ],
-    "typescript.validate.enable": false,
-    "javascript.validate.enable": false,
-    "files.eol": "\n",
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit"
-    },
-    "editor.rulers": [
-      140
-    ],
-    "eslint.enable": false,
-    "prettier.singleQuote": true
+  "autoHide.autoHidePanel": false,
+  "remote.extensionKind": {
+    "alefragnani.project-manager": [
+      "workspace"
+    ]
+  },
+  "cSpell.words": [
+    "rrate",
+    "rtot",
+    "selflearning",
+    "Tellstick",
+    "wavg",
+    "wdir",
+    "wgust"
+  ],
+  "typescript.validate.enable": false,
+  "javascript.validate.enable": false,
+  "files.eol": "\n",
+  "editor.rulers": [
+    120
+  ],
+  "eslint.enable": false
 }
