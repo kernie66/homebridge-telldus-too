@@ -2,7 +2,7 @@
   "watch": [
     "src"
   ],
-  "ext": "ts",
+  "ext": "js,ts",
   "ignore": [],
   "exec": "tsc && homebridge -U ./test/hbConfig -D",
   "signal": "SIGTERM",

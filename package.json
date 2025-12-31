@@ -17,6 +17,7 @@
   "type": "module",
   "dependencies": {
     "events": "^3.3.0",
+    "figlet": "^1.9.4",
     "homebridge-lib": "^7.1.4",
     "luxon": "^3.5.0",
     "node-cache": "^5.1.2",
@@ -47,6 +48,7 @@
   },
   "scripts": {
     "build": "rimraf ./dist && tsc",
+    "watch": "npm run build && npm link && nodemon",
     "test": "vitest"
   },
   "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
