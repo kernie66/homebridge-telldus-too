@@ -16,8 +16,9 @@ import TdTypes from './TdTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, isoDateTimeToIntl } from './utils/dateTimeHelpers.js';
-import { stateToText, wait } from './utils/utils.js';
+import { sleep, stateToText, wait } from './utils/utils.js';
 import uuid from './utils/uuid.js';
+import figlet from 'figlet';
 
 /*
 const events = require('events');
@@ -63,14 +64,14 @@ class TdPlatform extends Platform {
     this.platformBeatRate = 30;
     this.stateCache = new NodeCache();
     this.td = new TdTypes(homebridge);
-    this.debug('Characteristics: %s', this.td.Characteristics);
+    this.vdebug('Characteristics: %o', this.td.Characteristics);
 
     const optionParser = new OptionParser(this.config, true);
     optionParser
-      .stringKey('name')
-      .stringKey('platform')
-      .stringKey('ipAddress')
-      .stringKey('accessToken')
+      .stringKey('name', true)
+      .stringKey('platform', true)
+      .stringKey('ipAddress', true)
+      .stringKey('accessToken', true)
       .boolKey('random')
       .intKey('delay', 0, 300)
       .intKey('repeats', 0, 5)
@@ -82,32 +83,40 @@ class TdPlatform extends Platform {
       .intKey('configHeartrate', 1, 300)
       .boolKey('randomize')
       .stringKey('locale')
-      .on('userInputError', (message) => {
-        this.warn('config.json: %s', message);
+      .on('userInputError', (error) => {
+        throw new Error(error);
       });
 
-    optionParser.parse(configJson);
-    if (!this.config.ipAddress) {
-      this.warn('IP address missing in config file, aborting...');
-    } else if (!this.config.accessToken) {
-      this.warn('Access token missing in config file, aborting...');
-    } else {
-      this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
+    try {
+      optionParser.parse(configJson);
+      if (!this.config.ipAddress) {
+        throw new Error('IP address missing in config file');
+      } else if (!this.config.accessToken) {
+        throw new Error('Access token missing in config file');
+      } else {
+        this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
 
-      this.config.ignoreIds = [];
-      if (this.config.ignore) {
-        this.config.ignoreIds = this.config.ignore.split(',').map(Number);
-        this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
+        this.config.ignoreIds = [];
+        if (this.config.ignore) {
+          this.config.ignoreIds = this.config.ignore.split(',').map(Number);
+          this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
+        }
+
+        this.once('heartbeat', this.init);
       }
 
-      this.once('heartbeat', this.init);
+      this.debug('config: %j', this.config);
+
+      this.on('heartbeat', async (beat) => {
+        await this.platformBeat(beat);
+      });
+    } catch (error) {
+      this.error(`\n${figlet.textSync('Config Error')}`);
+      this.log(error);
+      this.log('Check the config file and restart Homebridge');
+      this.log('The plugin aborts the initialization');
+      return;
     }
-
-    this.debug('config: %j', this.config);
-
-    this.on('heartbeat', async (beat) => {
-      await this.platformBeat(beat);
-    });
     this.on('shutdown', async () => {
       return this.shutdown();
     });
