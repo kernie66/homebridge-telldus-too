@@ -25,7 +25,7 @@
     {
       "name": "TelldusTooTest",
       "ipAddress": "192.168.1.118",
-      "accessToken": "AABBCC",
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImF1ZCI6ImhvbWVicmlkZ2UtdGVsbGR1cyIsImV4cCI6MTc5ODc0NDkxOX0.eyJyZW5ldyI6dHJ1ZSwidHRsIjozMTUzNjAwMH0.uf9YpJGwv2NjlrAGcTchSGMxHTMQmwZOQok7LTm_3vQ",
       "delay": 60,
       "random": false,
       "repeats": 0,

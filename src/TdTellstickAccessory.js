@@ -74,7 +74,9 @@ class TdTellstickAccessory extends AccessoryDelegate {
       silent: true,
     });
 
-    this.debug('Found access token for IP:', colors.green(platform.config.ipAddress));
+    this.debug('IP address:', colors.green(platform.config.ipAddress));
+    this.debug('Config access token:', this.values.configAccessToken);
+    this.debug('Current access token:', this.values.accessToken);
 
     // Try to initialise the gateway
     try {

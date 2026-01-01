@@ -20,22 +20,9 @@ function checkFunction(handler) {
   return false;
 }
 
-const regExp = {
-  ip: /(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)/,
-  host: /(^([A-Za-z0-9_-]+){1}(\.[A-Za-z0-9_-]+)$)/,
-  token: /^[\w-_=]*\.[\w-_=]*\.[\w-_=]*$/,
-};
-
 class TelldusApi extends HttpClient {
   constructor(host, accessToken) {
     super();
-    if (!regExp.ip.test(host) && !regExp.host.test(host)) {
-      throw new TypeError(`TelldusAPI: host ${host} is not a valid value`);
-    }
-
-    if (!regExp.token.test(accessToken)) {
-      throw new TypeError('TelldusAPI: given access token not a valid value');
-    }
 
     this.host = host;
     this.setAccessToken(accessToken);

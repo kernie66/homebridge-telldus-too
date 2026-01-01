@@ -39,6 +39,11 @@ const checkStatusCode = require('./utils/checkStatusCode');
 const checkSensorType = require('./utils/checkSensorType');
 const TdTellstickAccessory = require('./TdTellstickAccessory.js');
 */
+const configRegExp = {
+  ip: /(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)/,
+  host: /(^([A-Za-z0-9_-]+){1}(\.[A-Za-z0-9_-]+)$)/,
+  token: /(^((?:\.?(?:[A-Za-z0-9-_]+)){3})$)/,
+};
 
 const supportedCommands = {
   on: 0x0001, // 1
@@ -84,28 +89,33 @@ class TdPlatform extends Platform {
       .boolKey('randomize')
       .stringKey('locale')
       .on('userInputError', (error) => {
-        throw new Error(error);
+        throw new TypeError(error);
       });
 
     try {
       optionParser.parse(configJson);
       if (!this.config.ipAddress) {
         throw new Error('IP address missing in config file');
-      } else if (!this.config.accessToken) {
+      }
+      if (!configRegExp.ip.test(this.config.ipAddress) && !configRegExp.host.test(this.config.ipAddress)) {
+        throw new Error(`IP address ${this.config.ipAddress} is not a valid value`);
+      }
+      if (!this.config.accessToken) {
         throw new Error('Access token missing in config file');
-      } else {
-        this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
-
-        this.config.ignoreIds = [];
-        if (this.config.ignore) {
-          this.config.ignoreIds = this.config.ignore.split(',').map(Number);
-          this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
-        }
-
-        this.once('heartbeat', this.init);
+      }
+      if (!configRegExp.token.test(this.config.accessToken)) {
+        throw new Error('Given access token not a valid value');
       }
 
-      this.debug('config: %j', this.config);
+      this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
+
+      this.config.ignoreIds = [];
+      if (this.config.ignore) {
+        this.config.ignoreIds = this.config.ignore.split(',').map(Number);
+        this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
+      }
+
+      this.once('heartbeat', this.init);
 
       this.on('heartbeat', async (beat) => {
         await this.platformBeat(beat);
@@ -113,8 +123,8 @@ class TdPlatform extends Platform {
     } catch (error) {
       this.error(`\n${figlet.textSync('Config Error')}`);
       this.log(error);
-      this.log('Check the config file and restart Homebridge');
-      this.log('The plugin aborts the initialization');
+      this.warn('Check the config file and restart Homebridge');
+      this.warn('The plugin aborts the initialization');
       return;
     }
     this.on('shutdown', async () => {
@@ -136,6 +146,7 @@ class TdPlatform extends Platform {
     // Check if access token has been updated in the config file
     if (this.config.accessToken !== this.tellstick.values.configAccessToken) {
       this.warn('Access token updated in config, will use this as new access token');
+      this.tellstick.values.configAccessToken = this.config.accessToken;
     } else {
       this.debug('Config access token not updated, will use existing access token');
     }
@@ -159,7 +170,7 @@ class TdPlatform extends Platform {
           this.log('Telldus system version:', colors.green(sysInfo.body.version));
           this.tellstick.firmware = sysInfo.body.version;
           this.log('Telldus system time:', colors.green(isoDateTimeToIntl(sysInfo.body.time, this.config.locale)));
-          this.tellstick.getNewAccessToken();
+          // this.tellstick.getNewAccessToken();
           connected = true;
         }
       } catch (error) {
@@ -440,7 +451,7 @@ class TdPlatform extends Platform {
         }
         // Check if the access token needs to be refreshed
         if (getTimestamp() > this.tellstick.values.nextRefresh) {
-          this.tellstick.getNewAccessToken();
+          // this.tellstick.getNewAccessToken();
         }
       } catch (_error) {
         this.error('Error getting device state from Telldus, will retry');
