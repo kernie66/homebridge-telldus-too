@@ -5,8 +5,8 @@
 import { HttpClient } from 'homebridge-lib/HttpClient';
 import qs from 'qs';
 import { COMMANDS } from '../TdConstants.js';
+import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
 import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
-import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClient.js';
 
 function setPath(path: string, queryString: {}) {
   return queryString ? `${path}?${qs.stringify(queryString)}` : path;

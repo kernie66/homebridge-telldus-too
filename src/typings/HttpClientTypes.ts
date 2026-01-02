@@ -16,6 +16,7 @@ export interface HttpResponse {
   };
   headers: {};
   parsedBody: unknown;
+  request: HttpRequest;
   statusCode: number;
   statusMessage: string;
   ok: boolean; // Added for simplified status check
