@@ -272,9 +272,7 @@ class SwitchService extends ServiceDelegate {
       // Prepare abort controller
       this.acDelay = new AbortController();
       try {
-        await wait(delay, {
-          signal: this.acDelay.signal,
-        });
+        await wait(delay, this.acDelay.signal);
       } catch (err) {
         this.debug('Delay timer aborted:', err);
         return;
@@ -310,9 +308,7 @@ class SwitchService extends ServiceDelegate {
         this.acRepeat = new AbortController();
         // Wait 2 seconds + 1 second/repetition between repeats
         try {
-          await wait(2000 + this.values.repetition * 1000, {
-            signal: this.acRepeat.signal,
-          });
+          await wait(2000 + this.values.repetition * 1000, this.acRepeat.signal);
         } catch (err) {
           this.debug('Repeat timer aborted:', err);
           return;

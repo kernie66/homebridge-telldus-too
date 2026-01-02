@@ -1,8 +1,10 @@
-// utils.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// utils.ts
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-const windDirections = [
+import { COMMANDS } from '../TdConstants.js';
+
+const WIND_DIRECTIONS = [
   'North',
   'NNE',
   'NE',
@@ -20,13 +22,14 @@ const windDirections = [
   'NW',
   'NNW',
   'North',
-];
+] as const;
 
-export function windDirection(degrees) {
-  return windDirections[Math.round((degrees * 16) / 360)];
+export function windDirection(degrees: number) {
+  const realDegrees = degrees < 0 ? 0 : degrees % 360;
+  return WIND_DIRECTIONS[(realDegrees * 16) % 360];
 }
 
-const windDirectionsSE = [
+const WIND_DIRECTIONS_SE = [
   'Nordan',
   'NNÖ',
   'NÖ',
@@ -44,25 +47,26 @@ const windDirectionsSE = [
   'NV',
   'NNV',
   'Nordan',
-];
+] as const;
 
-export function windDirectionSE(degrees) {
-  return windDirectionsSE[Math.round((degrees * 16) / 360)];
+export function windDirectionSE(degrees: number) {
+  const realDegrees = degrees < 0 ? 0 : degrees % 360;
+  return WIND_DIRECTIONS_SE[realDegrees];
 }
 
-export const sleep = (seconds) => {
+export const sleep = (seconds: number) => {
   const milliSeconds = Math.min(seconds * 1000, Math.pow(2, 30));
   return new Promise((resolve) => {
     setTimeout(resolve, milliSeconds);
   });
 };
 
-export function wait(ms, opts = {}) {
+export function wait(ms: number, signal?: AbortSignal) {
   return new Promise((resolve, reject) => {
-    let timerId = setTimeout(resolve, ms);
-    if (opts.signal) {
+    const timerId = setTimeout(resolve, ms);
+    if (signal) {
       // implement aborting logic for our async operation
-      opts.signal.addEventListener('abort', (event) => {
+      signal.addEventListener('abort', (event) => {
         clearTimeout(timerId);
         reject(event);
       });
@@ -70,10 +74,17 @@ export function wait(ms, opts = {}) {
   });
 }
 
+type Time = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+};
+
 // Convert seconds to HH:MM:SS format
-export function toTime(seconds) {
-  const time = {};
-  let secondsLeft;
+export function toTime(seconds: number) {
+  const time = <Time>{};
+  let secondsLeft: number;
   time.days = Math.trunc(seconds / (24 * 3600));
   secondsLeft = seconds - time.days * 24 * 3600;
   time.hours = Math.trunc(secondsLeft / 3600);
@@ -84,6 +95,7 @@ export function toTime(seconds) {
   return time;
 }
 
+/*
 // Convert DD:HH:MM:SS format to seconds
 export function toSeconds(timeArray) {
   let seconds = 0;
@@ -98,9 +110,10 @@ export function toSeconds(timeArray) {
   }
   return seconds;
 }
+*/
 
 // Convert Telldus state to text
-export function stateToText(state) {
+export function stateToText(state: number) {
   let stateText;
   const telldusStates = [
     'ON', // 1
@@ -117,13 +130,14 @@ export function stateToText(state) {
     'THERMOSTAT', // 2048
   ];
   if (state !== undefined) {
-    stateText = telldusStates[Math.log2(state)];
+    const stateIndex = Math.round(Math.log2(state));
+    stateText = telldusStates[stateIndex];
   } else {
     stateText = 'Undefined';
   }
   return stateText;
 }
 
-export function setSupportedMethods(commands) {
-  return Object.values(commands).reduce((memo, num) => memo + num, 0);
+export function setSupportedMethods(commands: typeof COMMANDS) {
+  return Object.values(commands).reduce((memo: number, num: number) => memo + num, 0);
 }

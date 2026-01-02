@@ -1,19 +1,18 @@
-// homebridge-telldus-too/lib/api/TelldusApi.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/api/TelldusApi.ts
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-// const homebridgeLib = require('homebridge-lib');
-// const querystring = require('qs');
 import { HttpClient } from 'homebridge-lib/HttpClient';
 import qs from 'qs';
 import { COMMANDS } from '../TdConstants.js';
 import { setSupportedMethods } from '../utils/utils.js';
+import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClient.js';
 
-function setPath(path, queryString) {
-  return queryString ? `${path}?${qs.stringify(qs)}` : path;
+function setPath(path: string, queryString: {}) {
+  return queryString ? `${path}?${qs.stringify(queryString)}` : path;
 }
 
-function checkFunction(handler) {
+function checkFunction(handler: Function) {
   if (handler && typeof handler === 'function') {
     return handler;
   }
@@ -21,7 +20,7 @@ function checkFunction(handler) {
 }
 
 class TelldusApi extends HttpClient {
-  constructor(host, accessToken) {
+  constructor(host: string, accessToken: string) {
     super();
 
     this.host = host;
@@ -45,26 +44,29 @@ class TelldusApi extends HttpClient {
         ],
       });
       this.apiClient
-        .on('error', (error) => {
+        .on('error', (error: HttpError) => {
           this.lastError = error;
           if (this.errorHandler) {
             this.errorHandler(error);
           }
         })
-        .on('request', (request) => {
+        .on('request', (request: HttpRequest) => {
           if (this.requestHandler) {
             this.requestHandler(request);
           }
         })
-        .on('response', (response) => {
+        .on('response', (response: HttpResponse) => {
           this.lastResponse = response;
           if (this.responseHandler) {
             this.responseHandler(response);
           }
         });
     } catch (error) {
-      // console.log('Error:', error);
-      throw new TypeError(`TelldusAPI: Error initialising API client (${error.name}: ${error.message})`);
+      let errorMessage = 'unknown error';
+      if (error instanceof Error) {
+        errorMessage = `${error.name}: ${error.message}`;
+      }
+      throw new Error(`TelldusAPI: Error initialising API client (${errorMessage})`);
     }
   }
 
@@ -76,19 +78,19 @@ class TelldusApi extends HttpClient {
     return this.expires;
   }
 
-  setRequestHandler(handler) {
+  setRequestHandler(handler: Function) {
     this.requestHandler = checkFunction(handler);
   }
 
-  setResponseHandler(handler) {
+  setResponseHandler(handler: Function) {
     this.responseHandler = checkFunction(handler);
   }
 
-  setErrorHandler(handler) {
+  setErrorHandler(handler: Function) {
     this.errorHandler = checkFunction(handler);
   }
 
-  setAccessToken(token) {
+  setAccessToken(token: string) {
     this.accessToken = token;
     this.headers = {
       Authorization: `Bearer ${token}`,
@@ -103,7 +105,7 @@ class TelldusApi extends HttpClient {
     return this.lastError;
   }
 
-  _checkResponseOk(response) {
+  _checkResponseOk(response: HttpResponse) {
     response.ok = false;
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       if (!response.body.error) {
@@ -123,7 +125,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async getSensorInfo(id) {
+  async getSensorInfo(id: string) {
     const response = await this.apiClient.get(
       setPath('sensor/info', {
         id,
@@ -143,21 +145,15 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async getDeviceInfo(id, supportedMethods = setSupportedMethods(COMMANDS)) {
-    if (supportedMethods) {
-      const response = await this.apiClient.get(
-        setPath('device/info', {
-          id,
-          supportedMethods,
-        }),
-        this.headers,
-      );
-      return this._checkResponseOk(response);
-    }
-    return {
-      ok: false,
-      supportedMethods: supportedMethods,
-    };
+  async getDeviceInfo(id: string, supportedMethods = setSupportedMethods(COMMANDS)) {
+    const response = await this.apiClient.get(
+      setPath('device/info', {
+        id,
+        supportedMethods,
+      }),
+      this.headers,
+    );
+    return this._checkResponseOk(response);
   }
 
   /*
@@ -169,7 +165,7 @@ class TelldusApi extends HttpClient {
   }
   */
 
-  async bellDevice(id) {
+  async bellDevice(id: string) {
     const response = await this.apiClient.get(
       setPath('device/bell', {
         id,
@@ -179,7 +175,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async dimDevice(id, level) {
+  async dimDevice(id: string, level: string) {
     const response = await this.apiClient.get(
       setPath('device/dim', {
         id,
@@ -190,7 +186,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async onOffDevice(id, on) {
+  async onOffDevice(id: string, on: boolean) {
     const response = await this.apiClient.get(
       setPath(`device/turn${on ? 'On' : 'Off'}`, {
         id,

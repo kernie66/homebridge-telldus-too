@@ -1,6 +1,6 @@
-// homebridge-telldus-too/lib/TdConstants.js
+// homebridge-telldus-too/lib/TdConstants.ts
 
-export const FULL_COMMANDS = Object.freeze({
+export const FULL_COMMANDS = {
   TURNON: 1,
   TURNOFF: 2,
   BELL: 4,
@@ -13,7 +13,7 @@ export const FULL_COMMANDS = Object.freeze({
   STOP: 512,
   RGB: 1024,
   THERMOSTAT: 2048,
-});
+} as const;
 
 export const COMMANDS = {
   on: 0x0001, // 1
@@ -26,4 +26,4 @@ export const COMMANDS = {
   up: 0x0080, // 128
   down: 0x0100, // 256
   stop: 0x0200, // 512
-};
+} as const;

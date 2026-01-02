@@ -239,7 +239,7 @@ class TdPlatform extends Platform {
       this.error('Error accessing Telldus, plug-in suspended...');
       this.error('Error name:', error.name);
       this.error('Error message:', error.message);
-      await wait(1000 * 60 * 60 * 24 * 30);
+      return;
     }
 
     this.switchAccessories = {};
