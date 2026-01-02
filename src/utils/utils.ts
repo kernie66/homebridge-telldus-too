@@ -2,7 +2,7 @@
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-import { COMMANDS, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
+import { COMMANDS, TELLDUS_STATES, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
 
 export function windDirection(degrees: number) {
   const realDegrees = degrees < 0 ? 0 : degrees % 360;
@@ -75,23 +75,9 @@ export function toSeconds(timeArray) {
 // Convert Telldus state to text
 export function stateToText(state: number) {
   let stateText;
-  const telldusStates = [
-    'ON', // 1
-    'OFF', // 2
-    'BELL', // 4
-    'TOGGLE', // 8
-    'DIM', // 16
-    'LEARN', // 32
-    'EXECUTE', // 64
-    'UP', // 128
-    'DOWN', // 256
-    'STOP', // 512
-    'RGB', // 1024
-    'THERMOSTAT', // 2048
-  ];
   if (state !== undefined) {
     const stateIndex = Math.round(Math.log2(state));
-    stateText = telldusStates[stateIndex];
+    stateText = TELLDUS_STATES[stateIndex];
   } else {
     stateText = 'Undefined';
   }
@@ -100,4 +86,15 @@ export function stateToText(state: number) {
 
 export function setSupportedMethods(commands: typeof COMMANDS) {
   return Object.values(commands).reduce((memo: number, num: number) => memo + num, 0);
+}
+
+export function getErrorMessage(error: unknown) {
+  let errorMessage = 'unknown error';
+  if (typeof error === 'string') {
+    errorMessage = error;
+  }
+  if (error instanceof Error) {
+    errorMessage = `${error.name}: ${error.message}`;
+  }
+  return errorMessage;
 }

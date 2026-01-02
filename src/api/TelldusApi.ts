@@ -5,7 +5,7 @@
 import { HttpClient } from 'homebridge-lib/HttpClient';
 import qs from 'qs';
 import { COMMANDS } from '../TdConstants.js';
-import { setSupportedMethods } from '../utils/utils.js';
+import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
 import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClient.js';
 
 function setPath(path: string, queryString: {}) {
@@ -20,6 +20,8 @@ function checkFunction(handler: Function) {
 }
 
 class TelldusApi extends HttpClient {
+  host: string;
+  expires: number;
   constructor(host: string, accessToken: string) {
     super();
 
@@ -62,10 +64,7 @@ class TelldusApi extends HttpClient {
           }
         });
     } catch (error) {
-      let errorMessage = 'unknown error';
-      if (error instanceof Error) {
-        errorMessage = `${error.name}: ${error.message}`;
-      }
+      const errorMessage = getErrorMessage(error);
       throw new Error(`TelldusAPI: Error initialising API client (${errorMessage})`);
     }
   }

@@ -10,6 +10,7 @@ import RainSensorService from './RainSensorService.js';
 import TempSensorService from './TempSensorService.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import WindSensorService from './WindSensorService.js';
+import { getErrorMessage } from './utils/utils.js';
 
 /*
 const homebridgeLib = require('homebridge-lib');
@@ -88,10 +89,7 @@ class TdSensorAccessory extends AccessoryDelegate {
         this.log('Identifying sensor with ID %s', this.sensorId);
       });
     } catch (error) {
-      let errorMessage = 'unknown error';
-      if (error instanceof Error) {
-        errorMessage = `${error.name}: ${error.message}`;
-      }
+      const errorMessage = getErrorMessage(error);
       this.error(`Sensor Accessory error: (${errorMessage})`);
       throw new Error(`Sensor Accessory error: (${errorMessage})`);
       // return;

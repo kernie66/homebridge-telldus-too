@@ -28,6 +28,21 @@ export const COMMANDS = {
   stop: 0x0200, // 512
 } as const;
 
+export const TELLDUS_STATES = [
+  'ON', // 1
+  'OFF', // 2
+  'BELL', // 4
+  'TOGGLE', // 8
+  'DIM', // 16
+  'LEARN', // 32
+  'EXECUTE', // 64
+  'UP', // 128
+  'DOWN', // 256
+  'STOP', // 512
+  'RGB', // 1024
+  'THERMOSTAT', // 2048
+] as const;
+
 export const WIND_DIRECTIONS = [
   'North',
   'NNE',
