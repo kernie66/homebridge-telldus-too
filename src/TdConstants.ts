@@ -27,3 +27,43 @@ export const COMMANDS = {
   down: 0x0100, // 256
   stop: 0x0200, // 512
 } as const;
+
+export const WIND_DIRECTIONS = [
+  'North',
+  'NNE',
+  'NE',
+  'ENE',
+  'East',
+  'ESE',
+  'SE',
+  'SSE',
+  'South',
+  'SSW',
+  'SW',
+  'WSW',
+  'West',
+  'WNW',
+  'NW',
+  'NNW',
+  'North',
+] as const;
+
+export const WIND_DIRECTIONS_SE = [
+  'Nordan',
+  'NNÖ',
+  'NÖ',
+  'ÖNÖ',
+  'Östan',
+  'ÖSÖ',
+  'SÖ',
+  'SSÖ',
+  'Sunnan',
+  'SSV',
+  'SV',
+  'VSV',
+  'Västan',
+  'VNV',
+  'NV',
+  'NNV',
+  'Nordan',
+] as const;

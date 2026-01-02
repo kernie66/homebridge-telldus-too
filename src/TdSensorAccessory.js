@@ -5,6 +5,7 @@
 
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import 'homebridge-lib/ServiceDelegate/History';
 import RainSensorService from './RainSensorService.js';
 import TempSensorService from './TempSensorService.js';
 import checkStatusCode from './utils/checkStatusCode.js';
@@ -17,8 +18,6 @@ const RainSensorService = require('./RainSensorService');
 const WindSensorService = require('./WindSensorService');
 const checkStatusCode = require('./utils/checkStatusCode');
 */
-
-const { History } = ServiceDelegate;
 
 class TdSensorAccessory extends AccessoryDelegate {
   constructor(platform, params) {
@@ -40,55 +39,64 @@ class TdSensorAccessory extends AccessoryDelegate {
     this.rainSensorServices = {};
     this.windSensorServices = {};
 
-    // Check if we have a temperature sensor
-    if (this.temperatureSensor) {
-      this.tempSensorServices.temperature = new TempSensorService.Temperature(this);
-      // Check if we also have a humidity sensor
-      if (this.humiditySensor) {
-        this.tempSensorServices.humidity = new TempSensorService.Humidity(this);
+    try {
+      // Check if we have a temperature sensor
+      if (this.temperatureSensor) {
+        this.tempSensorServices.temperature = new TempSensorService.Temperature(this);
+        // Check if we also have a humidity sensor
+        if (this.humiditySensor) {
+          this.tempSensorServices.humidity = new TempSensorService.Humidity(this);
+        }
+        // Generate history for temperature and/or humidity
+        this.historyService = new ServiceDelegate.History(this, {
+          temperatureDelegate: this.temperatureSensor
+            ? this.tempSensorServices.temperature.characteristicDelegate('temperature')
+            : null,
+          humidityDelegate: this.humiditySensor
+            ? this.tempSensorServices.humidity.characteristicDelegate('humidity')
+            : null,
+        });
+        this.manageLogLevel(this.tempSensorServices.temperature.characteristicDelegate('logLevel'), false);
       }
-      // Generate history for temperature and/or humidity
-      this.historyService = new History(this, {
-        temperatureDelegate: this.temperatureSensor
-          ? this.tempSensorServices.temperature.characteristicDelegate('temperature')
-          : null,
-        humidityDelegate: this.humiditySensor
-          ? this.tempSensorServices.humidity.characteristicDelegate('humidity')
-          : null,
+
+      // Check if we have a rain sensor
+      else if (this.rainSensor) {
+        this.rainSensorService = new RainSensorService.Rain(this);
+        this.manageLogLevel(this.rainSensorService.characteristicDelegate('logLevel'), false);
+      } else if (this.windSensor) {
+        this.windSensorService = new WindSensorService.Wind(this);
+        this.manageLogLevel(this.windSensorService.characteristicDelegate('logLevel'), false);
+      } else {
+        this.warn('No sensor included, this plugin needs it.');
+      }
+
+      this.debug('Accessory initialised');
+      this.heartbeatEnabled = true;
+      setImmediate(() => {
+        this.emit('initialised');
       });
-      this.manageLogLevel(this.tempSensorServices.temperature.characteristicDelegate('logLevel'), false);
+      this.on('initialised', async () => {
+        await this.getSensorData();
+      });
+      this.on('heartbeat', async (beat) => {
+        await this.heartbeat(beat);
+      });
+      this.on('shutdown', async () => {
+        return this.shutdown();
+      });
+      this.on('identify', async () => {
+        this.log('Identifying sensor with ID %s', this.sensorId);
+      });
+    } catch (error) {
+      let errorMessage = 'unknown error';
+      if (error instanceof Error) {
+        errorMessage = `${error.name}: ${error.message}`;
+      }
+      this.error(`Sensor Accessory error: (${errorMessage})`);
+      throw new Error(`Sensor Accessory error: (${errorMessage})`);
+      // return;
     }
-
-    // Check if we have a rain sensor
-    else if (this.rainSensor) {
-      this.rainSensorService = new RainSensorService.Rain(this);
-      this.manageLogLevel(this.rainSensorService.characteristicDelegate('logLevel'), false);
-    } else if (this.windSensor) {
-      this.windSensorService = new WindSensorService.Wind(this);
-      this.manageLogLevel(this.windSensorService.characteristicDelegate('logLevel'), false);
-    } else {
-      this.warn('No sensor included, this plugin needs it.');
-    }
-
-    this.debug('Accessory initialised');
-    this.heartbeatEnabled = true;
-    setImmediate(() => {
-      this.emit('initialised');
-    });
-    this.on('initialised', async () => {
-      await this.getSensorData();
-    });
-    this.on('heartbeat', async (beat) => {
-      await this.heartbeat(beat);
-    });
-    this.on('shutdown', async () => {
-      return this.shutdown();
-    });
-    this.on('identify', async () => {
-      this.log('Identifying sensor with ID %s', this.sensorId);
-    });
   }
-
   async shutdown() {
     this.debug('Nothing to do at shutdown');
   }
@@ -116,7 +124,7 @@ class TdSensorAccessory extends AccessoryDelegate {
         checkStatusCode(response, this);
       } else {
         const sensorData = response.body;
-        this.debug('Sensor data:', sensorData);
+        this.vdebug('Sensor data:', sensorData);
         if (this.temperatureSensor) {
           for (const id in this.tempSensorServices) {
             this.tempSensorServices[id].checkObservation(sensorData);

@@ -2,52 +2,12 @@
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-import { COMMANDS } from '../TdConstants.js';
-
-const WIND_DIRECTIONS = [
-  'North',
-  'NNE',
-  'NE',
-  'ENE',
-  'East',
-  'ESE',
-  'SE',
-  'SSE',
-  'South',
-  'SSW',
-  'SW',
-  'WSW',
-  'West',
-  'WNW',
-  'NW',
-  'NNW',
-  'North',
-] as const;
+import { COMMANDS, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
 
 export function windDirection(degrees: number) {
   const realDegrees = degrees < 0 ? 0 : degrees % 360;
   return WIND_DIRECTIONS[(realDegrees * 16) % 360];
 }
-
-const WIND_DIRECTIONS_SE = [
-  'Nordan',
-  'NNÖ',
-  'NÖ',
-  'ÖNÖ',
-  'Östan',
-  'ÖSÖ',
-  'SÖ',
-  'SSÖ',
-  'Sunnan',
-  'SSV',
-  'SV',
-  'VSV',
-  'Västan',
-  'VNV',
-  'NV',
-  'NNV',
-  'Nordan',
-] as const;
 
 export function windDirectionSE(degrees: number) {
   const realDegrees = degrees < 0 ? 0 : degrees % 360;

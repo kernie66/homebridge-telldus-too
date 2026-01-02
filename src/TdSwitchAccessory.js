@@ -72,7 +72,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
   async heartbeat(beat) {
     this.checkState();
     if (beat % this.switchService.values.heartrate === 0) {
-      this.debug('Switch accessory heartbeat');
+      this.vdebug('Switch accessory heartbeat');
     }
   }
 
@@ -83,7 +83,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
       const key = 'ID' + this.deviceId;
 
       const tdState = this.stateCache.get('td' + key);
-      this.debug('tdState:', tdState);
+      this.vdebug('tdState:', tdState);
       if (tdState === undefined) {
         this.warn('Cached value from Telldus does not exist for', key);
         return;
@@ -98,7 +98,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
       }
 
       const piState = this.stateCache.get('pi' + key);
-      this.debug('piState:', piState);
+      this.vdebug('piState:', piState);
       if (piState === undefined) {
         this.warn('Cached value from Plug-in does not exist for', key);
         return;
@@ -112,8 +112,8 @@ class TdSwitchAccessory extends AccessoryDelegate {
         piCachedValue = false;
       }
 
-      this.debug('Cached Telldus state is [%s] for %s', stateToText(tdState), key);
-      this.debug('Cached Plug-in state is [%s] for %s', stateToText(piState), key);
+      this.vdebug('Cached Telldus state is [%s] for %s', stateToText(tdState), key);
+      this.vdebug('Cached Plug-in state is [%s] for %s', stateToText(piState), key);
       if (tdCachedValue !== piCachedValue) {
         this.log(
           'Current state [%s] from Telldus is not the same as the set value [%s], updating',
