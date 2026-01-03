@@ -3,6 +3,7 @@
 //
 // Homebridge plugin for Telldus.
 
+import clipboard from 'clipboardy';
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import colors from 'yoctocolors';
 import TelldusApi from './api/TelldusApi.js';
@@ -109,6 +110,7 @@ class TdTellstickAccessory extends AccessoryDelegate {
     this.on('identify', async () => {
       this.warn(colors.yellow('Identifying Tellstick'));
       this.warn('Current access token:', colors.green(this.values.accessToken));
+      clipboard.writeSync(this.values.accessToken);
     });
   }
 

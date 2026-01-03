@@ -1,13 +1,8 @@
 // homebridge-lib request handler functions
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
-import { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
-
-type ThisLoggers = {
-  warn: Function;
-  debug: Function;
-  vdebug: Function;
-};
+import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
+import type { ThisLoggers } from '../typings/thisTypes.js';
 
 export function errorHandler(this: ThisLoggers, error: HttpError) {
   this.warn('Telldus request %d: Error = %s %s', error.request.id, error.request.method, error.request.resource);

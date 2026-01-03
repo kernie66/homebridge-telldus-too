@@ -4,6 +4,7 @@
 // Homebridge plugin for Telldus.
 
 import events from 'events';
+import figlet from 'figlet';
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
@@ -18,7 +19,6 @@ import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, isoDateTimeToIntl } from './utils/dateTimeHelpers.js';
 import { sleep, stateToText, wait } from './utils/utils.js';
 import uuid from './utils/uuid.js';
-import figlet from 'figlet';
 
 /*
 const events = require('events');
@@ -249,8 +249,7 @@ class TdPlatform extends Platform {
       const config = {};
       let info;
       try {
-        const infoResponse = await this.telldusApi?.getDeviceInfo(id);
-        this.log('Supported methods:', infoResponse.supportedMethods);
+        const infoResponse = await this.telldusApi.getDeviceInfo(id);
         if (!infoResponse.ok) {
           checkStatusCode(infoResponse, this);
           this.warn('No info from Telldus when parsing, skipping device ID:', id);

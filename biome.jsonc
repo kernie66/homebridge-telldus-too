@@ -62,7 +62,13 @@
         "noNamespace": "error",
         "useArrayLiterals": "error",
         "useAsConstAssertion": "error",
-        "useBlockStatements": "error"
+        "useBlockStatements": "error",
+        "useImportType": {
+          "level": "error",
+          "options": {
+            "style": "separatedType"
+          }
+        }
       },
       "suspicious": {
         "noAssignInExpressions": "error",

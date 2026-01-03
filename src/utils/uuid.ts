@@ -1,5 +1,5 @@
 // uuid function
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
 import { NIL as NIL_UUID, v5 as uuidv5 } from 'uuid';
@@ -12,7 +12,7 @@ const regExp = {
   uuidSuffix: /^-[0-9A-F]{4}-[1-5][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/,
 };
 
-export default function uuid(name) {
+export default function uuid(name: string) {
   if (!name) {
     throw new TypeError('uuid: name cannot be empty');
   }

@@ -2,7 +2,8 @@
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-import { COMMANDS, TELLDUS_STATES, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
+import type { COMMANDS } from '../TdConstants.js';
+import { TELLDUS_STATES, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
 
 export function windDirection(degrees: number) {
   const realDegrees = degrees < 0 ? 0 : degrees % 360;

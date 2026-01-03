@@ -1,10 +1,13 @@
 // checkStatusCode function
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
+
+import type { HttpResponse } from '../typings/HttpClientTypes.js';
+import type { ThisLoggers } from '../typings/thisTypes.js';
 
 // Function to check the HTTP status code when Telldus responds with an error
 // Return true if the error is identified, else false
-export default function checkStatusCode(response, context) {
+export default function checkStatusCode(response: HttpResponse, context: ThisLoggers) {
   // Check if it is a normal 200 response but with error instead of reply
   if (response.body.error) {
     context.error('Telldus replies with error:', response.body.error);

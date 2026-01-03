@@ -1,5 +1,5 @@
-// makeURL.js
-// Copyright © 2023-2025 Kenneth Jagenheim. All rights reserved.
+// makeURL.ts
+// Copyright © 2023-2026 Kenneth Jagenheim. All rights reserved.
 //
 
 const regExp = {
@@ -7,7 +7,7 @@ const regExp = {
   host: /(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})|(([A-Za-z0-9_-]+){1}(\.[A-Za-z0-9_-]+)*)/,
 };
 
-export default function makeURL(inputURL) {
+export default function makeURL(inputURL: string) {
   if (!inputURL) {
     throw new TypeError('makeURL: inputURL cannot be empty');
   }
