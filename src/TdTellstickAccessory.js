@@ -9,26 +9,8 @@ import colors from 'yoctocolors';
 import TelldusApi from './api/TelldusApi.js';
 import TellstickService from './TdTellstickService.js';
 import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
-import { getTimestamp, timestampToIntl, toEveDate } from './utils/dateTimeHelpers.js';
+import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import uuid from './utils/uuid.js';
-
-/*
-const AccessoryDelegate = require('homebridge-lib/lib/AccessoryDelegate.js');
-const HomebridgeTelldusApi = require('./api/HomebridgeTelldusApi.js');
-const clc = require('cli-color');
-const {
-  requestHandler,
-  errorHandler,
-  responseHandler,
-} = require('./utils/apiHandlers.js');
-const {
-  getTimestamp,
-  toEveDate,
-  timestampToIntl,
-} = require('./utils/dateTimeHelpers.js');
-// uuid = require('./utils/uuid.js');
-const Tellstick = require('./TdTellstickService.js');
-*/
 
 class TdTellstickAccessory extends AccessoryDelegate {
   constructor(platform, params) {
@@ -120,8 +102,8 @@ class TdTellstickAccessory extends AccessoryDelegate {
       this.lastRefresh = getTimestamp();
       this.accessTokenExpires = newToken.expires;
       this.nextRefresh = this.lastRefresh + (newToken.expires - this.lastRefresh) * 0.8;
-      this.log('Telldus access token expires:', colors.green(timestampToIntl(newToken.expires, this.locale)));
-      this.log('Next scheduled token refresh:', colors.blueBright(timestampToIntl(this.nextRefresh, this.locale)));
+      this.log('Telldus access token expires:', colors.green(toEveDate(newToken.expires)));
+      this.log('Next scheduled token refresh:', colors.blueBright(toEveDate(this.nextRefresh)));
       this.values.accessToken = newToken.token;
       this.telldusApi.setAccessToken(newToken.token);
       this.values.tokenExpires = newToken.expires;

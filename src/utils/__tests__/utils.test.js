@@ -1,12 +1,38 @@
 import { describe, expect, it } from 'vitest';
-import { COMMANDS } from '../../TdConstants.js';
-import { setSupportedMethods } from '../utils.js';
+import { COMMANDS, TELLDUS_STATES } from '../../TdConstants.js';
+import { getErrorMessage, setSupportedMethods, stateToText } from '../utils.js';
 
-describe('Test the different util functions', () =>
+describe('Test the different util functions', () => {
   it('sets the sum of all commands', () => {
     const sumOfCommands = setSupportedMethods(COMMANDS);
-    console.log('Sum of commands:', sumOfCommands, {
+    console.log({
       sumOfCommands,
     });
     expect(sumOfCommands).toBe(1023);
-  }));
+  });
+
+  it('gets the default error message', () => {
+    const errorMessage = getErrorMessage();
+    expect(errorMessage).toBe('unknown error');
+  });
+
+  it('gets a string error message', () => {
+    const errorString = 'My error message';
+    const errorMessage = getErrorMessage(errorString);
+    expect(errorMessage).toBe(errorString);
+  });
+
+  it('gets an error object', () => {
+    const errorString = 'My error message';
+    const errorObject = new TypeError(errorString);
+    const errorMessage = getErrorMessage(errorObject);
+    expect(errorMessage).toBe(`TypeError: ${errorString}`);
+  });
+
+  it('converts a state number to a state text', () => {
+    for (let state = 0; state < TELLDUS_STATES.length; state++) {
+      const stateText = stateToText(Math.pow(2, state));
+      expect(stateText).toBe(TELLDUS_STATES[state]);
+    }
+  });
+});

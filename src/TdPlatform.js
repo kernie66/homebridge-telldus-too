@@ -1,5 +1,5 @@
 // homebridge-telldus-too/lib/TdPlatform.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus.
 
@@ -16,8 +16,8 @@ import TdTellstickAccessory from './TdTellstickAccessory.js';
 import TdTypes from './TdTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import checkStatusCode from './utils/checkStatusCode.js';
-import { getTimestamp, isoDateTimeToIntl } from './utils/dateTimeHelpers.js';
-import { sleep, stateToText, wait } from './utils/utils.js';
+import { getTimestamp, isoDateTimeToEveDate } from './utils/dateTimeHelpers.js';
+import { stateToText, wait } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
 /*
@@ -169,7 +169,7 @@ class TdPlatform extends Platform {
           this.log('Telldus system type:', colors.green(sysInfo.body.product));
           this.log('Telldus system version:', colors.green(sysInfo.body.version));
           this.tellstick.firmware = sysInfo.body.version;
-          this.log('Telldus system time:', colors.green(isoDateTimeToIntl(sysInfo.body.time, this.config.locale)));
+          this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
           // this.tellstick.getNewAccessToken();
           connected = true;
         }

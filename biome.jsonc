@@ -49,6 +49,7 @@
         "noUnreachableSuper": "error",
         "noUnsafeFinally": "error",
         "noUnsafeOptionalChaining": "error",
+        "noUnusedImports": "warn",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "error",

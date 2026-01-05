@@ -77,7 +77,7 @@ export function toSeconds(timeArray) {
 export function stateToText(state: number) {
   let stateText;
   if (state !== undefined) {
-    const stateIndex = Math.round(Math.log2(state));
+    const stateIndex = Math.log2(state);
     stateText = TELLDUS_STATES[stateIndex];
   } else {
     stateText = 'Undefined';
@@ -98,4 +98,8 @@ export function getErrorMessage(error: unknown) {
     errorMessage = `${error.name}: ${error.message}`;
   }
   return errorMessage;
+}
+
+export function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
 }
