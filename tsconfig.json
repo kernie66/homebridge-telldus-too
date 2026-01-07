@@ -32,5 +32,8 @@
   "include": [
     "homebridge-ui",
     "src"
+  ],
+  "exclude": [
+    "**/__tests__/*"
   ]
 }

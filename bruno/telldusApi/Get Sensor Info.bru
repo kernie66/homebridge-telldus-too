@@ -1,0 +1,20 @@
+meta {
+  name: Get Sensor Info
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://192.168.1.118/api/sensor/info?id=119
+  body: none
+  auth: inherit
+}
+
+params:query {
+  id: 119
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
