@@ -1,0 +1,16 @@
+meta {
+  name: Get Refresh Token
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://192.168.1.118/api/refreshToken
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -12,6 +12,28 @@
       ]
     },
     "typescript.validate.enable": false,
-    "javascript.validate.enable": false
+    "javascript.validate.enable": false,
+    "workbench.colorCustomizations": {
+      "editor.selectionBackground": "#e788ff7c",
+      "editor.selectionHighlightBackground": "#ff00005b",
+      "editor.selectionHighlightBorder": "#00ff2a77",
+      "editor.findMatchBackground": "#81ae904a",
+      "editor.findMatchHighlightBackground": "#d9a87b3f",
+      "editor.wordHighlightBackground": "#ffff0033",
+      "terminal.selectionBackground": "#e788ff7c",
+      "selection.background": "#e788ff7c",
+      "activityBar.activeBackground": "#e788ff40",
+      "editorBracketMatch.background": "#ff00005b",
+      "editorBracketMatch.border": "#00ff2a77",
+      "[Catppuccin Dark Pro]": {
+        "editor.background": "#1a1a2e",
+        "activityBar.background": "#16213e",
+        "statusBar.background": "#1e1e2e",
+        "titleBar.activeBackground": "#181825"
+      },
+      "activityBar.background": "#02342F",
+      "titleBar.activeBackground": "#034942",
+      "titleBar.activeForeground": "#E9FEFC"
+    }
   }
 }

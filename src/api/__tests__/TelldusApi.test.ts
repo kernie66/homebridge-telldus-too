@@ -3,7 +3,10 @@
 
 import { URL } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { testDeviceInfo, testSystemInfo } from '../../../test/telldusApiHandlers.js';
+import {
+  testDeviceInfo,
+  testSystemInfo,
+} from '../../../test/telldusApiFakeData.js';
 import TelldusApi from '../TelldusApi.js';
 
 const host = '192.168.1.254';
@@ -14,8 +17,17 @@ describe('Test API functions', () => {
   it('gets system info', async () => {
     const testApi = new TelldusApi(host, accessToken);
     const systemInfo = await testApi.getSystemInfo();
-    expect(systemInfo.request.headers.authorization).toBe('Bearer ' + accessToken);
+    expect(systemInfo.request.headers.authorization).toBe(
+      'Bearer ' + accessToken
+    );
     expect(systemInfo.body.product).toBe(testSystemInfo.product);
+  });
+
+  it('gets device list', async () => {
+    const testApi = new TelldusApi(host, accessToken);
+    const deviceList = await testApi.listDevices();
+    console.log('deviceList: %o', deviceList);
+    expect(deviceList.body.device.length).toBe(3);
   });
 
   it('gets device info', async () => {
