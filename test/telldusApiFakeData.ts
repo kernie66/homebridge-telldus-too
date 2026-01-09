@@ -195,8 +195,13 @@ export const testSensorInfo = [
   },
 ];
 
-export const testRefreshToken = {
-  expires: 1799447338,
-  token:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImF1ZCI6ImhvbWVicmlkZ2UtdGVsbGR1cyIsImV4cCI6MTc5OTQ0NzMzOH0.eyJyZW5ldyI6dHJ1ZSwidHRsIjozMTUzNjAwMH0.wWcVWF05jWfYBOv2XahXwZAygVQY29EqxhfnXyVWBHM',
-};
+export const testRefreshToken = [
+  {
+    expires: 1799447338,
+    token:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImF1ZCI6ImhvbWVicmlkZ2UtdGVsbGR1cyIsImV4cCI6MTc5OTQ0NzMzOH0.eyJyZW5ldyI6dHJ1ZSwidHRsIjozMTUzNjAwMH0.wWcVWF05jWfYBOv2XahXwZAygVQY29EqxhfnXyVWBHM',
+  },
+  {
+    error: 'Invalid token supplied',
+  },
+];

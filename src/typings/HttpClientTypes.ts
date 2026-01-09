@@ -19,7 +19,7 @@ export interface HttpResponse {
   request: HttpRequest;
   statusCode: number;
   statusMessage: string;
-  ok: boolean; // Added for simplified status check
+  // ok: boolean; // Added for simplified status check
 }
 
 export interface HttpError {

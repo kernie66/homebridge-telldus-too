@@ -7,6 +7,7 @@ import qs from 'qs';
 import { COMMANDS } from '../TdConstants.js';
 import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
 import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
+import type { RefreshTokenResponse, RequestResponse } from './TelldusApi.types.js';
 
 function setPath(path: string, queryString: {}) {
   return queryString ? `${path}?${qs.stringify(queryString)}` : path;
@@ -105,13 +106,19 @@ class TelldusApi extends HttpClient {
   }
 
   _checkResponseOk(response: HttpResponse) {
-    response.ok = false;
+    const requestResponse: RequestResponse = {
+      ok: false,
+      body: response.body,
+      request: response.request,
+      statusCode: response.statusCode,
+      statusMessage: response.statusMessage,
+    };
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       if (!response.body.error) {
-        response.ok = true;
+        requestResponse.ok = true;
       }
     }
-    return response;
+    return requestResponse;
   }
 
   async getSystemInfo() {
@@ -124,7 +131,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async getSensorInfo(id: string) {
+  async getSensorInfo(id: number) {
     const response = await this.apiClient.get(
       setPath('sensor/info', {
         id,
@@ -144,7 +151,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async getDeviceInfo(id: string, supportedMethods = setSupportedMethods(COMMANDS)) {
+  async getDeviceInfo(id: number, supportedMethods = setSupportedMethods(COMMANDS)) {
     const response = await this.apiClient.get(
       setPath('device/info', {
         id,
@@ -216,7 +223,8 @@ class TelldusApi extends HttpClient {
     });
   }
   */
-  async refreshAccessToken() {
+
+  async refreshAccessToken(): Promise<RefreshTokenResponse> {
     const token = this.accessToken;
     const response = await this.apiClient.get(
       setPath('refreshToken', {
