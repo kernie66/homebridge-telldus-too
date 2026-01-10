@@ -5,6 +5,7 @@ import {
   testRefreshToken,
   testSensorInfo,
   testSensorList,
+  testSuccessMessage,
   testSystemInfo,
 } from './telldusApiFakeData';
 
@@ -32,7 +33,6 @@ export const telldusApiHandlers = [
   http.get('http://192.168.1.254/api/sensor/info', ({ request }) => {
     const params = URL.parse(request.url);
     const id = params.searchParams.get('id');
-    console.log('id', id, typeof id);
     switch (id) {
       case '105':
         return HttpResponse.json(testSensorInfo[0]);
@@ -53,10 +53,17 @@ export const telldusApiHandlers = [
     return HttpResponse.json(testDeviceInfo[1]);
   }),
 
+  http.get('http://192.168.1.254/api/device/turnOn', () => {
+    return HttpResponse.json(testSuccessMessage);
+  }),
+
+  http.get('http://192.168.1.254/api/device/turnOff', () => {
+    return HttpResponse.json(testSuccessMessage);
+  }),
+
   http.get('http://192.168.1.254/api/refreshToken', () => {
     const index = counter === 0 ? 0 : 1; // Return token on first call, error on second
     counter += 1;
-    console.log('index', index, counter);
     return HttpResponse.json(testRefreshToken[index]);
   }),
 ];

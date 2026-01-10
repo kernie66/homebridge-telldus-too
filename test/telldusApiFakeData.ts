@@ -195,6 +195,10 @@ export const testSensorInfo = [
   },
 ];
 
+export const testSuccessMessage = {
+  status: 'success',
+};
+
 export const testRefreshToken = [
   {
     expires: 1799447338,

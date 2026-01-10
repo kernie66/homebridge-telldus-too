@@ -1,0 +1,20 @@
+meta {
+  name: Set Device Off
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://192.168.1.118/api/device/turnOff?id=10
+  body: none
+  auth: inherit
+}
+
+params:query {
+  id: 10
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
