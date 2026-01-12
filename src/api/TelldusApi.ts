@@ -112,6 +112,8 @@ class TelldusApi extends HttpClient {
       request: response.request,
       statusCode: response.statusCode,
       statusMessage: response.statusMessage,
+      headers: response.headers,
+      parsedBody: response.parsedBody,
     };
     if (response.statusCode >= 200 && response.statusCode <= 299) {
       if (!response.body.error) {
@@ -181,7 +183,7 @@ class TelldusApi extends HttpClient {
     return this._checkResponseOk(response);
   }
 
-  async dimDevice(id: string, level: string) {
+  async dimDevice(id: string, level: number) {
     const response = await this.apiClient.get(
       setPath('device/dim', {
         id,

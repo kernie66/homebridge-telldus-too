@@ -1,30 +1,61 @@
-// homebridge-telldus-too/lib/SwitchService.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/SwitchService.ts
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type NodeCache from 'node-cache';
 import colors from 'yoctocolors';
+import type TelldusApi from './api/TelldusApi.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import type { MyTelldusTypes, SwitchAccessoryType, SwitchServiceParams } from './typings/SwitchTypes.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
-import { stateToText, wait } from './utils/utils.js';
-
-/*
-const clc = require('cli-color');
-const homebridgeLib = require('homebridge-lib');
-const telldus = require('./TdConstants');
-const checkStatusCode = require('./utils/checkStatusCode');
-const {
-  toEveDate,
-  getTimestamp,
-} = require('./utils/dateTimeHelpers');
-const { wait, stateToText } = require('./utils/utils');
-// const { setTimeout } = require('node:timers/promises')
-*/
+import { getErrorMessage, stateToText, wait } from './utils/utils.js';
 
 class SwitchService extends ServiceDelegate {
-  constructor(switchAccessory, params = {}) {
+  deviceId: string;
+  model: string;
+  modelType: string;
+  random: number;
+  delay: number;
+  repeats: number;
+  heartrate: number;
+  td: MyTelldusTypes;
+  state: number;
+  stateCache: unknown;
+  telldusApi: TelldusApi;
+  switchMuteTime: number;
+  timeout: number;
+  switchOn: boolean = false;
+  lastSwitchOn: boolean = false;
+  acDelay: AbortController;
+  acDelaySignal: AbortSignal;
+  acDelayActive: boolean;
+  acRepeat: AbortController;
+  acRepeatSignal: AbortSignal;
+  acRepeatActive: boolean;
+  acDim: AbortController;
+  acDimSignal: AbortSignal;
+  acDimActive: boolean = false;
+  timerActive: boolean;
+  activeTimeout: NodeJS.Timeout | null;
+  endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' = 'Not activated' as const;
+  /*  deviceId: string;
+  model: string;
+  modelType: string;
+  random: number;
+  delay: number;
+  repeats: number;
+  heartrate: number;
+  td: MyTelldusTypes;
+  state: number;
+  stateCache: NodeCache;
+  telldusApi: TelldusApi;
+  switchMuteTime: number;
+  timeout: number;
+*/
+  constructor(switchAccessory: SwitchAccessoryType, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
     // If it is a dimmer, set service to lightbulb, else switch
     if (switchAccessory.modelType === 'dimmer' || params.lightbulb) {
@@ -46,13 +77,25 @@ class SwitchService extends ServiceDelegate {
     this.telldusApi = switchAccessory.telldusApi;
     this.switchMuteTime = switchAccessory.platformBeatRate * 2;
     this.timeout = params.timeout;
+    this.log = switchAccessory.log;
+    this.debug = switchAccessory.debug;
+    this.warn = switchAccessory.warn;
+    this.error = switchAccessory.error;
+    this.acDelay = new AbortController();
+    this.acDelaySignal = this.acDelay.signal;
+    this.acDelayActive = false;
+    this.acRepeat = new AbortController();
+    this.acRepeatSignal = this.acRepeat.signal;
+    this.acRepeatActive = false;
+    this.acDim = new AbortController();
+    this.acDimSignal = this.acDim.signal;
 
     this.addCharacteristicDelegate({
       key: 'on',
       Characteristic: this.Characteristics.hap.On,
       value: this.state === FULL_COMMANDS.TURNON,
     })
-      .on('didSet', (value) => {
+      .on('didSet', (value: boolean) => {
         this.values.repetition = 0;
         if (!this.values.disabled && !this.values.enabled) {
           this.switchOn = value;
@@ -61,7 +104,7 @@ class SwitchService extends ServiceDelegate {
           this.log('Switch constantly disabled/enabled,', colors.green('deactivate it to turn it on/off!'));
         }
       })
-      .on('didTouch', (value) => {
+      .on('didTouch', (value: boolean) => {
         this.values.repetition = 0;
         if (!this.values.disabled && !this.values.enabled) {
           if (this.modelType !== 'dimmer') {
@@ -84,7 +127,7 @@ class SwitchService extends ServiceDelegate {
         value: 100,
         unit: '%',
         Characteristic: this.Characteristics.hap.Brightness,
-      }).on('didSet', (value) => {
+      }).on('didSet', (value: number) => {
         this.debug('Brightness value', value);
         this.setDimmerLevel(switchAccessory, value);
       });
@@ -100,7 +143,7 @@ class SwitchService extends ServiceDelegate {
       key: 'enableRandomOnce',
       value: false,
       Characteristic: this.td.Characteristics.EnableRandomOnce,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (value) {
         this.values.disableRandomOnce = false;
       }
@@ -110,7 +153,7 @@ class SwitchService extends ServiceDelegate {
       key: 'disableRandomOnce',
       value: false,
       Characteristic: this.td.Characteristics.DisableRandomOnce,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (value) {
         this.values.enableRandomOnce = false;
       }
@@ -139,7 +182,7 @@ class SwitchService extends ServiceDelegate {
       key: 'disabled',
       value: false,
       Characteristic: this.td.Characteristics.Disabled,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (value && !this.values.enabled) {
         this.values.on = false;
         this.switchOn = false;
@@ -154,7 +197,7 @@ class SwitchService extends ServiceDelegate {
       key: 'enabled',
       value: false,
       Characteristic: this.td.Characteristics.Enabled,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (value && !this.values.disabled) {
         this.values.on = true;
         this.switchOn = true;
@@ -209,8 +252,8 @@ class SwitchService extends ServiceDelegate {
     this.values.setDefault = false;
   }
 
-  async setOn(switchAccessory) {
-    let newValue = this.switchOn !== this.lastSwitchOn;
+  async setOn(switchAccessory: SwitchAccessoryType) {
+    const newValue = this.switchOn !== this.lastSwitchOn;
     this.lastSwitchOn = this.switchOn;
     // If active update and new value, we assume that it is user controlled
     const userControl = switchAccessory.onUpdating ? newValue : false;
@@ -233,25 +276,27 @@ class SwitchService extends ServiceDelegate {
       this.debug('Switch mute aborted');
     }
 
-    // Check if the delay abort controller is defined
-    if (this.acDelay) {
+    // Check if the delay abort controller is active
+    if (this.acDelayActive) {
       try {
         this.debug('Aborting the delay timer before time is up');
         this.acDelay.abort();
-      } catch (e) {
-        this.warn('Error when aborting delay timer: %s', e.message);
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error when aborting delay timer: %s', errorMessage);
       }
-      this.acDelay = null;
+      this.acDelayActive = false;
     }
     // Check if the repeat abort controller is defined
-    if (this.acRepeat) {
+    if (this.acRepeatActive) {
       try {
         this.debug('Aborting the repeat timer before time is up');
         this.acRepeat.abort();
-      } catch (e) {
-        this.warn('Error when aborting repeat timer: %s', e.message);
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error when aborting repeat timer: %s', errorMessage);
       }
-      this.acRepeat = null;
+      this.acRepeatActive = false;
     }
 
     // Check if this is assumed to be a user controlled action
@@ -270,14 +315,15 @@ class SwitchService extends ServiceDelegate {
       }
       this.log('Waiting for %d seconds', delay / 1000);
       // Prepare abort controller
-      this.acDelay = new AbortController();
+      this.acDelayActive = true;
       try {
-        await wait(delay, this.acDelay.signal);
-      } catch (err) {
-        this.debug('Delay timer aborted:', err);
+        await wait(delay, this.acDelaySignal);
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        this.debug('Delay timer aborted:', errorMessage);
         return;
       }
-      this.acDelay = null;
+      this.acDelayActive = false;
       this.log('Delay performed');
     }
 
@@ -290,7 +336,7 @@ class SwitchService extends ServiceDelegate {
       if (response.ok) {
         this.log('Switch set to', stateToText(telldusState));
       } else {
-        checkStatusCode(response, this);
+        checkStatusCode(response, this.error);
       }
       this.values.lastActivation = toEveDate(getTimestamp());
       // If it is a dimmer and it is on, then send the current brightness value
@@ -305,15 +351,16 @@ class SwitchService extends ServiceDelegate {
         this.values.repetition = repetition;
         this.log('Repeat command, repetition number: %d of %d', this.values.repetition, this.values.repeats);
         // Prepare abort controller
-        this.acRepeat = new AbortController();
+        this.acRepeatActive = true;
         // Wait 2 seconds + 1 second/repetition between repeats
         try {
-          await wait(2000 + this.values.repetition * 1000, this.acRepeat.signal);
-        } catch (err) {
-          this.debug('Repeat timer aborted:', err);
+          await wait(2000 + this.values.repetition * 1000, this.acRepeatSignal);
+        } catch (error) {
+          const errorMessage = getErrorMessage(error);
+          this.debug('Repeat timer aborted:', errorMessage);
           return;
         }
-        this.acRepeat = null;
+        this.acRepeatActive = false;
       }
     } while (repetition <= this.values.repeats);
 
@@ -344,13 +391,12 @@ class SwitchService extends ServiceDelegate {
   // used in Eve to set the dimmer.
   // The dimmer is turned on automatically if it was off, so the delay
   // ensures that the dim command will be sent after the on command.
-  async setDimmerLevel(switchAccessory, dimLevel, immediately = false) {
+  async setDimmerLevel(switchAccessory: SwitchAccessoryType, dimLevel: number, immediately = false) {
     // If a dim command is pending, abort it
-    if (this.dimming) {
+    if (this.acDimActive) {
       this.acDim.abort();
     }
-    this.dimming = true;
-    this.acDim = new AbortController();
+    this.acDimActive = true;
 
     const brightness = Math.trunc((dimLevel * 255) / 100); // Convert % to 0-255
 
@@ -358,24 +404,24 @@ class SwitchService extends ServiceDelegate {
       // Check if the dimmer should be changed after a delay
       if (!immediately) {
         // Start a timer for the new dim command
-        await wait(500, {
-          signal: this.acDim.signal,
-        });
+        await wait(500, this.acDimSignal);
       }
       this.debug('Setting dimmer level to %s%', dimLevel);
       const response = await this.telldusApi.dimDevice(switchAccessory.deviceId, brightness);
       if (!response.ok) {
-        checkStatusCode(response, this);
+        checkStatusCode(response, this.error);
         this.warn('Error when setting dim level');
       }
-      this.dimming = false;
+      this.acDimActive = false;
     } catch (error) {
-      if (!error.message) {
+      const errorMessage = getErrorMessage(error);
+
+      if (!errorMessage) {
         this.log('The current timer was stopped');
       } else {
-        this.warn('Error setting dim level: %s', error);
+        this.warn('Error setting dim level: %s', errorMessage);
       }
-      this.dimming = false;
+      this.acDimActive = false;
     }
   }
 }

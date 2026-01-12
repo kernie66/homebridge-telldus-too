@@ -27,7 +27,7 @@ export function wait(ms: number, signal?: AbortSignal) {
     const timerId = setTimeout(resolve, ms);
     if (signal) {
       // implement aborting logic for our async operation
-      signal.addEventListener('abort', (event) => {
+      signal.addEventListener('abort', (event: Event) => {
         clearTimeout(timerId);
         reject(event);
       });

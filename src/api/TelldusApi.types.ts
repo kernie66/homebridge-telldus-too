@@ -1,13 +1,8 @@
-import type { HttpError, HttpRequest } from '../typings/HttpClientTypes.js';
+import type { HttpResponse } from '../typings/HttpClientTypes.js';
 
-export type RequestResponse = {
+export interface RequestResponse extends HttpResponse {
   ok: boolean;
-  body: {};
-  request: HttpRequest;
-  statusCode: number;
-  statusMessage: string;
-  error?: HttpError;
-};
+}
 
 export type RefreshTokenResponse = {
   expires: number;
