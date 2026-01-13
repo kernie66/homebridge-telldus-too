@@ -8,5 +8,13 @@ export default defineConfig({
       'dist/*',
     ],
     setupFiles: './test/vitest.setup.ts',
+    coverage: {
+      include: [
+        'src/**/*.{ts,js}',
+      ],
+      exclude: [
+        '**/__tests__/**',
+      ],
+    },
   },
 });
