@@ -142,6 +142,29 @@ export const testSensorInfo = [
     sensorId: 105,
   },
   {
+    battery: 254,
+    data: [
+      {
+        lastUpdated: 1722272816,
+        name: 'temp',
+        scale: 0,
+        value: 21.100000000000001,
+      },
+      {
+        lastUpdated: 1722272816,
+        name: 'humidity',
+        scale: 0,
+        value: 56.0,
+      },
+    ],
+    id: 168,
+    lastUpdated: 1722272816,
+    model: 'F824',
+    name: 'Inside',
+    protocol: 'oregon',
+    sensorId: 168,
+  },
+  {
     battery: 253,
     data: [
       {

@@ -334,7 +334,7 @@ class TdPlatform extends Platform {
       config.name = info.name || 'Sensor ' + info.id;
       config.uuid = uuid(config.name + config.id);
       const sensorType = checkSensorType(info);
-      if (sensorType) {
+      if (sensorType !== 'unknown') {
         config.model = sensorType;
         if (sensorType.includes('temperature')) {
           config.temperatureSensor = true;

@@ -54,3 +54,23 @@ export type MyTelldusTypes = {
     NextRefresh: Function;
   };
 };
+
+type ModelType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain';
+
+export type SensorInfoType = {
+  id: number;
+  name: string;
+  model: ModelType;
+  protocol: string;
+  sensorId: number;
+  battery: number;
+  lastUpdated: number;
+  data: {
+    lastUpdated: number;
+    name: string;
+    value: number;
+    scale: number;
+  }[];
+};
+
+export type SensorType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';
