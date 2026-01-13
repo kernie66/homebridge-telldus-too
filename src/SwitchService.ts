@@ -4,7 +4,6 @@
 // Homebridge plugin for Telldus switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import type NodeCache from 'node-cache';
 import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
 import { FULL_COMMANDS } from './TdConstants.js';
@@ -41,20 +40,7 @@ class SwitchService extends ServiceDelegate {
   timerActive: boolean;
   activeTimeout: NodeJS.Timeout | null;
   endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' = 'Not activated' as const;
-  /*  deviceId: string;
-  model: string;
-  modelType: string;
-  random: number;
-  delay: number;
-  repeats: number;
-  heartrate: number;
-  td: MyTelldusTypes;
-  state: number;
-  stateCache: NodeCache;
-  telldusApi: TelldusApi;
-  switchMuteTime: number;
-  timeout: number;
-*/
+
   constructor(switchAccessory: SwitchAccessoryType, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
     // If it is a dimmer, set service to lightbulb, else switch

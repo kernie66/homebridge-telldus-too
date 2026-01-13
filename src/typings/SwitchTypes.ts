@@ -1,32 +1,6 @@
 import type NodeCache from 'node-cache';
 import type TelldusApi from '../api/TelldusApi.js';
 import type { ThisLoggers } from './thisTypes.js';
-
-export interface SwitchServiceTypes extends ThisLoggers {
-  deviceId: string;
-  model: string;
-  modelType: string;
-  random: number;
-  delay: number;
-  repeats: number;
-  heartrate: number;
-  td: MyTelldusTypes;
-  state: number;
-  stateCache: unknown;
-  telldusApi: TelldusApi;
-  switchMuteTime: number;
-  timeout: number;
-  switchOn: boolean;
-  lastSwitchOn: boolean;
-  acDelay: AbortController | null;
-  acRepeat: AbortController | null;
-  timerActive: boolean;
-  activeTimeout: NodeJS.Timeout | null;
-  endStatus: string;
-  dimming: boolean;
-  acDim: AbortController | null;
-}
-
 export interface SwitchAccessoryType extends ThisLoggers {
   name: string;
   deviceId: string;
