@@ -1,5 +1,5 @@
 // homebridge-telldus-too/lib/TdTellstickAccessory.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus.
 
@@ -10,6 +10,7 @@ import TelldusApi from './api/TelldusApi.js';
 import TellstickService from './TdTellstickService.js';
 import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
+import { getErrorMessage } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
 class TdTellstickAccessory extends AccessoryDelegate {
@@ -77,10 +78,9 @@ class TdTellstickAccessory extends AccessoryDelegate {
 
       this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
-      this.debug('Full error:\n', error);
+      const errorMessage = getErrorMessage(error);
       this.error('Error initialising the plug-in, suspending...');
-      this.error('Error name:', error.name);
-      this.error('Error message:', error.message);
+      this.error('Error message:', errorMessage);
       // sleep(Math.pow(2, 25));
     }
 

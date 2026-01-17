@@ -1,5 +1,5 @@
 // homebridge-telldus-too/lib/TdSensorAccessory.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus sensors.
 
@@ -9,16 +9,8 @@ import 'homebridge-lib/ServiceDelegate/History';
 import RainSensorService from './RainSensorService.js';
 import TempSensorService from './TempSensorService.js';
 import checkStatusCode from './utils/checkStatusCode.js';
-import WindSensorService from './WindSensorService.js';
 import { getErrorMessage } from './utils/utils.js';
-
-/*
-const homebridgeLib = require('homebridge-lib');
-const TempSensorService = require('./TempSensorService');
-const RainSensorService = require('./RainSensorService');
-const WindSensorService = require('./WindSensorService');
-const checkStatusCode = require('./utils/checkStatusCode');
-*/
+import WindSensorService from './WindSensorService.js';
 
 class TdSensorAccessory extends AccessoryDelegate {
   constructor(platform, params) {
@@ -134,7 +126,9 @@ class TdSensorAccessory extends AccessoryDelegate {
         }
       }
     } catch (error) {
-      this.warn('Error getting sensor data:', error.name, error.message);
+      const errorMessage = getErrorMessage(error);
+      this.warn('Error getting sensor data from sensor ID:', this.sensorId);
+      this.warn('Error message:', errorMessage);
     }
   }
 }
