@@ -1,6 +1,6 @@
 import type { HttpResponse } from '../typings/HttpClientTypes.js';
 
-export interface RequestResponse extends HttpResponse {
+export interface RequestResponse<T> extends HttpResponse<T> {
   ok: boolean;
 }
 

@@ -2,11 +2,11 @@
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-import type { SensorInfoType, SensorType } from '../typings/SwitchTypes.js';
+import type { SensorInfoType, SensorModelType } from '../typings/TelldusTypes.js';
 
 // Function to determine the type of Telldus sensor
-export default function checkSensorType(sensorInfo: SensorInfoType): SensorType {
-  let sensorType: SensorType = 'unknown';
+export default function checkSensorType(sensorInfo: SensorInfoType): SensorModelType {
+  let sensorType: SensorModelType = 'unknown';
   // Check the obvious models
   if (sensorInfo.model === 'temperature' || sensorInfo.model === 'temperaturehumidity') {
     return sensorInfo.model;
@@ -17,7 +17,7 @@ export default function checkSensorType(sensorInfo: SensorInfoType): SensorType 
     if (sensorInfo.data[1] && sensorInfo.data[1].name === 'humidity') {
       sensorType = sensorType + 'humidity';
     }
-    return sensorType as SensorType;
+    return sensorType as SensorModelType;
   }
   // Check for wind sensor
   const windTypes = [

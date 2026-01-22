@@ -7,7 +7,8 @@ import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
 import { FULL_COMMANDS } from './TdConstants.js';
-import type { MyTelldusTypes, SwitchAccessoryType, SwitchServiceParams } from './typings/SwitchTypes.js';
+import type TdMyCustomTypes from './TdMyCustomTypes.js';
+import type { SwitchAccessoryType, SwitchServiceParams } from './typings/SwitchTypes.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage, stateToText, wait } from './utils/utils.js';
@@ -20,7 +21,7 @@ class SwitchService extends ServiceDelegate {
   delay: number;
   repeats: number;
   heartrate: number;
-  td: MyTelldusTypes;
+  td: TdMyCustomTypes;
   state: number;
   stateCache: unknown;
   telldusApi: TelldusApi;

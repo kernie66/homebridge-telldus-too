@@ -35,7 +35,7 @@
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0-dev.20260114",
     "vitest": "^4.0.16",
     "vitest-mock-extended": "^3.1.0"
   },

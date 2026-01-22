@@ -1,16 +1,37 @@
-// homebridge-telldus-too/lib/TdTypes.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/TdMyCustomTypes.js
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Custom HomeKit Characteristics and common functions.
 
+import type { API } from 'homebridge';
 import { CustomHomeKitTypes } from 'homebridge-lib/CustomHomeKitTypes';
 import uuid from './utils/uuid.js';
 
-//const homebridgeLib = require('homebridge-lib');
-//const uuid = require('./utils/uuid');
+class TdMyCustomTypes extends CustomHomeKitTypes {
+  Characteristics!: {
+    EnableRandomOnce: boolean;
+    DisableRandomOnce: boolean;
+    Disabled: boolean;
+    Enabled: boolean;
+    Random: boolean;
+    Delay: number;
+    MinDelay: number;
+    TimeOut: number;
+    Repeats: number;
+    Repetition: number;
+    Status: string;
+    Heartrate: number;
+    SwitchMuteTime: number;
+    LastActivation: string;
+    TokenExpires: string;
+    NextRefresh: string;
+    LastUpdated: string;
+  };
+  hapCharacteristics!: {
+    StatusActive: boolean;
+  };
 
-class TdTypes extends CustomHomeKitTypes {
-  constructor(homebridge) {
+  constructor(homebridge: API) {
     super(homebridge);
 
     this.createCharacteristicClass(
@@ -223,4 +244,4 @@ class TdTypes extends CustomHomeKitTypes {
   }
 }
 
-export default TdTypes;
+export default TdMyCustomTypes;

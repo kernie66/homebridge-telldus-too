@@ -1,44 +1,29 @@
-// homebridge-telldus-too/lib/TdPlatform.js
+// homebridge-telldus-too/lib/TdPlatform.ts
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus.
 
 import events from 'events';
 import figlet from 'figlet';
+import type { API, Logger } from 'homebridge';
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
 import colors from 'yoctocolors';
+import type TelldusApi from './api/TelldusApi.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import TdMyCustomTypes from './TdMyCustomTypes.js';
 import TdSensorAccessory from './TdSensorAccessory.js';
 import TdSwitchAccessory from './TdSwitchAccessory.js';
 import TdTellstickAccessory from './TdTellstickAccessory.js';
-import TdTypes from './TdTypes.js';
+import type { ConfigJson } from './typings/ConfigJsonTypes.js';
+import type { SwitchConfigTypes } from './typings/SwitchTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, isoDateTimeToEveDate } from './utils/dateTimeHelpers.js';
-import { stateToText, wait } from './utils/utils.js';
+import { getErrorMessage, stateToText, wait } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
-/*
-const events = require('events');
-const homebridgeLib = require('homebridge-lib');
-const TdSwitchAccessory = require('./TdSwitchAccessory');
-const TdSensorAccessory = require('./TdSensorAccessory');
-const TdTypes = require('./TdTypes');
-const telldus = require('./TdConstants');
-const uuid = require('./utils/uuid');
-const NodeCache = require('node-cache');
-const { stateToText, wait } = require('./utils/utils');
-const {
-  isoDateTimeToIntl,
-  getTimestamp,
-} = require('./utils/dateTimeHelpers');
-const clc = require('cli-color');
-const checkStatusCode = require('./utils/checkStatusCode');
-const checkSensorType = require('./utils/checkSensorType');
-const TdTellstickAccessory = require('./TdTellstickAccessory.js');
-*/
 const configRegExp = {
   ip: /(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)/,
   host: /(^([A-Za-z0-9_-]+){1}(\.[A-Za-z0-9_-]+)$)/,
@@ -59,7 +44,25 @@ const supportedCommands = {
 };
 
 class TdPlatform extends Platform {
-  constructor(log, configJson, homebridge) {
+  config: ConfigJson;
+  initialised: boolean;
+  platformBeatRate: number;
+  stateCache: NodeCache;
+  td: TdMyCustomTypes;
+  // deviceArray!: number[];
+  // sensorArray!: number[];
+  numberOfDevices!: number;
+  numberOfSensors!: number;
+  switchAccessories!: {
+    [key: string]: TdSwitchAccessory;
+  };
+  sensorAccessories!: {
+    [key: string]: TdSensorAccessory;
+  };
+  tellstick!: TdTellstickAccessory;
+  telldusApi!: TelldusApi;
+
+  constructor(log: Logger, configJson: ConfigJson, homebridge: API) {
     super(log, configJson, homebridge);
     this.config = {
       name: 'TelldusToo',
@@ -68,7 +71,9 @@ class TdPlatform extends Platform {
     this.initialised = false;
     this.platformBeatRate = 30;
     this.stateCache = new NodeCache();
-    this.td = new TdTypes(homebridge);
+    this.td = new TdMyCustomTypes(homebridge);
+    console.log('🚀 ~ TdPlatform ~ constructor ~ td:', this.td);
+
     this.vdebug('Characteristics: %o', this.td.Characteristics);
 
     const optionParser = new OptionParser(this.config, true);
@@ -88,7 +93,7 @@ class TdPlatform extends Platform {
       .intKey('configHeartrate', 1, 300)
       .boolKey('randomize')
       .stringKey('locale')
-      .on('userInputError', (error) => {
+      .on('userInputError', (error: string) => {
         throw new TypeError(error);
       });
 
@@ -117,12 +122,13 @@ class TdPlatform extends Platform {
 
       this.once('heartbeat', this.init);
 
-      this.on('heartbeat', async (beat) => {
+      this.on('heartbeat', async (beat: number) => {
         await this.platformBeat(beat);
       });
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
       this.error(`\n${figlet.textSync('Config Error')}`);
-      this.log(error);
+      this.log(errorMessage);
       this.warn('Check the config file and restart Homebridge');
       this.warn('The plugin aborts the initialization');
       return;
@@ -133,14 +139,18 @@ class TdPlatform extends Platform {
   }
 
   async init() {
-    let deviceArray = [];
-    let sensorArray = [];
+    const deviceArray: number[] = [];
+    const sensorArray: number[] = [];
 
     this.debug('Initializing platform');
     this.tellstick = new TdTellstickAccessory(this, {
       config: this.config,
     });
 
+    if (!this.tellstick.telldusApi) {
+      this.error('Telldus API not initialized, aborting plugin initialization');
+      return;
+    }
     this.telldusApi = this.tellstick.telldusApi;
 
     // Check if access token has been updated in the config file
@@ -158,7 +168,7 @@ class TdPlatform extends Platform {
       try {
         const sysInfo = await this.telldusApi.getSystemInfo();
         if (!sysInfo.ok) {
-          if (!checkStatusCode(sysInfo, this)) {
+          if (!checkStatusCode(sysInfo, this.error)) {
             if (!sysInfo.body.product) {
               this.error('Unknown response from Telldus, check if the host address is correct and restart');
               this.warn('Will retry in 1 minute...');
@@ -174,10 +184,8 @@ class TdPlatform extends Platform {
           connected = true;
         }
       } catch (error) {
-        this.debug('Full error:\n', error);
-        this.error('Error getting system information from Telldus');
-        this.error('Error name:', error.name);
-        this.error('Error message:', error.message);
+        const errorMessage = getErrorMessage(error);
+        this.error('Error getting system information from Telldus:', errorMessage);
         this.warn('Will retry in 1 minute...');
         await wait(60 * 1000);
       }
@@ -192,7 +200,7 @@ class TdPlatform extends Platform {
       while (retry) {
         deviceResponse = await this.telldusApi.listDevices();
         if (!deviceResponse.ok) {
-          checkStatusCode(deviceResponse, this);
+          checkStatusCode(deviceResponse, this.error);
           this.warn(colors.blueBright('Will retry in 1 minute...'));
           wait(60 * 1000);
         } else {
@@ -203,13 +211,13 @@ class TdPlatform extends Platform {
       this.numberOfDevices = devices.length;
       if (this.numberOfDevices) {
         this.log('Number of Telldus devices found:', this.numberOfDevices);
-        devices.forEach((element) => {
+        devices.forEach((element: { id: number }) => {
           deviceArray.push(element.id);
         });
       } else {
         this.warn('No Telldus devices found!');
       }
-      this.deviceArray = deviceArray;
+      // this.deviceArray = deviceArray;
 
       retry = true;
       // Get sensors from Telldus
@@ -217,7 +225,7 @@ class TdPlatform extends Platform {
       while (retry) {
         sensorResponse = await this.telldusApi.listSensors();
         if (!sensorResponse.ok) {
-          checkStatusCode(sensorResponse, this);
+          checkStatusCode(sensorResponse, this.error);
           this.warn(colors.blueBright('Will retry in 1 minute...'));
           wait(60 * 1000);
         } else {
@@ -228,38 +236,38 @@ class TdPlatform extends Platform {
       this.numberOfSensors = sensors.length;
       if (this.numberOfSensors) {
         this.log('Number of Telldus sensors found:', this.numberOfSensors);
-        sensors.forEach((element) => {
+        sensors.forEach((element: { id: number }) => {
           sensorArray.push(element.id);
         });
       } else {
         this.warn('No Telldus sensors found!');
       }
-      this.sensorArray = sensorArray;
+      // this.sensorArray = sensorArray;
     } catch (error) {
+      const errorMessage = getErrorMessage(error);
       this.error('Error accessing Telldus, plug-in suspended...');
-      this.error('Error name:', error.name);
-      this.error('Error message:', error.message);
+      this.error('Error message:', errorMessage);
       return;
     }
 
     this.switchAccessories = {};
     const validSwitches = [];
     // Parse the Telldus devices
-    for (const id of this.deviceArray) {
-      const config = {};
+    for (const id of deviceArray) {
+      const config: SwitchConfigTypes = {};
       let info;
       try {
         const infoResponse = await this.telldusApi.getDeviceInfo(id);
         if (!infoResponse.ok) {
-          checkStatusCode(infoResponse, this);
+          checkStatusCode(infoResponse, this.error);
           this.warn('No info from Telldus when parsing, skipping device ID:', id);
           continue;
         }
         info = infoResponse.body;
       } catch (error) {
-        this.warn('Error getting device info, skipping...');
-        this.warn('Error name:', error.name);
-        this.warn('Error message:', error.message);
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error getting device info, skipping device ID:', id);
+        this.warn('Error message:', errorMessage);
         continue;
       }
       config.id = info.id;
@@ -287,7 +295,7 @@ class TdPlatform extends Platform {
       config.methods = info.methods;
       config.protocol = info.protocol;
       config.state = info.state;
-      config.type = info.type;
+      // config.type = info.type; // Not used currently
       config.delay = this.config.delay;
       config.random = this.config.random;
       config.lightbulb = this.config.lightbulb;
@@ -309,21 +317,21 @@ class TdPlatform extends Platform {
     const validSensors = [];
 
     // Parse the Telldus sensors
-    for (const id of this.sensorArray) {
+    for (const id of sensorArray) {
       const config = {};
       let info;
       try {
         const infoResponse = await this.telldusApi?.getSensorInfo(id);
         if (!infoResponse.ok) {
-          checkStatusCode(infoResponse, this);
+          checkStatusCode(infoResponse, this.error);
           this.warn('No info from Telldus when parsing ID: %d, skipping device...', id);
           continue;
         }
         info = infoResponse.body;
       } catch (error) {
-        this.warn('Error getting sensor info, skipping...');
-        this.warn('Error name:', error.name);
-        this.warn('Error message:', error.message);
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error getting sensor info, skipping device ID:', id);
+        this.warn('Error message:', errorMessage);
         continue;
       }
       if (!info.name && this.config.ignoreUnnamedSensors) {
@@ -434,7 +442,7 @@ class TdPlatform extends Platform {
         // Get states of all devices from Telldus
         const deviceResponse = await this.telldusApi.listDevices();
         if (!deviceResponse.ok) {
-          checkStatusCode(deviceResponse, this);
+          checkStatusCode(deviceResponse, this.error);
           this.warn('No response from Telldus, will retry next cycle...');
         } else {
           const devices = deviceResponse.body.device;
@@ -452,8 +460,10 @@ class TdPlatform extends Platform {
         if (getTimestamp() > this.tellstick.values.nextRefresh) {
           // this.tellstick.getNewAccessToken();
         }
-      } catch (_error) {
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
         this.error('Error getting device state from Telldus, will retry');
+        this.error('Error message:', errorMessage);
       }
     }
   }

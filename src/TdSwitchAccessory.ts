@@ -7,18 +7,22 @@ import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import type { SwitchAccessoryParams } from './typings/SwitchTypes.js';
 import { stateToText } from './utils/utils.js';
 
-/*
-const homebridgeLib = require('homebridge-lib');
-const BellService = require('./BellService');
-const SwitchService = require('./SwitchService');
-const telldus = require('./TdConstants');
-const { stateToText } = require('./utils/utils');
-*/
-
 class TdSwitchAccessory extends AccessoryDelegate {
-  constructor(platform, params) {
+  id: string;
+  deviceId: string;
+  model: string;
+  modelType: string;
+  random: boolean;
+  lightbulb: boolean;
+  delay: number;
+  repeats: number;
+  state: number;
+  heartrate: number;
+
+  constructor(platform, params: SwitchAccessoryParams) {
     super(platform, params);
     this.id = params.id;
     this.deviceId = params.deviceId;
@@ -54,7 +58,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
     this.on('initialised', async () => {
       await this.checkState();
     });
-    this.on('heartbeat', async (beat) => {
+    this.on('heartbeat', async (beat: number) => {
       await this.heartbeat(beat);
     });
     this.on('shutdown', async () => {
@@ -69,7 +73,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
     this.debug('Nothing to do at shutdown');
   }
 
-  async heartbeat(beat) {
+  async heartbeat(beat: number) {
     this.checkState();
     if (beat % this.switchService.values.heartrate === 0) {
       this.vdebug('Switch accessory heartbeat');
