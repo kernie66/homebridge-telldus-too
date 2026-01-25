@@ -74,15 +74,15 @@ export function toSeconds(timeArray) {
 */
 
 // Convert Telldus state to text
-export function stateToText(state: number) {
-  let stateText;
-  if (state !== undefined) {
-    const stateIndex = Math.log2(state);
-    stateText = TELLDUS_STATES[stateIndex];
-  } else {
-    stateText = 'Undefined';
+export function stateToText(state: number | undefined) {
+  if (state === undefined || state === 0) {
+    return 'Undefined';
   }
-  return stateText;
+  const stateIndex = Math.log2(state);
+  if (stateIndex < 0 || stateIndex >= TELLDUS_STATES.length) {
+    return 'Undefined';
+  }
+  return TELLDUS_STATES[stateIndex];
 }
 
 export function setSupportedMethods(commands: typeof COMMANDS) {

@@ -12,7 +12,7 @@ import { stateToText } from './utils/utils.js';
 
 class TdSwitchAccessory extends AccessoryDelegate {
   id: string;
-  deviceId: string;
+  deviceId: number;
   model: string;
   modelType: string;
   random: boolean;

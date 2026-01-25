@@ -4,6 +4,7 @@
 // Homebridge plugin for Telldus sensors.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type { SensorAccessoryType } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 // const homebridgeLib = require('homebridge-lib');
@@ -22,11 +23,13 @@ class TempSensorService extends ServiceDelegate {
     return Settings;
   }
 
-  checkObservation() {}
+  checkObservation() {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class Temperature extends TempSensorService {
-  constructor(sensorAccessory, params = {}) {
+  constructor(sensorAccessory: SensorAccessoryType, params = {}) {
     params.name = sensorAccessory.name + ' Temperature';
     params.Service = sensorAccessory.Services.eve.TemperatureSensor;
     super(sensorAccessory, params);
@@ -104,7 +107,7 @@ class Temperature extends TempSensorService {
 }
 
 class Humidity extends TempSensorService {
-  constructor(sensorAccessory, params = {}) {
+  constructor(sensorAccessory: SensorAccessoryType, params = {}) {
     params.name = sensorAccessory.name + ' Humidity';
     params.Service = sensorAccessory.Services.hap.HumiditySensor;
     super(sensorAccessory, params);

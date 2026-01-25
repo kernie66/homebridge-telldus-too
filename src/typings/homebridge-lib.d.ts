@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: Global types for homebridge-lib */
+
 declare module 'homebridge-lib/Accessory';
 declare module 'homebridge-lib/Characteristic';
 declare module 'homebridge-lib/HttpClient';
@@ -20,3 +21,5 @@ interface AccessoryParams {
   software?: string;
   logLevel?: string;
 }
+
+declare class AccessoryDelegate extends EventEmitter {}

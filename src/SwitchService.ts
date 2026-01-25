@@ -14,7 +14,7 @@ import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage, stateToText, wait } from './utils/utils.js';
 
 class SwitchService extends ServiceDelegate {
-  deviceId: string;
+  deviceId: number;
   model: string;
   modelType: string;
   random: number;
@@ -26,7 +26,6 @@ class SwitchService extends ServiceDelegate {
   stateCache: unknown;
   telldusApi: TelldusApi;
   switchMuteTime: number;
-  timeout: number;
   switchOn: boolean = false;
   lastSwitchOn: boolean = false;
   acDelay: AbortController;
@@ -63,7 +62,6 @@ class SwitchService extends ServiceDelegate {
     this.stateCache = switchAccessory.stateCache;
     this.telldusApi = switchAccessory.telldusApi;
     this.switchMuteTime = switchAccessory.platformBeatRate * 2;
-    this.timeout = params.timeout;
     this.log = switchAccessory.log;
     this.debug = switchAccessory.debug;
     this.warn = switchAccessory.warn;

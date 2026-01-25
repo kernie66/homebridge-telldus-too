@@ -10,11 +10,7 @@ export interface HttpRequest {
   url: string;
 }
 
-export type ResponseBodyError = {
-  error?: string;
-};
-
-export interface HttpResponse<T = ResponseBodyError> {
+export interface HttpResponse<T = {}> {
   body: T;
   headers: {};
   parsedBody: unknown;

@@ -4,17 +4,18 @@
 
 import { HttpClient } from 'homebridge-lib/HttpClient';
 import qs from 'qs';
+import type {
+  DeviceInfoType,
+  DeviceListType,
+  ResponseBodyError,
+  SensorInfoType,
+  SensorListType,
+  SystemInfoType,
+} from '../api/TelldusApi.types.js';
 import { COMMANDS } from '../TdConstants.js';
 import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
-import type {
-  DeviceBaseType,
-  DeviceInfoType,
-  SensorBaseType,
-  SensorInfoType,
-  SystemInfoType,
-} from '../typings/TelldusTypes.js';
 import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
-import type { RefreshTokenResponse, RequestResponse } from './TelldusApi.types.js';
+import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
 function setPath(path: string, queryString: {}) {
   return queryString ? `${path}?${qs.stringify(queryString)}` : path;
@@ -65,7 +66,7 @@ class TelldusApi extends HttpClient {
             this.requestHandler(request);
           }
         })
-        .on('response', (response: HttpResponse) => {
+        .on('response', (response: HttpResponse<{}>) => {
           this.lastResponse = response;
           if (this.responseHandler) {
             this.responseHandler(response);
@@ -112,58 +113,46 @@ class TelldusApi extends HttpClient {
     return this.lastError;
   }
 
-  checkResponseOk<T>(response: HttpResponse<T>) {
-    const requestResponse = {
-      ok: false,
-      body: response.body,
-      request: response.request,
-      statusCode: response.statusCode,
-      statusMessage: response.statusMessage,
-      headers: response.headers,
-      parsedBody: response.parsedBody,
-    };
-    if (response.statusCode >= 200 && response.statusCode <= 299) {
-      if (!response.body.error) {
-        requestResponse.ok = true;
-      }
-    }
-    return requestResponse;
+  checkResponseOk<T>(response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>) {
+    const ok = (response.statusCode >= 200 && response.statusCode <= 299 && !response.body.error) || false;
+    return ok;
   }
 
-  async getSystemInfo(): Promise<RequestResponse<SystemInfoType>> {
+  async getSystemInfo() {
     const response: HttpResponse<SystemInfoType> = await this.apiClient.get('system/info', this.headers);
-    return this.checkResponseOk<SystemInfoType>(response);
+    response.ok = this.checkResponseOk<SystemInfoType>(response);
+    return response;
   }
 
-  async listSensors(): Promise<RequestResponse<SensorBaseType[]>> {
-    const response: HttpResponse<SensorBaseType[]> = await this.apiClient.get('sensors/list', this.headers);
-    return this.checkResponseOk<SensorBaseType[]>(response);
+  async listSensors() {
+    const response: HttpResponse<SensorListType> = await this.apiClient.get('sensors/list', this.headers);
+    response.ok = this.checkResponseOk<SensorListType>(response);
+    return response;
   }
 
-  async getSensorInfo(id: number): Promise<RequestResponse<SensorInfoType>> {
+  async getSensorInfo(id: number) {
     const response: HttpResponse<SensorInfoType> = await this.apiClient.get(
       setPath('sensor/info', {
         id,
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
-  async listDevices(supportedMethods = setSupportedMethods(COMMANDS)): Promise<RequestResponse<DeviceBaseType[]>> {
-    const response: HttpResponse<DeviceBaseType[]> = await this.apiClient.get(
+  async listDevices(supportedMethods = setSupportedMethods(COMMANDS)) {
+    const response: HttpResponse<DeviceListType> = await this.apiClient.get(
       setPath('devices/list', {
         supportedMethods,
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
-  async getDeviceInfo(
-    id: number,
-    supportedMethods = setSupportedMethods(COMMANDS),
-  ): Promise<RequestResponse<DeviceInfoType>> {
+  async getDeviceInfo(id: number, supportedMethods = setSupportedMethods(COMMANDS)) {
     const response: HttpResponse<DeviceInfoType> = await this.apiClient.get(
       setPath('device/info', {
         id,
@@ -171,7 +160,8 @@ class TelldusApi extends HttpClient {
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
   /*
@@ -183,17 +173,18 @@ class TelldusApi extends HttpClient {
   }
   */
 
-  async bellDevice(id: string) {
+  async bellDevice(id: number) {
     const response = await this.apiClient.get(
       setPath('device/bell', {
         id,
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
-  async dimDevice(id: string, level: number) {
+  async dimDevice(id: number, level: number) {
     const response = await this.apiClient.get(
       setPath('device/dim', {
         id,
@@ -201,17 +192,19 @@ class TelldusApi extends HttpClient {
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
-  async onOffDevice(id: string, on: boolean) {
+  async onOffDevice(id: number, on: boolean) {
     const response = await this.apiClient.get(
       setPath(`device/turn${on ? 'On' : 'Off'}`, {
         id,
       }),
       this.headers,
     );
-    return this.checkResponseOk(response);
+    response.ok = this.checkResponseOk(response);
+    return response;
   }
 
   /*

@@ -2,7 +2,8 @@
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
-import type { SensorInfoType, SensorModelType } from '../typings/TelldusTypes.js';
+import type { SensorInfoType } from '../api/TelldusApi.types.js';
+import type { SensorModelType } from '../typings/SensorTypes.js';
 
 // Function to determine the type of Telldus sensor
 export default function checkSensorType(sensorInfo: SensorInfoType): SensorModelType {

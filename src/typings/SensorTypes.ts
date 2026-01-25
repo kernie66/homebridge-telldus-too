@@ -4,32 +4,34 @@ import type NodeCache from 'node-cache';
 import type TelldusApi from '../api/TelldusApi.js';
 import type TdMyCustomTypes from '../TdMyCustomTypes.js';
 
-export interface SwitchParamsType {
+export interface SensorParamsType {
   name: string;
   id: string;
-  deviceId: string;
+  deviceId: number;
 }
 
-export interface SwitchConfigTypes {
+export interface SensorConfigTypes {
   name?: string;
   uuid?: string;
   id?: number;
   manufacturer?: string;
-  model?: string;
-  modelType?: SwitchTypes;
+  model?: SensorModelType;
+  temperatureSensor?: boolean;
+  humiditySensor?: boolean;
+  windSensor?: boolean;
+  rainSensor?: boolean;
   firmware?: string;
-  state?: number;
   category?: string;
-  delay?: number;
-  random?: boolean;
-  lightbulb?: boolean;
-  methods?: number;
+  randomize?: boolean;
+  configHeartrate?: number;
   protocol?: string;
 }
 
-export type SwitchTypes = 'switch' | 'dimmer' | 'bell' | 'Unknown';
+export type SensorModelType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';
 
-export interface SwitchAccessoryParams extends AccessoryParams {
+export type SensorTypes = 'switch' | 'dimmer' | 'bell' | 'Unknown';
+
+export interface SensorAccessoryParams extends AccessoryParams {
   deviceId: number;
   model: string;
   modelType: string;
@@ -41,7 +43,7 @@ export interface SwitchAccessoryParams extends AccessoryParams {
   lightbulb?: boolean;
   state: number;
 }
-export interface SwitchAccessoryType extends Logging {
+export interface SensorAccessoryType extends Logging, EventEmitter {
   name: string;
   deviceId: number;
   model: string;
@@ -66,7 +68,7 @@ export interface SwitchAccessoryType extends Logging {
   onUpdating: boolean;
 }
 
-export type SwitchServiceParams = {
+export type SensorServiceParams = {
   name: string;
   lightbulb?: boolean;
   Service?: Function;

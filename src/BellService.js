@@ -31,7 +31,6 @@ class BellService extends ServiceDelegate {
     this.heartrate = switchAccessory.heartrate;
     this.td = switchAccessory.td;
     this.telldusApi = switchAccessory.telldusApi;
-    this.timeout = params.timeout;
 
     this.addCharacteristicDelegate({
       key: 'bell',
