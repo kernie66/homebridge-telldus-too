@@ -20,7 +20,7 @@ import TdSwitchAccessory from './TdSwitchAccessory.js';
 import TdTellstickAccessory from './TdTellstickAccessory.js';
 import type { ConfigJson } from './typings/ConfigJsonTypes.js';
 import type { HttpResponse } from './typings/HttpClientTypes.js';
-import type { SensorConfigTypes } from './typings/SensorTypes.js';
+import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorTypes.js';
 import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import checkStatusCode from './utils/checkStatusCode.js';
@@ -341,7 +341,22 @@ class TdPlatform extends Platform {
 
     // Parse the Telldus sensors
     for (const id of sensorArray) {
-      const sensorConfig: SensorConfigTypes = {};
+      const sensorConfig: Required<SensorConfigTypes> = {
+        name: '',
+        uuid: '',
+        id: 0,
+        manufacturer: '',
+        model: '',
+        temperatureSensor: false,
+        humiditySensor: false,
+        windSensor: false,
+        rainSensor: false,
+        firmware: '',
+        category: this.Accessory.Categories.Sensor,
+        randomize: false,
+        configHeartrate: 300,
+        protocol: '',
+      };
       let info;
       try {
         const infoResponse = await this.telldusApi?.getSensorInfo(id);
@@ -381,8 +396,8 @@ class TdPlatform extends Platform {
         }
         sensorConfig.manufacturer = 'Telldus';
         sensorConfig.protocol = info.protocol;
-        sensorConfig.randomize = this.config.randomize;
-        sensorConfig.configHeartrate = this.config.configHeartrate;
+        sensorConfig.randomize = this.config.randomize || false;
+        sensorConfig.configHeartrate = this.config.configHeartrate || 15;
         sensorConfig.category = this.Accessory.Categories.Sensor;
         if (this.config.ignoreIds?.includes(sensorConfig.id)) {
           this.log('Ignoring sensor: %s, ID: %s', sensorConfig.name, sensorConfig.id);
@@ -427,16 +442,16 @@ class TdPlatform extends Platform {
     }
 
     for (const tdSensor of validSensors) {
-      const sensorParams = {
+      const sensorParams: SensorAccessoryParams = {
         name: tdSensor.name,
         sensorId: tdSensor.id,
         id: tdSensor.uuid,
         manufacturer: tdSensor.manufacturer,
         model: tdSensor.model,
-        temperatureSensor: tdSensor.temperatureSensor || false,
-        humiditySensor: tdSensor.humiditySensor || false,
-        rainSensor: tdSensor.rainSensor || false,
-        windSensor: tdSensor.windSensor || false,
+        temperatureSensor: tdSensor.temperatureSensor,
+        humiditySensor: tdSensor.humiditySensor,
+        rainSensor: tdSensor.rainSensor,
+        windSensor: tdSensor.windSensor,
         configHeartrate: tdSensor.configHeartrate,
         randomize: tdSensor.randomize,
         firmware: 'ID-' + tdSensor.id,

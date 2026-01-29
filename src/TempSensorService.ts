@@ -4,13 +4,19 @@
 // Homebridge plugin for Telldus sensors.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import type { SensorAccessoryType } from './typings/SensorTypes.js';
+import type { SensorInfoType } from './api/TelldusApi.types.js';
+import type TdSensorAccessory from './TdSensorAccessory.js';
+import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 // const homebridgeLib = require('homebridge-lib');
 // const { toEveDate } = require('./utils/dateTimeHelpers');
 
 class TempSensorService extends ServiceDelegate {
+  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
+    super(sensorAccessory, params);
+  }
+
   static get Temperature() {
     return Temperature;
   }
@@ -23,13 +29,19 @@ class TempSensorService extends ServiceDelegate {
     return Settings;
   }
 
-  checkObservation() {
-    throw new Error('Method not implemented.');
-  }
+  // checkObservation() {
+  //   throw new Error('Method not implemented.');
+  // }
 }
 
 class Temperature extends TempSensorService {
-  constructor(sensorAccessory: SensorAccessoryType, params = {}) {
+  // name: string;
+  randomize: boolean;
+  configHeartrate: number;
+  newHeartrate!: number;
+  // Service: Function;
+
+  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Temperature';
     params.Service = sensorAccessory.Services.eve.TemperatureSensor;
     super(sensorAccessory, params);
@@ -96,7 +108,7 @@ class Temperature extends TempSensorService {
     }
   }
 
-  checkObservation(observation) {
+  checkObservation(observation: SensorInfoType) {
     if (observation.data[0] && observation.data[0].name === 'temp') {
       this.values.temperature = Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset;
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
@@ -107,7 +119,7 @@ class Temperature extends TempSensorService {
 }
 
 class Humidity extends TempSensorService {
-  constructor(sensorAccessory: SensorAccessoryType, params = {}) {
+  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Humidity';
     params.Service = sensorAccessory.Services.hap.HumiditySensor;
     super(sensorAccessory, params);
@@ -119,7 +131,7 @@ class Humidity extends TempSensorService {
     });
   }
 
-  checkObservation(observation) {
+  checkObservation(observation: SensorInfoType) {
     if (observation.data[1] && observation.data[1].name === 'humidity') {
       this.values.humidity = Math.round(observation.data[1].value);
     } else {
@@ -129,7 +141,7 @@ class Humidity extends TempSensorService {
 }
 
 class Settings extends TempSensorService {
-  constructor(sensorAccessory, params = {}) {
+  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Services';
     params.Service = sensorAccessory.Services.my.Resource;
     super(sensorAccessory, params);
@@ -160,8 +172,8 @@ class Settings extends TempSensorService {
     });
   }
 
-  checkObservation(observation) {
-    if (observation.data[0].lastUpdated) {
+  checkObservation(observation: SensorInfoType) {
+    if (observation.data[0]?.lastUpdated) {
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
     } else {
       this.warn('Observation time not found for sensor');

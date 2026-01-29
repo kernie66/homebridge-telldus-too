@@ -3,8 +3,9 @@
 declare module 'homebridge-lib/Accessory';
 declare module 'homebridge-lib/Characteristic';
 declare module 'homebridge-lib/HttpClient';
+// declare module 'homebridge-lib/AccessoryDelegate';
 declare module 'homebridge-lib/ServiceDelegate';
-declare module 'homebridge-lib/AccessoryDelegate';
+// declare module 'homebridge-lib/ServiceDelegate/History';
 declare module 'homebridge-lib/CharacteristicDelegate';
 declare module 'homebridge-lib/Platform';
 declare module 'homebridge-lib/OptionParser';

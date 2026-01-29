@@ -5,7 +5,8 @@
 
 import { createRequire } from 'node:module';
 import type { API } from 'homebridge';
-import packageJson from '../package.json';
+import packageJson from '../package.json' with { type: 'json' };
+
 import TdPlatform from './TdPlatform.js';
 
 //const require = createRequire(import.meta.url);

@@ -7,6 +7,7 @@ import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import type TdPlatform from './TdPlatform.js';
 import type { SwitchAccessoryParams } from './typings/SwitchTypes.js';
 import { stateToText } from './utils/utils.js';
 
@@ -22,7 +23,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
   state: number;
   heartrate: number;
 
-  constructor(platform, params: SwitchAccessoryParams) {
+  constructor(platform: TdPlatform, params: SwitchAccessoryParams) {
     super(platform, params);
     this.id = params.id;
     this.deviceId = params.deviceId;

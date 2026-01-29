@@ -1,24 +1,16 @@
 // homebridge-telldus-too/lib/RainSensorService.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus sensors.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type { SensorInfoType } from './api/TelldusApi.types.js';
+import type TdSensorAccessory from './TdSensorAccessory.js';
+import type { SensorAccessoryType, SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
-// const homebridgeLib = require('homebridge-lib');
-// const { toEveDate } = require('./utils/dateTimeHelpers');
-
 class RainSensorService extends ServiceDelegate {
-  static get Rain() {
-    return Rain;
-  }
-
-  checkObservation() {}
-}
-
-class Rain extends RainSensorService {
-  constructor(sensorAccessory, params = {}) {
+  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Rain';
     params.Service = sensorAccessory.Services.my.Resource;
     super(sensorAccessory, params);
@@ -62,14 +54,14 @@ class Rain extends RainSensorService {
     });
   }
 
-  checkObservation(observation) {
+  checkObservation(observation: SensorInfoType) {
     if (observation.data) {
       for (const data of observation.data) {
         if (data.name === 'rtot') {
           this.values.rain24h = Math.round(data.value * 10) / 10;
         }
         if (data.name === 'rrate') {
-          let rainRate = Math.round(data.value * 10) / 10;
+          const rainRate = Math.round(data.value * 10) / 10;
           this.values.rain1h = rainRate;
           this.values.rain = rainRate > 0.2 ? true : false;
         }

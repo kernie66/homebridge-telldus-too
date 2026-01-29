@@ -8,7 +8,8 @@ import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
 import { FULL_COMMANDS } from './TdConstants.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
-import type { SwitchAccessoryType, SwitchServiceParams } from './typings/SwitchTypes.js';
+import type TdSwitchAccessory from './TdSwitchAccessory.js';
+import type { SwitchServiceParams } from './typings/SwitchTypes.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage, stateToText, wait } from './utils/utils.js';
@@ -17,7 +18,7 @@ class SwitchService extends ServiceDelegate {
   deviceId: number;
   model: string;
   modelType: string;
-  random: number;
+  random: boolean;
   delay: number;
   repeats: number;
   heartrate: number;
@@ -41,7 +42,7 @@ class SwitchService extends ServiceDelegate {
   activeTimeout: NodeJS.Timeout | null;
   endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' = 'Not activated' as const;
 
-  constructor(switchAccessory: SwitchAccessoryType, params: SwitchServiceParams) {
+  constructor(switchAccessory: TdSwitchAccessory, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
     // If it is a dimmer, set service to lightbulb, else switch
     if (switchAccessory.modelType === 'dimmer' || params.lightbulb) {
@@ -237,7 +238,7 @@ class SwitchService extends ServiceDelegate {
     this.values.setDefault = false;
   }
 
-  async setOn(switchAccessory: SwitchAccessoryType) {
+  async setOn(switchAccessory: TdSwitchAccessory) {
     const newValue = this.switchOn !== this.lastSwitchOn;
     this.lastSwitchOn = this.switchOn;
     // If active update and new value, we assume that it is user controlled
@@ -376,7 +377,7 @@ class SwitchService extends ServiceDelegate {
   // used in Eve to set the dimmer.
   // The dimmer is turned on automatically if it was off, so the delay
   // ensures that the dim command will be sent after the on command.
-  async setDimmerLevel(switchAccessory: SwitchAccessoryType, dimLevel: number, immediately = false) {
+  async setDimmerLevel(switchAccessory: TdSwitchAccessory, dimLevel: number, immediately = false) {
     // If a dim command is pending, abort it
     if (this.acDimActive) {
       this.acDim.abort();

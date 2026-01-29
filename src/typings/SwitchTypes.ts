@@ -1,4 +1,3 @@
-import type EventEmitter from 'node:events';
 import type { Logging } from 'homebridge';
 import type NodeCache from 'node-cache';
 import type TelldusApi from '../api/TelldusApi.js';
@@ -7,7 +6,7 @@ import type TdMyCustomTypes from '../TdMyCustomTypes.js';
 export interface SwitchParamsType {
   name: string;
   id: string;
-  deviceId: string;
+  deviceId: number;
 }
 
 export interface SwitchConfigTypes {
@@ -31,7 +30,7 @@ export type SwitchTypes = 'switch' | 'dimmer' | 'bell' | 'Unknown';
 
 export interface SwitchAccessoryParams extends AccessoryParams {
   deviceId: number;
-  model: string;
+  // model: string;
   modelType: string;
   switchMuteTime?: number;
   delay?: number;
@@ -46,7 +45,7 @@ export interface SwitchAccessoryType extends Logging {
   deviceId: number;
   model: string;
   modelType: string;
-  switchMuteTime: number;
+  // switchMuteTime: number;
   delay: number;
   repeats: number;
   heartrate: number;
@@ -67,9 +66,10 @@ export interface SwitchAccessoryType extends Logging {
 }
 
 export type SwitchServiceParams = {
-  name: string;
+  name?: string;
   lightbulb?: boolean;
   Service?: Function;
+  primaryService?: boolean;
 };
 
 export type SensorType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';
