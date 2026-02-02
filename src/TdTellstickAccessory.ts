@@ -1,4 +1,4 @@
-// homebridge-telldus-too/lib/TdTellstickAccessory.js
+// homebridge-telldus-too/lib/TdTellstickAccessory.ts
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus.
@@ -7,14 +7,41 @@ import clipboard from 'clipboardy';
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import colors from 'yoctocolors';
 import TelldusApi from './api/TelldusApi.js';
-import TellstickService from './TdTellstickService.js';
+import type TdMyCustomTypes from './TdMyCustomTypes.js';
+import type TdPlatform from './TdPlatform.js';
+import TellstickService from './TellstickService.js';
 import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
 class TdTellstickAccessory extends AccessoryDelegate {
-  constructor(platform, params) {
+  service!: TellstickService;
+  td: TdMyCustomTypes;
+  givenAccessToken?: string;
+  locale?: string;
+  telldusApi!: TelldusApi;
+  lastRefresh!: number;
+  accessTokenExpires!: number;
+  nextRefresh!: number;
+  values!: {
+    accessToken: string;
+    configAccessToken: string;
+    tokenExpires: number;
+    nextRefresh: number;
+  };
+
+  constructor(
+    platform: TdPlatform,
+    params: {
+      config: {
+        name: string;
+        ipAddress: string;
+        accessToken?: string;
+        locale?: string;
+      };
+    },
+  ) {
     super(platform, {
       id: uuid(params.config.name),
       name: 'Tellstick',

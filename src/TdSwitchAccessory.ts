@@ -4,24 +4,32 @@
 // Homebridge plugin for Telldus switch devices.
 
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
+import type { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type NodeCache from 'node-cache';
+import type TelldusApi from './api/TelldusApi.js';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
 import { FULL_COMMANDS } from './TdConstants.js';
+import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
 import type { SwitchAccessoryParams } from './typings/SwitchTypes.js';
 import { stateToText } from './utils/utils.js';
 
 class TdSwitchAccessory extends AccessoryDelegate {
-  id: string;
   deviceId: number;
-  model: string;
   modelType: string;
   random: boolean;
   lightbulb: boolean;
   delay: number;
   repeats: number;
   state: number;
+  stateCache: NodeCache;
   heartrate: number;
+  telldusApi: TelldusApi;
+  td: TdMyCustomTypes;
+  platformBeatRate: number;
+  onUpdating: boolean;
+  switchService: ServiceDelegate;
 
   constructor(platform: TdPlatform, params: SwitchAccessoryParams) {
     super(platform, params);
@@ -84,10 +92,11 @@ class TdSwitchAccessory extends AccessoryDelegate {
   // Check the state of the devices using the cached values from the platform
   checkState() {
     if (!this.onUpdating) {
-      let tdCachedValue, piCachedValue;
-      const key = 'ID' + this.deviceId;
+      let tdCachedValue: boolean = false,
+        piCachedValue: boolean = false;
+      const key = `ID${this.deviceId}`;
 
-      const tdState = this.stateCache.get('td' + key);
+      const tdState: number | undefined = this.stateCache.get(`td${key}`);
       this.vdebug('tdState:', tdState);
       if (tdState === undefined) {
         this.warn('Cached value from Telldus does not exist for', key);
@@ -102,7 +111,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
         tdCachedValue = false;
       }
 
-      const piState = this.stateCache.get('pi' + key);
+      const piState: number | undefined = this.stateCache.get(`pi${key}`);
       this.vdebug('piState:', piState);
       if (piState === undefined) {
         this.warn('Cached value from Plug-in does not exist for', key);

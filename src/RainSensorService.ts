@@ -6,7 +6,7 @@
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import type { SensorInfoType } from './api/TelldusApi.types.js';
 import type TdSensorAccessory from './TdSensorAccessory.js';
-import type { SensorAccessoryType, SensorServiceParams } from './typings/SensorTypes.js';
+import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 class RainSensorService extends ServiceDelegate {

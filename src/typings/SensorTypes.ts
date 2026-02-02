@@ -1,5 +1,4 @@
-import type EventEmitter from 'node:events';
-import type { Logging } from 'homebridge';
+import type { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import type TelldusApi from '../api/TelldusApi.js';
 import type TdMyCustomTypes from '../TdMyCustomTypes.js';
 
@@ -32,16 +31,15 @@ export type SensorTypes = 'switch' | 'dimmer' | 'bell' | 'Unknown';
 
 export interface SensorAccessoryParams extends AccessoryParams {
   sensorId: number;
-  // model: string;
-  // modelType: string;
   temperatureSensor: boolean;
   humiditySensor: boolean;
   windSensor: boolean;
   rainSensor: boolean;
   configHeartrate: number;
+  heartrate?: number;
   randomize: boolean;
 }
-export interface SensorAccessoryType extends Logging, EventEmitter {
+export interface SensorAccessoryType extends AccessoryDelegate {
   name: string;
   sensorId: number;
   model: string;
@@ -51,35 +49,32 @@ export interface SensorAccessoryType extends Logging, EventEmitter {
   repeats: number;
   heartrate: number;
   newHeartrate: number;
-  Services: {
-    hap: {
-      Switch: Function;
-      Lightbulb: Function;
-      HumiditySensor: Function;
-    };
-    my: {
-      Resource: Function;
-    };
-    eve: {
-      TemperatureSensor: Function;
-      HumiditySensor: Function;
-    };
-  };
+  // Services: {
+  //   hap: {
+  //     Switch: () => void;
+  //     Lightbulb: () => void;
+  //     HumiditySensor: () => void;
+  //   };
+  //   my: {
+  //     Resource: () => void;
+  //   };
+  //   eve: {
+  //     TemperatureSensor: () => void;
+  //     HumiditySensor: () => void;
+  //   };
+  // };
   randomize: boolean;
-  // state: number;
-  // stateCache: NodeCache;
   telldusApi: TelldusApi;
   td: TdMyCustomTypes;
   platformBeatRate: number;
   configHeartrate: number;
   logLevel: string;
-  onUpdating: boolean;
 }
 
 export interface SensorServiceParams {
   name?: string;
   lightbulb?: boolean;
-  Service?: Function;
+  Service?: () => void;
 }
 
 export type SensorType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';

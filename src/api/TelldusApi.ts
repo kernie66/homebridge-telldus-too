@@ -3,7 +3,7 @@
 //
 
 import { HttpClient } from 'homebridge-lib/HttpClient';
-import qs from 'qs';
+import queryString from 'query-string';
 import type {
   DeviceInfoType,
   DeviceListType,
@@ -17,11 +17,16 @@ import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClient
 import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
 import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
-function setPath(path: string, queryString: {}) {
-  return queryString ? `${path}?${qs.stringify(queryString)}` : path;
+function setPath(
+  path: string,
+  qs: {
+    [key: string]: unknown;
+  },
+) {
+  return qs ? `${path}?${queryString.stringify(qs)}` : path;
 }
 
-function checkFunction(handler: Function) {
+function checkFunction(handler: (...args: unknown[]) => void) {
   if (handler && typeof handler === 'function') {
     return handler;
   }
@@ -66,7 +71,7 @@ class TelldusApi extends HttpClient {
             this.requestHandler(request);
           }
         })
-        .on('response', (response: HttpResponse<{}>) => {
+        .on('response', (response: HttpResponse<ResponseBodyError>) => {
           this.lastResponse = response;
           if (this.responseHandler) {
             this.responseHandler(response);
@@ -86,15 +91,15 @@ class TelldusApi extends HttpClient {
     return this.expires;
   }
 
-  setRequestHandler(handler: Function) {
+  setRequestHandler(handler: (...args: unknown[]) => void) {
     this.requestHandler = checkFunction(handler);
   }
 
-  setResponseHandler(handler: Function) {
+  setResponseHandler(handler: (...args: unknown[]) => void) {
     this.responseHandler = checkFunction(handler);
   }
 
-  setErrorHandler(handler: Function) {
+  setErrorHandler(handler: (...args: unknown[]) => void) {
     this.errorHandler = checkFunction(handler);
   }
 

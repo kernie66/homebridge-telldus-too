@@ -12,7 +12,7 @@ import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
 import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
-import type { DeviceListType, SensorListType } from './api/TelldusApi.types.js';
+import type { DeviceInfoType, DeviceListType, SensorInfoType, SensorListType } from './api/TelldusApi.types.js';
 import { FULL_COMMANDS } from './TdConstants.js';
 import TdMyCustomTypes from './TdMyCustomTypes.js';
 import TdSensorAccessory from './TdSensorAccessory.js';
@@ -70,6 +70,8 @@ class TdPlatform extends Platform {
     super(log, configJson, homebridge);
     this.config = {
       name: 'TelldusToo',
+      ipAddress: '',
+      accessToken: '',
     };
 
     this.initialised = false;
@@ -278,7 +280,7 @@ class TdPlatform extends Platform {
         methods: 0,
         protocol: '',
       };
-      let info;
+      let deviceInfo: DeviceInfoType;
       try {
         const infoResponse = await this.telldusApi.getDeviceInfo(id);
         if (!infoResponse.ok) {
@@ -286,38 +288,38 @@ class TdPlatform extends Platform {
           this.warn('No info from Telldus when parsing, skipping device ID:', id);
           continue;
         }
-        info = infoResponse.body;
+        deviceInfo = infoResponse.body;
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         this.warn('Error getting device info, skipping device ID:', id);
         this.warn('Error message:', errorMessage);
         continue;
       }
-      switchConfig.id = info.id;
-      if (!info.name && this.config.ignoreUnnamedSwitches) {
-        this.log('Ignoring unnamed switch with ID:', info.id);
+      switchConfig.id = deviceInfo.id;
+      if (!deviceInfo.name && this.config.ignoreUnnamedSwitches) {
+        this.log('Ignoring unnamed switch with ID:', deviceInfo.id);
         continue;
       }
-      switchConfig.name = info.name || 'Device ' + switchConfig.id;
+      switchConfig.name = deviceInfo.name || 'Device ' + switchConfig.id;
       switchConfig.uuid = uuid(switchConfig.name + switchConfig.id);
       // Split manufacturer and model
-      const modelSplit = (info.model || '').split(':');
+      const modelSplit = (deviceInfo.model || '').split(':');
       switchConfig.model = modelSplit[0] || 'unknown';
       switchConfig.manufacturer = modelSplit[1] || 'unknown';
       // Check type of switch, and if dimmers are to be used as switches
-      if (info.methods & supportedCommands.dim) {
+      if (deviceInfo.methods & supportedCommands.dim) {
         switchConfig.modelType = this.config.dimmerAsSwitch ? 'switch' : 'dimmer';
-      } else if (info.methods & supportedCommands.bell) {
+      } else if (deviceInfo.methods & supportedCommands.bell) {
         switchConfig.modelType = 'bell';
-      } else if (info.methods & supportedCommands.on) {
+      } else if (deviceInfo.methods & supportedCommands.on) {
         switchConfig.modelType = 'switch';
       } else {
-        this.warn('Ignoring unsupported Telldus device with ID:', info.id);
+        this.warn('Ignoring unsupported Telldus device with ID:', deviceInfo.id);
         continue;
       }
-      switchConfig.methods = info.methods;
-      switchConfig.protocol = info.protocol;
-      switchConfig.state = info.state;
+      switchConfig.methods = deviceInfo.methods;
+      switchConfig.protocol = deviceInfo.protocol;
+      switchConfig.state = deviceInfo.state;
       // switchConfig.type = info.type; // Not used currently
       switchConfig.delay = this.config.delay || 0;
       switchConfig.random = this.config.random || false;
@@ -357,29 +359,29 @@ class TdPlatform extends Platform {
         configHeartrate: 300,
         protocol: '',
       };
-      let info;
+      let sensorInfo: SensorInfoType;
       try {
-        const infoResponse = await this.telldusApi?.getSensorInfo(id);
+        const infoResponse = await this.telldusApi.getSensorInfo(id);
         if (!infoResponse.ok) {
           checkStatusCode(infoResponse, this.error);
           this.warn('No info from Telldus when parsing ID: %d, skipping device...', id);
           continue;
         }
-        info = infoResponse.body;
+        sensorInfo = infoResponse.body;
       } catch (error) {
         const errorMessage = getErrorMessage(error);
         this.warn('Error getting sensor info, skipping device ID:', id);
         this.warn('Error message:', errorMessage);
         continue;
       }
-      if (!info.name && this.config.ignoreUnnamedSensors) {
-        this.log('Ignoring unnamed sensor with ID:', info.id);
+      if (!sensorInfo.name && this.config.ignoreUnnamedSensors) {
+        this.log('Ignoring unnamed sensor with ID:', sensorInfo.id);
         continue;
       }
-      sensorConfig.id = info.id;
-      sensorConfig.name = info.name || 'Sensor ' + info.id;
+      sensorConfig.id = sensorInfo.id;
+      sensorConfig.name = sensorInfo.name || 'Sensor ' + sensorInfo.id;
       sensorConfig.uuid = uuid(sensorConfig.name + sensorConfig.id);
-      const sensorType = checkSensorType(info);
+      const sensorType = checkSensorType(sensorInfo);
       if (sensorType !== 'unknown') {
         sensorConfig.model = sensorType;
         if (sensorType.includes('temperature')) {
@@ -395,7 +397,7 @@ class TdPlatform extends Platform {
           sensorConfig.windSensor = true;
         }
         sensorConfig.manufacturer = 'Telldus';
-        sensorConfig.protocol = info.protocol;
+        sensorConfig.protocol = sensorInfo.protocol;
         sensorConfig.randomize = this.config.randomize || false;
         sensorConfig.configHeartrate = this.config.configHeartrate || 15;
         sensorConfig.category = this.Accessory.Categories.Sensor;
@@ -406,7 +408,7 @@ class TdPlatform extends Platform {
           validSensors.push(sensorConfig);
         }
       } else {
-        this.warn('Ignoring unknown sensor type for ID %s: %s', info.id, info.model);
+        this.warn('Ignoring unknown sensor type for ID %s: %s', sensorInfo.id, sensorInfo.model);
       }
     }
     this.log('Number of valid sensors', validSensors.length);
@@ -436,7 +438,6 @@ class TdPlatform extends Platform {
       );
       const switchAccessory = new TdSwitchAccessory(this, switchParams);
       this.setStateCache(tdSwitch);
-      // @ts-expect-error The types are not fixed from homebridge-lib
       jobs.push(events.once(switchAccessory, 'initialised'));
       // this.switchAccessories[tdSwitch] = switchAccessory;
     }
@@ -459,7 +460,6 @@ class TdPlatform extends Platform {
       };
       this.debug('Processing sensor', sensorParams.name);
       const sensorAccessory = new TdSensorAccessory(this, sensorParams);
-      // @ts-expect-error The types are not fixed from homebridge-lib
       jobs.push(events.once(sensorAccessory, 'initialised'));
       // this.sensorAccessories[tdSensor] = sensorAccessory;
     }

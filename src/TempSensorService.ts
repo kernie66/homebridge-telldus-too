@@ -29,9 +29,9 @@ class TempSensorService extends ServiceDelegate {
     return Settings;
   }
 
-  // checkObservation() {
-  //   throw new Error('Method not implemented.');
-  // }
+  checkObservation(_observation: SensorInfoType) {
+    throw new Error('Method not implemented.');
+  }
 }
 
 class Temperature extends TempSensorService {
@@ -108,7 +108,7 @@ class Temperature extends TempSensorService {
     }
   }
 
-  checkObservation(observation: SensorInfoType) {
+  override checkObservation(observation: SensorInfoType) {
     if (observation.data[0] && observation.data[0].name === 'temp') {
       this.values.temperature = Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset;
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
@@ -131,7 +131,7 @@ class Humidity extends TempSensorService {
     });
   }
 
-  checkObservation(observation: SensorInfoType) {
+  override checkObservation(observation: SensorInfoType) {
     if (observation.data[1] && observation.data[1].name === 'humidity') {
       this.values.humidity = Math.round(observation.data[1].value);
     } else {
@@ -141,12 +141,13 @@ class Humidity extends TempSensorService {
 }
 
 class Settings extends TempSensorService {
+  configHeartrate: number;
+
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Services';
     params.Service = sensorAccessory.Services.my.Resource;
     super(sensorAccessory, params);
     this.configHeartrate = sensorAccessory.configHeartrate;
-    this.newHeartrate = sensorAccessory.newHeartrate;
 
     this.addCharacteristicDelegate({
       key: 'observationTime',
@@ -162,7 +163,7 @@ class Settings extends TempSensorService {
         maxValue: 360,
         minStep: 1,
       },
-      value: sensorAccessory.heartrate,
+      value: sensorAccessory.configHeartrate,
     });
 
     this.addCharacteristicDelegate({
@@ -172,7 +173,7 @@ class Settings extends TempSensorService {
     });
   }
 
-  checkObservation(observation: SensorInfoType) {
+  override checkObservation(observation: SensorInfoType) {
     if (observation.data[0]?.lastUpdated) {
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
     } else {

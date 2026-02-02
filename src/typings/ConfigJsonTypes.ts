@@ -1,8 +1,8 @@
 export interface ConfigJson {
   name: string;
   platform?: string;
-  ipAddress?: string;
-  accessToken?: string;
+  ipAddress: string;
+  accessToken: string;
   random?: boolean;
   delay?: number;
   repeats?: number;

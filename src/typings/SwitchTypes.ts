@@ -1,4 +1,4 @@
-import type { Logging } from 'homebridge';
+import type { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import type NodeCache from 'node-cache';
 import type TelldusApi from '../api/TelldusApi.js';
 import type TdMyCustomTypes from '../TdMyCustomTypes.js';
@@ -30,7 +30,6 @@ export type SwitchTypes = 'switch' | 'dimmer' | 'bell' | 'Unknown';
 
 export interface SwitchAccessoryParams extends AccessoryParams {
   deviceId: number;
-  // model: string;
   modelType: string;
   switchMuteTime?: number;
   delay?: number;
@@ -40,7 +39,9 @@ export interface SwitchAccessoryParams extends AccessoryParams {
   lightbulb?: boolean;
   state: number;
 }
-export interface SwitchAccessoryType extends Logging {
+
+/*
+export interface SwitchAccessoryType extends AccessoryDelegate {
   name: string;
   deviceId: number;
   model: string;
@@ -49,12 +50,6 @@ export interface SwitchAccessoryType extends Logging {
   delay: number;
   repeats: number;
   heartrate: number;
-  Services: {
-    hap: {
-      Switch: Function;
-      Lightbulb: Function;
-    };
-  };
   random: number;
   state: number;
   stateCache: NodeCache;
@@ -64,11 +59,12 @@ export interface SwitchAccessoryType extends Logging {
   logLevel: string;
   onUpdating: boolean;
 }
+*/
 
 export type SwitchServiceParams = {
   name?: string;
   lightbulb?: boolean;
-  Service?: Function;
+  Service?: () => void;
   primaryService?: boolean;
 };
 

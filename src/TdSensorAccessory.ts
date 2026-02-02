@@ -19,10 +19,10 @@ import WindSensorService from './WindSensorService.js';
 type TempSensorTypes = 'temperature' | 'humidity';
 
 class TdSensorAccessory extends AccessoryDelegate {
-  name: string;
-  id: string;
+  // name: string;
+  // id: string;
   sensorId: number;
-  model: string;
+  // model: string;
   temperatureSensor: boolean;
   humiditySensor: boolean;
   rainSensor: boolean;
@@ -31,11 +31,10 @@ class TdSensorAccessory extends AccessoryDelegate {
   randomize: boolean;
   td: TdMyCustomTypes;
   telldusApi: TelldusApi;
-  // stateCache: NodeCache;
-  historyService!: Function; // ServiceDelegate.History;
+  historyService!: () => void; // ServiceDelegate.History;
   rainSensorService!: RainSensorService;
   windSensorService!: WindSensorService;
-  tempSensorServices: {
+  tempSensorServices!: {
     [key in TempSensorTypes]: TempSensorService;
   };
 
@@ -55,10 +54,6 @@ class TdSensorAccessory extends AccessoryDelegate {
     this.td = platform.td;
     this.telldusApi = platform.telldusApi;
     // this.stateCache = platform.stateCache;
-    this.tempSensorServices = {
-      temperature: {},
-      humidity: {},
-    };
 
     try {
       // Check if we have a temperature sensor

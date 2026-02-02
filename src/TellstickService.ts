@@ -1,21 +1,25 @@
-// homebridge-telldus-too/lib/TdTellstickService.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/TellstickService.ts
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type TdTellstickAccessory from './TdTellstickAccessory.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 
-/*
-const homebridgeLib = require('homebridge-lib');
-const {
-  toEveDate,
-  getTimestamp,
-} = require('./utils/dateTimeHelpers');
-*/
-
 class TellstickService extends ServiceDelegate {
-  constructor(gateway, params = {}) {
+  gateway: TdTellstickAccessory;
+  td: TdTellstickAccessory['td'];
+
+  constructor(
+    gateway: TdTellstickAccessory,
+    params: {
+      name: string;
+      Service?: unknown;
+      exposeConfiguredName?: boolean;
+      primaryService?: boolean;
+    },
+  ) {
     params.name = gateway.name;
     params.Service = gateway.Services.my.DeconzGateway;
     params.exposeConfiguredName = false;
