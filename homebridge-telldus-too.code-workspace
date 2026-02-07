@@ -34,6 +34,13 @@
       "activityBar.background": "#02342F",
       "titleBar.activeBackground": "#034942",
       "titleBar.activeForeground": "#E9FEFC"
-    }
+    },
+    "typescript.tsdk": "node_modules/typescript/lib"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+
+    ]
   }
 }

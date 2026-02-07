@@ -13,7 +13,7 @@ import type {
   SystemInfoType,
 } from '../api/TelldusApi.types.js';
 import { COMMANDS } from '../TdConstants.js';
-import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
+// import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
 import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
 import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
@@ -26,18 +26,29 @@ function setPath(
   return qs ? `${path}?${queryString.stringify(qs)}` : path;
 }
 
-function checkFunction(handler: (...args: unknown[]) => void) {
+// type Checker<T> = (handler: T) => T | false;
+const checkFunction = <T>(handler: T): T | false => {
   if (handler && typeof handler === 'function') {
     return handler;
   }
   return false;
-}
+};
 
 class TelldusApi extends HttpClient {
-  host: string;
+  apiClient: HttpClient;
+  headers: {
+    [key: string]: string;
+  } = {};
+  accessToken!: string;
+  lastResponse!: HttpResponse<ResponseBodyError>;
+  lastError!: HttpError;
+  requestHandler: ((request: HttpRequest) => void) | false = false;
+  responseHandler: ((response: HttpResponse<ResponseBodyError>) => void) | false = false;
+  errorHandler: ((error: HttpError) => void) | false = false;
   expires: number;
+
   constructor(host: string, accessToken: string) {
-    super();
+    super({});
 
     this.host = host;
     this.setAccessToken(accessToken);
@@ -91,15 +102,15 @@ class TelldusApi extends HttpClient {
     return this.expires;
   }
 
-  setRequestHandler(handler: (...args: unknown[]) => void) {
+  setRequestHandler(handler: (request: HttpRequest) => void) {
     this.requestHandler = checkFunction(handler);
   }
 
-  setResponseHandler(handler: (...args: unknown[]) => void) {
+  setResponseHandler(handler: (response: HttpResponse<ResponseBodyError>) => void) {
     this.responseHandler = checkFunction(handler);
   }
 
-  setErrorHandler(handler: (...args: unknown[]) => void) {
+  setErrorHandler(handler: (error: HttpError) => void) {
     this.errorHandler = checkFunction(handler);
   }
 

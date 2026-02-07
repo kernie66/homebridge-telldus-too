@@ -19,7 +19,6 @@ import TdSensorAccessory from './TdSensorAccessory.js';
 import TdSwitchAccessory from './TdSwitchAccessory.js';
 import TdTellstickAccessory from './TdTellstickAccessory.js';
 import type { ConfigJson } from './typings/ConfigJsonTypes.js';
-import type { HttpResponse } from './typings/HttpClientTypes.js';
 import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorTypes.js';
 import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
@@ -78,7 +77,6 @@ class TdPlatform extends Platform {
     this.platformBeatRate = 30;
     this.stateCache = new NodeCache();
     this.td = new TdMyCustomTypes(homebridge);
-    console.log('🚀 ~ TdPlatform ~ constructor ~ td:', this.td);
 
     this.vdebug('Characteristics: %o', this.td.Characteristics);
 
@@ -152,6 +150,7 @@ class TdPlatform extends Platform {
     this.tellstick = new TdTellstickAccessory(this, {
       config: this.config,
     });
+    this.debug('Tellstick accessory created');
 
     if (!this.tellstick.telldusApi) {
       this.error('Telldus API not initialized, aborting plugin initialization');

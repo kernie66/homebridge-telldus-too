@@ -56,7 +56,8 @@ class TdTellstickAccessory extends AccessoryDelegate {
     this.locale = params.config.locale;
     this.td = platform.td;
     // this.name = params.config.name;
-
+    console.log('this.logLevel:', this.logLevel);
+    this.debug('Initializing Tellstick accessory with name:', colors.green(this.name));
     // Persisted storage of the current access token
     this.addPropertyDelegate({
       key: 'accessToken',
@@ -102,7 +103,7 @@ class TdTellstickAccessory extends AccessoryDelegate {
         name: 'Tellstick Gateway',
         primaryService: true,
       });
-
+      console.log('🚀 ~ TdTellstickAccessory ~ constructor ~ this.service:', this.service);
       this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
       const errorMessage = getErrorMessage(error);

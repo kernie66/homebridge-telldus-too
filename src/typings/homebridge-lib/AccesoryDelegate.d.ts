@@ -13,7 +13,7 @@ declare module 'homebridge-lib/AccessoryDelegate' {
     model: string;
     hardware?: string;
     software: string;
-    logLevel: string;
+    logLevel: number;
     //    heartrate: number;
     firmware: string;
     serialNumber: string;
@@ -36,5 +36,5 @@ interface AccessoryParams {
   firmware: string;
   hardware?: string;
   software?: string;
-  logLevel?: string;
+  logLevel?: number;
 }

@@ -8,28 +8,28 @@ import { CustomHomeKitTypes } from 'homebridge-lib/CustomHomeKitTypes';
 import uuid from './utils/uuid.js';
 
 class TdMyCustomTypes extends CustomHomeKitTypes {
-  Characteristics!: {
-    EnableRandomOnce: boolean;
-    DisableRandomOnce: boolean;
-    Disabled: boolean;
-    Enabled: boolean;
-    Random: boolean;
-    Delay: number;
-    MinDelay: number;
-    TimeOut: number;
-    Repeats: number;
-    Repetition: number;
-    Status: string;
-    Heartrate: number;
-    SwitchMuteTime: number;
-    LastActivation: string;
-    TokenExpires: string;
-    NextRefresh: string;
-    LastUpdated: string;
-  };
-  hapCharacteristics!: {
-    StatusActive: boolean;
-  };
+  // _Characteristics!: {
+  //   EnableRandomOnce: boolean;
+  //   DisableRandomOnce: boolean;
+  //   Disabled: boolean;
+  //   Enabled: boolean;
+  //   Random: boolean;
+  //   Delay: number;
+  //   MinDelay: number;
+  //   TimeOut: number;
+  //   Repeats: number;
+  //   Repetition: number;
+  //   Status: string;
+  //   Heartrate: number;
+  //   SwitchMuteTime: number;
+  //   LastActivation: string;
+  //   TokenExpires: string;
+  //   NextRefresh: string;
+  //   LastUpdated: string;
+  // };
+  // _hapCharacteristics: {
+  //   StatusActive: boolean;
+  // };
 
   constructor(homebridge: API) {
     super(homebridge);
@@ -172,7 +172,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
     );
 
     this.createCharacteristicClass(
-      'Enabled',
+      'TdEnabled',
       uuid('Enabled'),
       {
         format: this.Formats.BOOL,
@@ -186,7 +186,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
     );
 
     this.createCharacteristicClass(
-      'Status',
+      'TdStatus',
       uuid('Status'),
       {
         format: this.Formats.STRING,
@@ -236,6 +236,21 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       },
       'Next Refresh',
     );
+
+    this.createCharacteristicClass(
+      'LastUpdated',
+      uuid('LastUpdated'),
+      {
+        format: this.Formats.STRING,
+        perms: [
+          this.Perms.PAIRED_READ,
+          this.Perms.NOTIFY,
+        ],
+      },
+      'Last Updated',
+    );
+
+    console.log(this);
 
     this.createServiceClass('TelldusGateway', uuid('TelldusGateway'), [
       this.Characteristics.LastUpdated,

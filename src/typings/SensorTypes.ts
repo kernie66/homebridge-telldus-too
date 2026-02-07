@@ -68,7 +68,7 @@ export interface SensorAccessoryType extends AccessoryDelegate {
   td: TdMyCustomTypes;
   platformBeatRate: number;
   configHeartrate: number;
-  logLevel: string;
+  logLevel: number;
 }
 
 export interface SensorServiceParams {

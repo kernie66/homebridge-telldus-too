@@ -12,6 +12,7 @@ declare module 'homebridge-lib/Delegate' {
       my: {
         Resource: () => void;
         DeconzGateway: () => void;
+        LogLevel: () => number;
       };
       eve: {
         TemperatureSensor: () => void;
@@ -19,6 +20,7 @@ declare module 'homebridge-lib/Delegate' {
       };
     };
 
+    logLevel: number;
     log: (message: string | Error, ...args: unknown[]) => void;
     warn: (message: string, ...args: unknown[]) => void;
     error: (message: string, ...args: unknown[]) => void;

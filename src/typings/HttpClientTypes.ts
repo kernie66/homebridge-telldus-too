@@ -1,5 +1,6 @@
 // Type definitions for homebridge-lib/HttpClient
 
+/*
 export interface HttpRequest {
   body: {};
   headers: {};
@@ -25,3 +26,4 @@ export interface HttpError {
   statusCode: number;
   statusMessage: string;
 }
+*/

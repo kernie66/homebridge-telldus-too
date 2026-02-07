@@ -7,26 +7,24 @@ import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import type TdTellstickAccessory from './TdTellstickAccessory.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 
+interface TellstickServiceParams {
+  name: string;
+  Service?: unknown;
+  exposeConfiguredName?: boolean;
+  primaryService?: boolean;
+}
 class TellstickService extends ServiceDelegate {
   gateway: TdTellstickAccessory;
   td: TdTellstickAccessory['td'];
 
-  constructor(
-    gateway: TdTellstickAccessory,
-    params: {
-      name: string;
-      Service?: unknown;
-      exposeConfiguredName?: boolean;
-      primaryService?: boolean;
-    },
-  ) {
+  constructor(gateway: TdTellstickAccessory, params: TellstickServiceParams) {
     params.name = gateway.name;
     params.Service = gateway.Services.my.DeconzGateway;
     params.exposeConfiguredName = false;
     super(gateway, params);
     this.gateway = gateway;
     this.td = gateway.td;
-
+    console.log('TellstickService initialized', this.Characteristics);
     this.addCharacteristicDelegate({
       key: 'lastUpdated',
       Characteristic: this.Characteristics.my.LastUpdated,
