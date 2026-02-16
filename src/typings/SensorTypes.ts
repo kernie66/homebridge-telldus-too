@@ -1,6 +1,7 @@
 import type { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import type TelldusApi from '../api/TelldusApi.js';
 import type TdMyCustomTypes from '../TdMyCustomTypes.js';
+import type TdPlatform from '../TdPlatform.js';
 
 export interface SensorParamsType {
   name: string;
@@ -39,7 +40,7 @@ export interface SensorAccessoryParams extends AccessoryParams {
   heartrate?: number;
   randomize: boolean;
 }
-export interface SensorAccessoryType extends AccessoryDelegate {
+export interface SensorAccessoryType extends AccessoryDelegate<TdPlatform, object> {
   name: string;
   sensorId: number;
   model: string;
@@ -74,7 +75,7 @@ export interface SensorAccessoryType extends AccessoryDelegate {
 export interface SensorServiceParams {
   name?: string;
   lightbulb?: boolean;
-  Service?: () => void;
+  Service?: unknown;
 }
 
 export type SensorType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';

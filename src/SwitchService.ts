@@ -14,7 +14,24 @@ import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage, stateToText, wait } from './utils/utils.js';
 
-class SwitchService extends ServiceDelegate {
+type SwitchServiceValues = {
+  on: boolean;
+  brightness: number;
+  random: boolean;
+  enableRandomOnce: boolean;
+  disableRandomOnce: boolean;
+  delay: number;
+  repeats: number;
+  repetition: number;
+  disabled: boolean;
+  enabled: boolean;
+  status: string;
+  lastActivation: string;
+  heartrate: number;
+  logLevel: number;
+};
+
+class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   deviceId: number;
   model: string;
   modelType: string;
@@ -235,7 +252,7 @@ class SwitchService extends ServiceDelegate {
     this.values.repeats = this.repeats;
     this.values.heartrate = this.heartrate;
     await wait(500);
-    this.values.setDefault = false;
+    // this.values.setDefault = false;
   }
 
   async setOn(switchAccessory: TdSwitchAccessory) {

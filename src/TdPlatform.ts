@@ -3,13 +3,13 @@
 //
 // Homebridge plugin for Telldus.
 
-import assert from 'assert';
-import events from 'events';
+import EventEmitter, { once } from 'node:events';
 import figlet from 'figlet';
 import type { API, Logger } from 'homebridge';
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
+import { assert } from 'tsafe';
 import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
 import type { DeviceInfoType, DeviceListType, SensorInfoType, SensorListType } from './api/TelldusApi.types.js';
@@ -46,7 +46,7 @@ const supportedCommands = {
   //stop: 0x0200, // 512
 };
 
-class TdPlatform extends Platform {
+class TdPlatform extends Platform<TdPlatform> {
   config: ConfigJson;
   initialised: boolean;
   platformBeatRate: number;
@@ -437,7 +437,8 @@ class TdPlatform extends Platform {
       );
       const switchAccessory = new TdSwitchAccessory(this, switchParams);
       this.setStateCache(tdSwitch);
-      jobs.push(events.once(switchAccessory, 'initialised'));
+      assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
+      jobs.push(once(switchAccessory, 'initialised'));
       // this.switchAccessories[tdSwitch] = switchAccessory;
     }
 
@@ -454,12 +455,12 @@ class TdPlatform extends Platform {
         windSensor: tdSensor.windSensor,
         configHeartrate: tdSensor.configHeartrate,
         randomize: tdSensor.randomize,
-        firmware: 'ID-' + tdSensor.id,
+        firmware: `ID-${tdSensor.id}`,
         category: tdSensor.category,
       };
       this.debug('Processing sensor', sensorParams.name);
       const sensorAccessory = new TdSensorAccessory(this, sensorParams);
-      jobs.push(events.once(sensorAccessory, 'initialised'));
+      jobs.push(once(sensorAccessory, 'initialised'));
       // this.sensorAccessories[tdSensor] = sensorAccessory;
     }
 

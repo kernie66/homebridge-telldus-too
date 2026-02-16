@@ -4,7 +4,6 @@
 declare module 'homebridge-lib/ServiceDelegate' {
   import { History } from './History.js';
   import { Delegate } from 'homebridge-lib/Delegate';
-  import type { windDirection } from '../../utils/utils';
 
   type CharacteristicType = {
     [key: string]: {
@@ -30,10 +29,10 @@ declare module 'homebridge-lib/ServiceDelegate' {
     };
   };
 
-  class ServiceDelegate extends Delegate {
+  class ServiceDelegate<T> extends Delegate {
     name: string;
     silent?: boolean;
-    values: Record<string, boolean | number | string | Date | windDirection>;
+    values: T; // Record<string, boolean | number | string | Date | windDirection>;
     Characteristic: CharacteristicType;
     Characteristics: CharacteristicsType;
 

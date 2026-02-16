@@ -1,5 +1,5 @@
-// homebridge-telldus-too/lib/WindSensorService.js
-// Copyright © 2022-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/WindSensorService.ts
+// Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus sensors.
 
@@ -10,15 +10,18 @@ import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 import { windDirection } from './utils/utils.js';
 
-/*
-const homebridgeLib = require('homebridge-lib');
-const { toEveDate } = require('./utils/dateTimeHelpers');
-const { windDirection } = require('./utils/utils');
-*/
+type WindSensorServiceValues = {
+  wind?: string;
+  windSpeed?: number;
+  maximumWindSpeed?: number;
+  observationTime?: string;
+  heartrate: number;
+  logLevel: number;
+};
 
-class WindSensorService extends ServiceDelegate {
+class WindSensorService extends ServiceDelegate<WindSensorServiceValues> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
-    params.name = sensorAccessory.name + ' Wind';
+    params.name = `${sensorAccessory.name} Wind`;
     params.Service = sensorAccessory.Services.my.Resource;
     super(sensorAccessory, params);
 

@@ -1,9 +1,13 @@
-// homebridge-telldus-too/lib/BellService.js
-// Copyright © 2023-2025 Kenneth Jagenheim. All rights reserved.
+// homebridge-telldus-too/lib/BellService.ts
+// Copyright © 2023-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus bell switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import type TelldusApi from './api/TelldusApi.js';
+import type TdMyCustomTypes from './TdMyCustomTypes.js';
+import type TdSwitchAccessory from './TdSwitchAccessory.js';
+import type { SwitchServiceParams } from './typings/SwitchTypes.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { wait } from './utils/utils.js';
@@ -19,8 +23,26 @@ const { wait } = require('./utils/utils');
 // const { setTimeout } = require('node:timers/promises')
 */
 
-class BellService extends ServiceDelegate {
-  constructor(switchAccessory, params = {}) {
+type BellServiceValues = {
+  bell: boolean;
+  disabled: boolean;
+  lastActivation: string;
+  heartrate: number;
+  logLevel: number;
+};
+
+class BellService extends ServiceDelegate<BellServiceValues> {
+  deviceId: number;
+  model: string;
+  modelType: string;
+  heartrate: number;
+  td: TdMyCustomTypes;
+  telldusApi: TelldusApi;
+  timerActive: boolean;
+  activeTimeout: NodeJS.Timeout | null;
+  bellOn: boolean = false;
+
+  constructor(switchAccessory: TdSwitchAccessory, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
     // If it is a dimmer, set service to lightbulb, else switch
     params.Service = switchAccessory.Services.hap.Switch;
@@ -36,7 +58,7 @@ class BellService extends ServiceDelegate {
       key: 'bell',
       Characteristic: this.Characteristics.hap.On,
       value: false,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (!this.values.disabled) {
         this.bellOn = value;
         this.setBell(switchAccessory);
@@ -49,10 +71,9 @@ class BellService extends ServiceDelegate {
       key: 'disabled',
       value: false,
       Characteristic: this.td.Characteristics.Disabled,
-    }).on('didSet', (value) => {
+    }).on('didSet', (value: boolean) => {
       if (value) {
-        this.switchOn = false;
-        this.setOn(switchAccessory);
+        // this.setOn(switchAccessory);
       }
     });
 
@@ -85,12 +106,12 @@ class BellService extends ServiceDelegate {
     this.activeTimeout = null;
   }
 
-  async setBell(switchAccessory) {
+  async setBell(switchAccessory: TdSwitchAccessory) {
     if (this.bellOn) {
       // Send bell command to device if switch activated
       const response = await this.telldusApi.bellDevice(switchAccessory.deviceId);
       if (!response.ok) {
-        checkStatusCode(response, this);
+        checkStatusCode(response, this.error);
       }
       this.values.lastActivation = toEveDate(getTimestamp());
       wait(500);

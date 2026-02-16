@@ -9,7 +9,16 @@ import type TdSensorAccessory from './TdSensorAccessory.js';
 import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
-class RainSensorService extends ServiceDelegate {
+type RainSensorServiceValues = {
+  rain: boolean;
+  rain1h: number;
+  rain24h: number;
+  observationTime?: string;
+  heartrate: number;
+  logLevel: number;
+};
+
+class RainSensorService extends ServiceDelegate<RainSensorServiceValues> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Rain';
     params.Service = sensorAccessory.Services.my.Resource;

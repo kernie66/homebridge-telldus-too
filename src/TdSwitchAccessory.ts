@@ -4,8 +4,8 @@
 // Homebridge plugin for Telldus switch devices.
 
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
-import type { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import type NodeCache from 'node-cache';
+import { assert, is } from 'tsafe';
 import type TelldusApi from './api/TelldusApi.js';
 import BellService from './BellService.js';
 import SwitchService from './SwitchService.js';
@@ -15,7 +15,9 @@ import type TdPlatform from './TdPlatform.js';
 import type { SwitchAccessoryParams } from './typings/SwitchTypes.js';
 import { stateToText } from './utils/utils.js';
 
-class TdSwitchAccessory extends AccessoryDelegate {
+class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
+  id: string;
+  model: string;
   deviceId: number;
   modelType: string;
   random: boolean;
@@ -29,7 +31,7 @@ class TdSwitchAccessory extends AccessoryDelegate {
   td: TdMyCustomTypes;
   platformBeatRate: number;
   onUpdating: boolean;
-  switchService: ServiceDelegate;
+  switchService: BellService | SwitchService;
 
   constructor(platform: TdPlatform, params: SwitchAccessoryParams) {
     super(platform, params);
@@ -83,14 +85,18 @@ class TdSwitchAccessory extends AccessoryDelegate {
   }
 
   async heartbeat(beat: number) {
-    this.checkState();
-    if (beat % this.switchService.values.heartrate === 0) {
-      this.vdebug('Switch accessory heartbeat');
+    if (this.modelType !== 'Bell') {
+      this.checkState();
+      if (beat % this.switchService.values.heartrate === 0) {
+        this.vdebug('Switch accessory heartbeat');
+      }
     }
   }
 
-  // Check the state of the devices using the cached values from the platform
+  // Check the state of the switch devices using the cached values from the platform
   checkState() {
+    // Only called for switches, not bells
+    assert(is<SwitchService>(this.switchService));
     if (!this.onUpdating) {
       let tdCachedValue: boolean = false,
         piCachedValue: boolean = false;

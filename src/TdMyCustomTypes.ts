@@ -250,8 +250,6 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       'Last Updated',
     );
 
-    console.log(this);
-
     this.createServiceClass('TelldusGateway', uuid('TelldusGateway'), [
       this.Characteristics.LastUpdated,
       this.hapCharacteristics.StatusActive,

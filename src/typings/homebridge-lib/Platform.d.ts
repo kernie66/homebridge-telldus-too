@@ -28,7 +28,7 @@ declare module 'homebridge-lib/Platform' {
    * @abstract
    * @extends Delegate
    */
-  class Platform extends Delegate {
+  class Platform<P> extends Delegate<P> {
     /** Load the platform plugin.
      *
      * Called by Homebridge, through the plugin's `index.js`, when loading the

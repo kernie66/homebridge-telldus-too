@@ -64,7 +64,7 @@ export interface SwitchAccessoryType extends AccessoryDelegate {
 export type SwitchServiceParams = {
   name?: string;
   lightbulb?: boolean;
-  Service?: () => void;
+  Service?: unknown;
   primaryService?: boolean;
 };
 

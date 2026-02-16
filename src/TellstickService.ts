@@ -13,7 +13,14 @@ interface TellstickServiceParams {
   exposeConfiguredName?: boolean;
   primaryService?: boolean;
 }
-class TellstickService extends ServiceDelegate {
+
+type TellstickServiceValues = {
+  lastUpdated: string;
+  tokenExpiration: string;
+  nextRefresh: string;
+  logLevel: number;
+};
+class TellstickService extends ServiceDelegate<TellstickServiceValues> {
   gateway: TdTellstickAccessory;
   td: TdTellstickAccessory['td'];
 
@@ -24,7 +31,7 @@ class TellstickService extends ServiceDelegate {
     super(gateway, params);
     this.gateway = gateway;
     this.td = gateway.td;
-    console.log('TellstickService initialized', this.Characteristics);
+
     this.addCharacteristicDelegate({
       key: 'lastUpdated',
       Characteristic: this.Characteristics.my.LastUpdated,

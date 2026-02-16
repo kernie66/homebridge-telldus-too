@@ -15,21 +15,22 @@ import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 import { getErrorMessage } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
-class TdTellstickAccessory extends AccessoryDelegate {
+type TellstickAccessoryValues = {
+  accessToken: string;
+  configAccessToken: string;
+  tokenExpires: number;
+  nextRefresh: number;
+};
+class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccessoryValues> {
   service!: TellstickService;
   td: TdMyCustomTypes;
   givenAccessToken?: string;
   locale?: string;
+  firmware?: string;
   telldusApi!: TelldusApi;
   lastRefresh!: number;
   accessTokenExpires!: number;
   nextRefresh!: number;
-  values!: {
-    accessToken: string;
-    configAccessToken: string;
-    tokenExpires: number;
-    nextRefresh: number;
-  };
 
   constructor(
     platform: TdPlatform,
@@ -48,7 +49,7 @@ class TdTellstickAccessory extends AccessoryDelegate {
       manufacturer: 'Telldus',
       model: 'Tellstick',
       firmware: '0.0.0',
-      software: null,
+      software: '',
       category: platform.Accessory.Categories.BRIDGE,
     });
 
