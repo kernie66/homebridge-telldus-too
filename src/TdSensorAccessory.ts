@@ -1,23 +1,23 @@
-// homebridge-telldus-too/lib/TdSensorAccessory.js
+// homebridge-telldus-too/lib/TdSensorAccessory.ts
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 // Homebridge plugin for Telldus sensors.
 
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import { assert, is } from 'tsafe';
 import type TelldusApi from './api/TelldusApi.js';
 import type { SensorInfoType } from './api/TelldusApi.types.js';
 import RainSensorService from './RainSensorService.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
-import { Humidity, Temperature } from './TempSensorService.js';
+import { HumidityService, TemperatureService } from './TempSensorService.js';
+// import type { History } from './typings/homebridge-lib/History.js';
 import type { SensorAccessoryParams } from './typings/SensorTypes.js';
 import checkStatusCode from './utils/checkStatusCode.js';
 import { getErrorMessage } from './utils/utils.js';
 import WindSensorService from './WindSensorService.js';
-
-type TempSensorTypes = 'temperature' | 'humidity';
+import 'homebridge-lib/ServiceDelegate/History';
+import type { History } from 'homebridge-lib/ServiceDelegate/History';
 
 class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   // name: string;
@@ -32,12 +32,11 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   randomize: boolean;
   td: TdMyCustomTypes;
   telldusApi: TelldusApi;
-  historyService!: () => void; // ServiceDelegate.History;
+  historyService!: History;
   rainSensorService!: RainSensorService;
   windSensorService!: WindSensorService;
-  tempSensorServices!: {
-    [key in TempSensorTypes]: Temperature | Humidity;
-  };
+  tempSensorService!: TemperatureService;
+  humiditySensorService!: HumidityService;
 
   constructor(platform: TdPlatform, params: SensorAccessoryParams) {
     super(platform, params);
@@ -59,25 +58,22 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
     try {
       // Check if we have a temperature sensor
       if (this.temperatureSensor) {
-        assert(is<Temperature>(this.tempSensorServices.temperature));
-        this.tempSensorServices.temperature = new Temperature(this, {
+        this.tempSensorService = new TemperatureService(this, {
           name: `${this.name} Temperature`,
         });
         // Check if we also have a humidity sensor
         if (this.humiditySensor) {
-          assert(is<Humidity>(this.tempSensorServices.humidity));
-          this.tempSensorServices.humidity = new Humidity(this, {});
+          this.humiditySensorService = new HumidityService(this, {});
         }
+
         // Generate history for temperature and/or humidity
         this.historyService = new ServiceDelegate.History(this, {
           temperatureDelegate: this.temperatureSensor
-            ? this.tempSensorServices.temperature.characteristicDelegate('temperature')
+            ? this.tempSensorService.characteristicDelegate('temperature')
             : null,
-          humidityDelegate: this.humiditySensor
-            ? this.tempSensorServices.humidity.characteristicDelegate('humidity')
-            : null,
+          humidityDelegate: this.humiditySensor ? this.humiditySensorService.characteristicDelegate('humidity') : null,
         });
-        this.manageLogLevel(this.tempSensorServices.temperature.characteristicDelegate('logLevel'), false);
+        this.manageLogLevel(this.tempSensorService.characteristicDelegate('logLevel'), false);
       }
 
       // Check if we have a rain sensor
@@ -122,8 +118,7 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   async heartbeat(beat: number) {
     let heartrate = 300;
     if (this.temperatureSensor) {
-      assert(is<Temperature>(this.tempSensorServices.temperature));
-      heartrate = this.tempSensorServices.temperature.values.heartrate;
+      heartrate = this.tempSensorService.values.heartrate;
     } else if (this.rainSensor) {
       heartrate = this.rainSensorService.values.heartrate;
     } else if (this.windSensor) {
@@ -139,15 +134,18 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   async getSensorData() {
     try {
       const response = await this.telldusApi.getSensorInfo(this.sensorId);
+      console.log('🚀 ~ TdSensorAccessory ~ getSensorData ~ response:', response);
+
       if (response.ok && checkStatusCode<SensorInfoType>(response, this.error)) {
         const sensorData = response.body;
         this.vdebug('Sensor data:', sensorData);
         if (this.temperatureSensor) {
-          for (const id in this.tempSensorServices) {
-            this.debug(`Checking tempSensorServices[${id}]`);
-            this.tempSensorServices[id as TempSensorTypes].checkObservation(sensorData);
-          }
-        } else if (this.rainSensor) {
+          this.tempSensorService.checkObservation(sensorData);
+        }
+        if (this.humiditySensor) {
+          this.humiditySensorService.checkObservation(sensorData);
+        }
+        if (this.rainSensor) {
           this.rainSensorService.checkObservation(sensorData);
         } else if (this.windSensor) {
           this.windSensorService.checkObservation(sensorData);

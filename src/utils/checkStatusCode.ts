@@ -6,7 +6,7 @@ import type { ResponseBodyError } from '../api/TelldusApi.types.js';
 // import type { HttpResponse } from '../typings/HttpClientTypes.js';
 
 // Function to check the HTTP status code when Telldus responds with an error
-// Return true if the error is identified, else false
+// Return true if no error is identified, else false
 export default function checkStatusCode<T>(
   response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>,
   logger: (message: string, ...args: unknown[]) => void = console.error,
@@ -27,7 +27,7 @@ export default function checkStatusCode<T>(
   } else if (response.statusCode >= 500 && response.statusCode <= 599) {
     logger('Telldus reports server error %s, %s', response.statusCode, response.statusMessage);
   } else {
-    return false;
+    return true;
   }
-  return true;
+  return false;
 }

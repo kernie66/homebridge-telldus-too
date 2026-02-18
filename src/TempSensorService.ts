@@ -9,17 +9,18 @@ import type TdSensorAccessory from './TdSensorAccessory.js';
 import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
+/*
 class TempSensorService<T> extends ServiceDelegate<T> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     super(sensorAccessory, params);
   }
 
   static get Temperature() {
-    return Temperature;
+    return TemperatureService;
   }
 
   static get Humidity() {
-    return Humidity;
+    return HumidityService;
   }
 
   static get Settings() {
@@ -30,6 +31,7 @@ class TempSensorService<T> extends ServiceDelegate<T> {
     throw new Error('Method not implemented.');
   }
 }
+*/
 
 type TemperatureServiceValues = {
   temperature?: number;
@@ -40,7 +42,7 @@ type TemperatureServiceValues = {
   logLevel: number;
 };
 
-class Temperature extends TempSensorService<TemperatureServiceValues> {
+class TemperatureService extends ServiceDelegate<TemperatureServiceValues> {
   // name: string;
   randomize: boolean;
   configHeartrate: number;
@@ -114,7 +116,7 @@ class Temperature extends TempSensorService<TemperatureServiceValues> {
     }
   }
 
-  override checkObservation(observation: SensorInfoType) {
+  checkObservation(observation: SensorInfoType) {
     if (observation.data[0] && observation.data[0].name === 'temp') {
       this.values.temperature = Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset || 0;
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
@@ -128,7 +130,7 @@ type HumidityServiceValues = {
   humidity?: number;
 };
 
-class Humidity extends TempSensorService<HumidityServiceValues> {
+class HumidityService extends ServiceDelegate<HumidityServiceValues> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = sensorAccessory.name + ' Humidity';
     params.Service = sensorAccessory.Services.hap.HumiditySensor;
@@ -141,7 +143,7 @@ class Humidity extends TempSensorService<HumidityServiceValues> {
     });
   }
 
-  override checkObservation(observation: SensorInfoType) {
+  checkObservation(observation: SensorInfoType) {
     if (observation.data[1] && observation.data[1].name === 'humidity') {
       this.values.humidity = Math.round(observation.data[1].value);
     } else {
@@ -150,13 +152,14 @@ class Humidity extends TempSensorService<HumidityServiceValues> {
   }
 }
 
+/*
 type SettingsServiceValues = {
   observationTime?: string;
   heartrate: number;
   logLevel: number;
 };
 
-class Settings extends TempSensorService<SettingsServiceValues> {
+class Settings extends ServiceDelegate<SettingsServiceValues> {
   configHeartrate: number;
 
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
@@ -197,5 +200,6 @@ class Settings extends TempSensorService<SettingsServiceValues> {
     }
   }
 }
+*/
 
-export { TempSensorService, Temperature, Humidity, Settings };
+export { TemperatureService, HumidityService };

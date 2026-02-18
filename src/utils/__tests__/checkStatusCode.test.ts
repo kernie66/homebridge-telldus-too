@@ -12,7 +12,7 @@ describe('Test Telldus API status code checker', () => {
     };
 
     const checkedResponse = checkStatusCode(response);
-    expect(checkedResponse).toBeFalsy();
+    expect(checkedResponse).toBeTruthy();
   });
 
   it('checks a 200 response with error in body', () => {
@@ -28,7 +28,7 @@ describe('Test Telldus API status code checker', () => {
       expect(message).toBe('Telldus replies with error:');
     };
     const checkedResponse = checkStatusCode(response, logger);
-    expect(checkedResponse).toBeTruthy();
+    expect(checkedResponse).toBeFalsy();
   });
 
   it('checks a 401 Unauthorized response', () => {
@@ -42,6 +42,6 @@ describe('Test Telldus API status code checker', () => {
       expect(message).toBe('Access denied, check if the access token is valid');
     };
     const checkedResponse = checkStatusCode(response, logger);
-    expect(checkedResponse).toBeTruthy();
+    expect(checkedResponse).toBeFalsy();
   });
 });

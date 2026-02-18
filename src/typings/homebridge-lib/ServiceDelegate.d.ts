@@ -2,7 +2,8 @@
 /** biome-ignore-all lint/correctness/noUnusedVariables: Global types for homebridge-lib */
 
 declare module 'homebridge-lib/ServiceDelegate' {
-  import { History } from './History.js';
+  import type { History } from 'homebridge-lib/ServiceDelegate/History';
+  // import { History } from './History.js';
   import { Delegate } from 'homebridge-lib/Delegate';
 
   type CharacteristicType = {
@@ -36,6 +37,9 @@ declare module 'homebridge-lib/ServiceDelegate' {
     Characteristic: CharacteristicType;
     Characteristics: CharacteristicsType;
 
+    static History: typeof History;
+    // History: History;
+
     addCharacteristicDelegate(params: {
       key: string;
       Characteristic: unknown;
@@ -48,10 +52,8 @@ declare module 'homebridge-lib/ServiceDelegate' {
     characteristicDelegate(key: string): CharacteristicDelegate;
 
     constructor(accessoryDelegate: unknown, params = {});
-
-    static History: typeof History;
   }
 
-  ServiceDelegate.History = History;
+  //ServiceDelegate.History = History;
   export { ServiceDelegate };
 }
