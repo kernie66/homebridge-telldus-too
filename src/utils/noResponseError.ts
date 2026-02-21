@@ -1,13 +1,12 @@
-// checkStatusCode function
+// noResponseError function
 // Copyright © 2022-2026 Kenneth Jagenheim. All rights reserved.
 //
 
 import type { ResponseBodyError } from '../api/TelldusApi.types.js';
-// import type { HttpResponse } from '../typings/HttpClientTypes.js';
 
 // Function to check the HTTP status code when Telldus responds with an error
 // Return true if no error is identified, else false
-export default function checkStatusCode<T>(
+export default function noResponseError<T>(
   response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>,
   logger: (message: string, ...args: unknown[]) => void = console.error,
 ) {

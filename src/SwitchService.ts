@@ -10,8 +10,8 @@ import { FULL_COMMANDS } from './TdConstants.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdSwitchAccessory from './TdSwitchAccessory.js';
 import type { SwitchServiceParams } from './typings/SwitchTypes.js';
-import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
+import noResponseError from './utils/noResponseError.js';
 import { getErrorMessage, stateToText, wait } from './utils/utils.js';
 
 type SwitchServiceValues = {
@@ -335,16 +335,22 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     let repetition = 0;
     do {
       // Control Telldus switch on/off
-      const response = await this.telldusApi.onOffDevice(switchAccessory.deviceId, this.switchOn);
-      if (response.ok) {
-        this.log('Switch set to', stateToText(telldusState));
-      } else {
-        checkStatusCode(response, this.error);
-      }
-      this.values.lastActivation = toEveDate(getTimestamp());
-      // If it is a dimmer and it is on, then send the current brightness value
-      if (this.modelType === 'dimmer' && this.switchOn) {
-        this.setDimmerLevel(switchAccessory, this.values.brightness, true);
+      try {
+        const response = await this.telldusApi.onOffDevice(switchAccessory.deviceId, this.switchOn);
+        if (response.ok && noResponseError(response, this.error)) {
+          this.log('Switch set to', stateToText(telldusState));
+          this.values.lastActivation = toEveDate(getTimestamp());
+          // If it is a dimmer and it is on, then send the current brightness value
+          if (this.modelType === 'dimmer' && this.switchOn) {
+            this.setDimmerLevel(switchAccessory, this.values.brightness, true);
+          }
+        } else {
+          throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
+        }
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error setting switch state for device ID:', this.deviceId);
+        this.warn('Error message:', errorMessage);
       }
 
       repetition += 1;
@@ -411,11 +417,11 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       }
       this.debug('Setting dimmer level to %s%', dimLevel);
       const response = await this.telldusApi.dimDevice(switchAccessory.deviceId, brightness);
-      if (!response.ok) {
-        checkStatusCode(response, this.error);
-        this.warn('Error when setting dim level');
+      if (response.ok && noResponseError(response, this.error)) {
+        this.acDimActive = false;
+      } else {
+        throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
       }
-      this.acDimActive = false;
     } catch (error) {
       const errorMessage = getErrorMessage(error);
 

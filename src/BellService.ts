@@ -8,20 +8,9 @@ import type TelldusApi from './api/TelldusApi.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdSwitchAccessory from './TdSwitchAccessory.js';
 import type { SwitchServiceParams } from './typings/SwitchTypes.js';
-import checkStatusCode from './utils/checkStatusCode.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
-import { wait } from './utils/utils.js';
-
-/*
-const homebridgeLib = require('homebridge-lib');
-const checkStatusCode = require('./utils/checkStatusCode');
-const {
-  toEveDate,
-  getTimestamp,
-} = require('./utils/dateTimeHelpers');
-const { wait } = require('./utils/utils');
-// const { setTimeout } = require('node:timers/promises')
-*/
+import noResponseError from './utils/noResponseError.js';
+import { getErrorMessage, wait } from './utils/utils.js';
 
 type BellServiceValues = {
   bell: boolean;
@@ -61,7 +50,7 @@ class BellService extends ServiceDelegate<BellServiceValues> {
     }).on('didSet', (value: boolean) => {
       if (!this.values.disabled) {
         this.bellOn = value;
-        this.setBell(switchAccessory);
+        this.setBell();
       } else {
         this.log('Bell disabled, enable it to be able to turn it on!');
       }
@@ -106,16 +95,23 @@ class BellService extends ServiceDelegate<BellServiceValues> {
     this.activeTimeout = null;
   }
 
-  async setBell(switchAccessory: TdSwitchAccessory) {
+  async setBell() {
     if (this.bellOn) {
-      // Send bell command to device if switch activated
-      const response = await this.telldusApi.bellDevice(switchAccessory.deviceId);
-      if (!response.ok) {
-        checkStatusCode(response, this.error);
+      try {
+        // Send bell command to device if switch activated
+        const response = await this.telldusApi.bellDevice(this.deviceId);
+        if (response.ok && noResponseError(response, this.error)) {
+          this.values.lastActivation = toEveDate(getTimestamp());
+          wait(500);
+          this.values.bell = false;
+        } else {
+          throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
+        }
+      } catch (error) {
+        const errorMessage = getErrorMessage(error);
+        this.warn('Error getting bell command response from device ID:', this.deviceId);
+        this.warn('Error message:', errorMessage);
       }
-      this.values.lastActivation = toEveDate(getTimestamp());
-      wait(500);
-      this.values.bell = false;
     }
   }
 }

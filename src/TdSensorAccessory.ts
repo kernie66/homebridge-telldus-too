@@ -13,7 +13,7 @@ import type TdPlatform from './TdPlatform.js';
 import { HumidityService, TemperatureService } from './TempSensorService.js';
 // import type { History } from './typings/homebridge-lib/History.js';
 import type { SensorAccessoryParams } from './typings/SensorTypes.js';
-import checkStatusCode from './utils/checkStatusCode.js';
+import noResponseError from './utils/noResponseError.js';
 import { getErrorMessage } from './utils/utils.js';
 import WindSensorService from './WindSensorService.js';
 import 'homebridge-lib/ServiceDelegate/History';
@@ -134,9 +134,8 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   async getSensorData() {
     try {
       const response = await this.telldusApi.getSensorInfo(this.sensorId);
-      console.log('🚀 ~ TdSensorAccessory ~ getSensorData ~ response:', response);
 
-      if (response.ok && checkStatusCode<SensorInfoType>(response, this.error)) {
+      if (response.ok && noResponseError<SensorInfoType>(response, this.error)) {
         const sensorData = response.body;
         this.vdebug('Sensor data:', sensorData);
         if (this.temperatureSensor) {

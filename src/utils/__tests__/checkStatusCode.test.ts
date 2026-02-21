@@ -1,5 +1,5 @@
 import { describe, it } from 'vitest';
-import checkStatusCode from '../checkStatusCode';
+import noResponseError from '../noResponseError';
 
 describe('Test Telldus API status code checker', () => {
   it('checks a normal 200 response', () => {
@@ -11,7 +11,7 @@ describe('Test Telldus API status code checker', () => {
       },
     };
 
-    const checkedResponse = checkStatusCode(response);
+    const checkedResponse = noResponseError(response);
     expect(checkedResponse).toBeTruthy();
   });
 
@@ -27,7 +27,7 @@ describe('Test Telldus API status code checker', () => {
       console.log('Logger message:', message);
       expect(message).toBe('Telldus replies with error:');
     };
-    const checkedResponse = checkStatusCode(response, logger);
+    const checkedResponse = noResponseError(response, logger);
     expect(checkedResponse).toBeFalsy();
   });
 
@@ -41,7 +41,7 @@ describe('Test Telldus API status code checker', () => {
       console.log('Logger message:', message);
       expect(message).toBe('Access denied, check if the access token is valid');
     };
-    const checkedResponse = checkStatusCode(response, logger);
+    const checkedResponse = noResponseError(response, logger);
     expect(checkedResponse).toBeFalsy();
   });
 });

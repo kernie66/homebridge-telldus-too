@@ -104,7 +104,6 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
         name: 'Tellstick Gateway',
         primaryService: true,
       });
-      console.log('🚀 ~ TdTellstickAccessory ~ constructor ~ this.service:', this.service);
       this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
