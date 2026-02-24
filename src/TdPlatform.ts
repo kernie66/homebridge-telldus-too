@@ -150,363 +150,373 @@ class TdPlatform extends Platform<TdPlatform> {
     const sensorArray: number[] = [];
 
     this.debug('Initializing platform');
-    this.tellstick = new TdTellstickAccessory(this, {
-      config: this.config,
-    });
-    this.debug('Tellstick accessory created');
-
-    if (!this.tellstick.telldusApi) {
-      this.error('Telldus API not initialized, aborting plugin initialization');
-      return;
-    }
-    this.telldusApi = this.tellstick.telldusApi;
-
-    // Check if access token has been updated in the config file
-    if (this.config.accessToken !== this.tellstick.values.configAccessToken) {
-      this.warn('Access token updated in config, will use this as new access token');
-      this.tellstick.values.configAccessToken = this.config.accessToken;
-    } else {
-      this.debug('Config access token not updated, will use existing access token');
-    }
-
-    // Try to connect to Telldus device, and try again if not successful
-    let connected = false;
-    do {
-      let attempts = 0;
-      // Check that Telldus is responding to the defined request parameters
-      try {
-        const sysInfo = await this.telldusApi.getSystemInfo();
-        if (sysInfo.ok && noResponseError(sysInfo, this.error)) {
-          assert(sysInfo.body.product, 'Telldus product information missing in response');
-          assert(sysInfo.body.version, 'Telldus version information missing in response');
-          assert(sysInfo.body.time, 'Telldus time information missing in response');
-          this.log('Connected to Telldus gateway at', colors.green(this.telldusApi.getUrl));
-          this.log('Telldus system type:', colors.green(sysInfo.body.product));
-          this.log('Telldus system version:', colors.green(sysInfo.body.version));
-          this.tellstick.firmware = sysInfo.body.version;
-          this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
-          // this.tellstick.getNewAccessToken();
-          connected = true;
-        } else {
-          throw new Error('No response from Telldus, check if the host address is correct and restart');
-        }
-      } catch (error) {
-        if (attempts < 10) {
-          attempts++;
-        }
-        await this.waitFor({
-          waitMinutes: attempts,
-          header: 'No Connection',
-          error,
-          reason: 'Error getting system information from Telldus',
-        });
-      }
-    } while (!connected);
-
-    // Find the devices and sensors of the Telldus gateway
     try {
-      let retry = true;
-      let attempts = 0;
+      this.tellstick = new TdTellstickAccessory(this, {
+        config: this.config,
+      });
+      this.debug('Tellstick accessory created');
 
-      // Get device list from Telldus
-      let deviceResponse!: HttpResponse<DeviceListType>;
-      while (retry) {
+      if (!this.tellstick.telldusApi) {
+        this.error('Telldus API not initialized, aborting plugin initialization');
+        return;
+      }
+      this.telldusApi = this.tellstick.telldusApi;
+
+      // Check if access token has been updated in the config file
+      if (this.config.accessToken !== this.tellstick.values.configAccessToken) {
+        this.warn('Access token updated in config, will use this as new access token');
+        this.tellstick.values.configAccessToken = this.config.accessToken;
+      } else {
+        this.debug('Config access token not updated, will use existing access token');
+      }
+
+      // Try to connect to Telldus device, and try again if not successful
+      let connected = false;
+      do {
+        let attempts = 0;
+        // Check that Telldus is responding to the defined request parameters
         try {
-          deviceResponse = await this.telldusApi.listDevices();
-          if (deviceResponse.ok && noResponseError(deviceResponse, this.error)) {
-            retry = false;
+          const sysInfo = await this.telldusApi.getSystemInfo();
+          if (sysInfo.ok && noResponseError(sysInfo, this.error)) {
+            assert(sysInfo.body.product, 'Telldus product information missing in response');
+            assert(sysInfo.body.version, 'Telldus version information missing in response');
+            assert(sysInfo.body.time, 'Telldus time information missing in response');
+            this.log('Connected to Telldus gateway at', colors.green(this.telldusApi.getUrl));
+            this.log('Telldus system type:', colors.green(sysInfo.body.product));
+            this.log('Telldus system version:', colors.green(sysInfo.body.version));
+            this.tellstick.firmware = sysInfo.body.version;
+            this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
+            // this.tellstick.getNewAccessToken();
+            connected = true;
           } else {
-            throw new Error('No response from Telldus');
+            throw new Error('No response from Telldus, check if the host address is correct and restart');
           }
         } catch (error) {
           if (attempts < 10) {
             attempts++;
-            await this.waitFor({
-              waitMinutes: 1,
-              header: 'Device Error',
-              error,
-              reason: 'Error getting device list from Telldus',
-            });
-          } else {
-            this.error('Error getting device list from Telldus, aborting initialization');
-            return;
+          }
+          await this.waitFor({
+            waitMinutes: attempts,
+            header: 'No Connection',
+            error,
+            reason: 'Error getting system information from Telldus',
+          });
+        }
+      } while (!connected);
+
+      // Find the devices and sensors of the Telldus gateway
+      try {
+        let retry = true;
+        let attempts = 0;
+
+        // Get device list from Telldus
+        let deviceResponse!: HttpResponse<DeviceListType>;
+        while (retry) {
+          try {
+            deviceResponse = await this.telldusApi.listDevices();
+            if (deviceResponse.ok && noResponseError(deviceResponse, this.error)) {
+              retry = false;
+            } else {
+              throw new Error('No response from Telldus');
+            }
+          } catch (error) {
+            if (attempts < 10) {
+              attempts++;
+              await this.waitFor({
+                waitMinutes: 1,
+                header: 'Device Error',
+                error,
+                reason: 'Error getting device list from Telldus',
+              });
+            } else {
+              this.error('Error getting device list from Telldus, aborting initialization');
+              return;
+            }
           }
         }
-      }
-      // Check the list of devices
-      const devices = deviceResponse.body.device;
-      this.numberOfDevices = devices.length;
-      if (this.numberOfDevices) {
-        this.log('Number of Telldus devices found:', this.numberOfDevices);
-        devices.forEach((element: { id: number }) => {
-          deviceArray.push(element.id);
-        });
-      } else {
-        this.warn('No Telldus devices found!');
-      }
-      // this.deviceArray = deviceArray;
+        // Check the list of devices
+        const devices = deviceResponse.body.device;
+        this.numberOfDevices = devices.length;
+        if (this.numberOfDevices) {
+          this.log('Number of Telldus devices found:', this.numberOfDevices);
+          devices.forEach((element: { id: number }) => {
+            deviceArray.push(element.id);
+          });
+        } else {
+          this.warn('No Telldus devices found!');
+        }
+        // this.deviceArray = deviceArray;
 
-      retry = true;
-      attempts = 0;
-      // Get sensors from Telldus
-      let sensorResponse!: HttpResponse<SensorListType>;
-      while (retry) {
+        retry = true;
+        attempts = 0;
+        // Get sensors from Telldus
+        let sensorResponse!: HttpResponse<SensorListType>;
+        while (retry) {
+          try {
+            sensorResponse = await this.telldusApi.listSensors();
+            if (sensorResponse.ok && noResponseError(sensorResponse, this.error)) {
+              retry = false;
+            } else {
+              throw new Error('No response from Telldus');
+            }
+          } catch (error) {
+            if (attempts < 10) {
+              attempts++;
+              await this.waitFor({
+                waitMinutes: 1,
+                header: 'Sensor Error',
+                error,
+                reason: 'Error getting sensor list from Telldus',
+              });
+            } else {
+              this.error('Error getting sensor list from Telldus, aborting initialization');
+              return;
+            }
+          }
+        }
+        // Check the list of sensors
+        const sensors = sensorResponse.body.sensor;
+        this.numberOfSensors = sensors.length;
+        if (this.numberOfSensors) {
+          this.log('Number of Telldus sensors found:', this.numberOfSensors);
+          sensors.forEach((element: { id: number }) => {
+            sensorArray.push(element.id);
+          });
+        } else {
+          this.warn('No Telldus sensors found!');
+        }
+        // this.sensorArray = sensorArray;
+      } catch (error) {
+        await this.waitFor({
+          waitMinutes: 0,
+          header: 'Telldus Error',
+          error,
+          reason: 'Error accessing Telldus during initialization, plug-in suspended...',
+        });
+        return;
+      }
+
+      this.switchAccessories = {};
+      const validSwitches: Required<SwitchConfigTypes>[] = [];
+      // Parse the Telldus devices
+      for (const id of deviceArray) {
+        const switchConfig: Required<SwitchConfigTypes> = {
+          name: '',
+          uuid: '',
+          id: 0,
+          manufacturer: '',
+          model: '',
+          modelType: 'Unknown',
+          firmware: '',
+          state: 0,
+          category: '',
+          delay: 0,
+          random: false,
+          lightbulb: false,
+          methods: 0,
+          protocol: '',
+        };
+        let deviceInfo: DeviceInfoType;
         try {
-          sensorResponse = await this.telldusApi.listSensors();
-          if (sensorResponse.ok && noResponseError(sensorResponse, this.error)) {
-            retry = false;
+          const infoResponse = await this.telldusApi.getDeviceInfo(id);
+          if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
+            deviceInfo = infoResponse.body;
           } else {
-            throw new Error('No response from Telldus');
+            this.warn('No info from Telldus when parsing, skipping device ID:', id);
+            continue;
           }
         } catch (error) {
-          if (attempts < 10) {
-            attempts++;
-            await this.waitFor({
-              waitMinutes: 1,
-              header: 'Sensor Error',
-              error,
-              reason: 'Error getting sensor list from Telldus',
-            });
-          } else {
-            this.error('Error getting sensor list from Telldus, aborting initialization');
-            return;
-          }
+          const errorMessage = getErrorMessage(error);
+          this.warn('Error getting device info, skipping device ID:', id);
+          this.warn('Error message:', errorMessage);
+          continue;
+        }
+        switchConfig.id = deviceInfo.id;
+        if (!deviceInfo.name && this.config.ignoreUnnamedSwitches) {
+          this.log('Ignoring unnamed switch with ID:', deviceInfo.id);
+          continue;
+        }
+        switchConfig.name = deviceInfo.name || 'Device ' + switchConfig.id;
+        switchConfig.uuid = uuid(switchConfig.name + switchConfig.id);
+        // Split manufacturer and model
+        const modelSplit = (deviceInfo.model || '').split(':');
+        switchConfig.model = modelSplit[0] || 'unknown';
+        switchConfig.manufacturer = modelSplit[1] || 'unknown';
+        // Check type of switch, and if dimmers are to be used as switches
+        if (deviceInfo.methods & supportedCommands.dim) {
+          switchConfig.modelType = this.config.dimmerAsSwitch ? 'switch' : 'dimmer';
+        } else if (deviceInfo.methods & supportedCommands.bell) {
+          switchConfig.modelType = 'bell';
+        } else if (deviceInfo.methods & supportedCommands.on) {
+          switchConfig.modelType = 'switch';
+        } else {
+          this.warn('Ignoring unsupported Telldus device with ID:', deviceInfo.id);
+          continue;
+        }
+        switchConfig.methods = deviceInfo.methods;
+        switchConfig.protocol = deviceInfo.protocol;
+        switchConfig.state = deviceInfo.state;
+        // switchConfig.type = info.type; // Not used currently
+        switchConfig.delay = this.config.delay || 0;
+        switchConfig.random = this.config.random || false;
+        switchConfig.lightbulb = this.config.lightbulb || false;
+        if (switchConfig.modelType === 'dimmer' || switchConfig.lightbulb) {
+          switchConfig.category = this.Accessory.Categories.Lightbulb;
+        } else {
+          switchConfig.category = this.Accessory.Categories.Switch;
+        }
+        if (this.config.ignoreIds?.includes(switchConfig.id)) {
+          this.log('Ignoring %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
+        } else {
+          this.log('Found %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
+          validSwitches.push(switchConfig);
         }
       }
-      // Check the list of sensors
-      const sensors = sensorResponse.body.sensor;
-      this.numberOfSensors = sensors.length;
-      if (this.numberOfSensors) {
-        this.log('Number of Telldus sensors found:', this.numberOfSensors);
-        sensors.forEach((element: { id: number }) => {
-          sensorArray.push(element.id);
-        });
-      } else {
-        this.warn('No Telldus sensors found!');
+      this.log('Number of valid switches', validSwitches.length);
+
+      this.sensorAccessories = {};
+      const validSensors = [];
+
+      // Parse the Telldus sensors
+      for (const id of sensorArray) {
+        const sensorConfig: Required<SensorConfigTypes> = {
+          name: '',
+          uuid: '',
+          id: 0,
+          manufacturer: '',
+          model: '',
+          temperatureSensor: false,
+          humiditySensor: false,
+          windSensor: false,
+          rainSensor: false,
+          firmware: '',
+          category: this.Accessory.Categories.Sensor,
+          randomize: false,
+          configHeartrate: 300,
+          protocol: '',
+        };
+        let sensorInfo: SensorInfoType;
+        try {
+          const infoResponse = await this.telldusApi.getSensorInfo(id);
+          if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
+            sensorInfo = infoResponse.body;
+          } else {
+            this.warn('No info from Telldus when parsing, skipping sensor ID: %d...', id);
+            continue;
+          }
+        } catch (error) {
+          const errorMessage = getErrorMessage(error);
+          this.warn('Error getting sensor info, skipping sensor ID:', id);
+          this.warn('Error message:', errorMessage);
+          continue;
+        }
+        if (!sensorInfo.name && this.config.ignoreUnnamedSensors) {
+          this.log('Ignoring unnamed sensor with ID:', sensorInfo.id);
+          continue;
+        }
+        sensorConfig.id = sensorInfo.id;
+        sensorConfig.name = sensorInfo.name || 'Sensor ' + sensorInfo.id;
+        sensorConfig.uuid = uuid(sensorConfig.name + sensorConfig.id);
+        const sensorType = checkSensorType(sensorInfo);
+        if (sensorType !== 'unknown') {
+          sensorConfig.model = sensorType;
+          if (sensorType.includes('temperature')) {
+            sensorConfig.temperatureSensor = true;
+          }
+          if (sensorType.includes('humidity')) {
+            sensorConfig.humiditySensor = true;
+          }
+          if (sensorType === 'rain') {
+            sensorConfig.rainSensor = true;
+          }
+          if (sensorType === 'wind') {
+            sensorConfig.windSensor = true;
+          }
+          sensorConfig.manufacturer = 'Telldus';
+          sensorConfig.protocol = sensorInfo.protocol;
+          sensorConfig.randomize = this.config.randomize || false;
+          sensorConfig.configHeartrate = this.config.configHeartrate || 15;
+          sensorConfig.category = this.Accessory.Categories.Sensor;
+          if (this.config.ignoreIds?.includes(sensorConfig.id)) {
+            this.log('Ignoring sensor: %s, ID: %s', sensorConfig.name, sensorConfig.id);
+          } else {
+            this.log('Found sensor: %s, ID: %s', sensorConfig.name, sensorConfig.id);
+            validSensors.push(sensorConfig);
+          }
+        } else {
+          this.warn('Ignoring unknown sensor type for ID %s: %s', sensorInfo.id, sensorInfo.model);
+        }
       }
-      // this.sensorArray = sensorArray;
+      this.log('Number of valid sensors', validSensors.length);
+
+      const jobs = [];
+
+      for (const tdSwitch of validSwitches) {
+        const switchParams: SwitchAccessoryParams = {
+          name: tdSwitch.name,
+          id: tdSwitch.uuid,
+          deviceId: tdSwitch.id,
+          manufacturer: tdSwitch.manufacturer,
+          model: tdSwitch.model,
+          modelType: tdSwitch.modelType,
+          firmware: 'ID-' + tdSwitch.id,
+          state: tdSwitch.state,
+          category: tdSwitch.category,
+          delay: tdSwitch.delay,
+          random: tdSwitch.random,
+          lightbulb: tdSwitch.lightbulb,
+        };
+        this.debug(
+          'Processing %s %s, State: [%s]',
+          switchParams.modelType,
+          switchParams.name,
+          stateToText(switchParams.state),
+        );
+        const switchAccessory = new TdSwitchAccessory(this, switchParams);
+        this.setStateCache(tdSwitch);
+        assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
+        jobs.push(once(switchAccessory, 'initialised'));
+        // this.switchAccessories[tdSwitch] = switchAccessory;
+      }
+
+      for (const tdSensor of validSensors) {
+        const sensorParams: SensorAccessoryParams = {
+          name: tdSensor.name,
+          sensorId: tdSensor.id,
+          id: tdSensor.uuid,
+          manufacturer: tdSensor.manufacturer,
+          model: tdSensor.model,
+          temperatureSensor: tdSensor.temperatureSensor,
+          humiditySensor: tdSensor.humiditySensor,
+          rainSensor: tdSensor.rainSensor,
+          windSensor: tdSensor.windSensor,
+          configHeartrate: tdSensor.configHeartrate,
+          randomize: tdSensor.randomize,
+          firmware: `ID-${tdSensor.id}`,
+          category: tdSensor.category,
+        };
+        this.debug('Processing sensor', sensorParams.name);
+        const sensorAccessory = new TdSensorAccessory(this, sensorParams);
+        jobs.push(once(sensorAccessory, 'initialised'));
+        // this.sensorAccessories[tdSensor] = sensorAccessory;
+      }
+
+      for (const job of jobs) {
+        await job;
+      }
+
+      this.initialised = true;
+      this.debug('Initialised');
+      this.emit('initialised');
     } catch (error) {
       await this.waitFor({
         waitMinutes: 0,
-        header: 'Telldus Error',
+        header: 'Initialization Error',
         error,
-        reason: 'Error accessing Telldus during initialization, plug-in suspended...',
+        reason: 'Error during platform initialization, plug-in suspended...',
       });
       return;
     }
-
-    this.switchAccessories = {};
-    const validSwitches: Required<SwitchConfigTypes>[] = [];
-    // Parse the Telldus devices
-    for (const id of deviceArray) {
-      const switchConfig: Required<SwitchConfigTypes> = {
-        name: '',
-        uuid: '',
-        id: 0,
-        manufacturer: '',
-        model: '',
-        modelType: 'Unknown',
-        firmware: '',
-        state: 0,
-        category: '',
-        delay: 0,
-        random: false,
-        lightbulb: false,
-        methods: 0,
-        protocol: '',
-      };
-      let deviceInfo: DeviceInfoType;
-      try {
-        const infoResponse = await this.telldusApi.getDeviceInfo(id);
-        if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
-          deviceInfo = infoResponse.body;
-        } else {
-          this.warn('No info from Telldus when parsing, skipping device ID:', id);
-          continue;
-        }
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error getting device info, skipping device ID:', id);
-        this.warn('Error message:', errorMessage);
-        continue;
-      }
-      switchConfig.id = deviceInfo.id;
-      if (!deviceInfo.name && this.config.ignoreUnnamedSwitches) {
-        this.log('Ignoring unnamed switch with ID:', deviceInfo.id);
-        continue;
-      }
-      switchConfig.name = deviceInfo.name || 'Device ' + switchConfig.id;
-      switchConfig.uuid = uuid(switchConfig.name + switchConfig.id);
-      // Split manufacturer and model
-      const modelSplit = (deviceInfo.model || '').split(':');
-      switchConfig.model = modelSplit[0] || 'unknown';
-      switchConfig.manufacturer = modelSplit[1] || 'unknown';
-      // Check type of switch, and if dimmers are to be used as switches
-      if (deviceInfo.methods & supportedCommands.dim) {
-        switchConfig.modelType = this.config.dimmerAsSwitch ? 'switch' : 'dimmer';
-      } else if (deviceInfo.methods & supportedCommands.bell) {
-        switchConfig.modelType = 'bell';
-      } else if (deviceInfo.methods & supportedCommands.on) {
-        switchConfig.modelType = 'switch';
-      } else {
-        this.warn('Ignoring unsupported Telldus device with ID:', deviceInfo.id);
-        continue;
-      }
-      switchConfig.methods = deviceInfo.methods;
-      switchConfig.protocol = deviceInfo.protocol;
-      switchConfig.state = deviceInfo.state;
-      // switchConfig.type = info.type; // Not used currently
-      switchConfig.delay = this.config.delay || 0;
-      switchConfig.random = this.config.random || false;
-      switchConfig.lightbulb = this.config.lightbulb || false;
-      if (switchConfig.modelType === 'dimmer' || switchConfig.lightbulb) {
-        switchConfig.category = this.Accessory.Categories.Lightbulb;
-      } else {
-        switchConfig.category = this.Accessory.Categories.Switch;
-      }
-      if (this.config.ignoreIds?.includes(switchConfig.id)) {
-        this.log('Ignoring %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
-      } else {
-        this.log('Found %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
-        validSwitches.push(switchConfig);
-      }
-    }
-    this.log('Number of valid switches', validSwitches.length);
-
-    this.sensorAccessories = {};
-    const validSensors = [];
-
-    // Parse the Telldus sensors
-    for (const id of sensorArray) {
-      const sensorConfig: Required<SensorConfigTypes> = {
-        name: '',
-        uuid: '',
-        id: 0,
-        manufacturer: '',
-        model: '',
-        temperatureSensor: false,
-        humiditySensor: false,
-        windSensor: false,
-        rainSensor: false,
-        firmware: '',
-        category: this.Accessory.Categories.Sensor,
-        randomize: false,
-        configHeartrate: 300,
-        protocol: '',
-      };
-      let sensorInfo: SensorInfoType;
-      try {
-        const infoResponse = await this.telldusApi.getSensorInfo(id);
-        if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
-          sensorInfo = infoResponse.body;
-        } else {
-          this.warn('No info from Telldus when parsing, skipping sensor ID: %d...', id);
-          continue;
-        }
-      } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error getting sensor info, skipping sensor ID:', id);
-        this.warn('Error message:', errorMessage);
-        continue;
-      }
-      if (!sensorInfo.name && this.config.ignoreUnnamedSensors) {
-        this.log('Ignoring unnamed sensor with ID:', sensorInfo.id);
-        continue;
-      }
-      sensorConfig.id = sensorInfo.id;
-      sensorConfig.name = sensorInfo.name || 'Sensor ' + sensorInfo.id;
-      sensorConfig.uuid = uuid(sensorConfig.name + sensorConfig.id);
-      const sensorType = checkSensorType(sensorInfo);
-      if (sensorType !== 'unknown') {
-        sensorConfig.model = sensorType;
-        if (sensorType.includes('temperature')) {
-          sensorConfig.temperatureSensor = true;
-        }
-        if (sensorType.includes('humidity')) {
-          sensorConfig.humiditySensor = true;
-        }
-        if (sensorType === 'rain') {
-          sensorConfig.rainSensor = true;
-        }
-        if (sensorType === 'wind') {
-          sensorConfig.windSensor = true;
-        }
-        sensorConfig.manufacturer = 'Telldus';
-        sensorConfig.protocol = sensorInfo.protocol;
-        sensorConfig.randomize = this.config.randomize || false;
-        sensorConfig.configHeartrate = this.config.configHeartrate || 15;
-        sensorConfig.category = this.Accessory.Categories.Sensor;
-        if (this.config.ignoreIds?.includes(sensorConfig.id)) {
-          this.log('Ignoring sensor: %s, ID: %s', sensorConfig.name, sensorConfig.id);
-        } else {
-          this.log('Found sensor: %s, ID: %s', sensorConfig.name, sensorConfig.id);
-          validSensors.push(sensorConfig);
-        }
-      } else {
-        this.warn('Ignoring unknown sensor type for ID %s: %s', sensorInfo.id, sensorInfo.model);
-      }
-    }
-    this.log('Number of valid sensors', validSensors.length);
-
-    const jobs = [];
-
-    for (const tdSwitch of validSwitches) {
-      const switchParams: SwitchAccessoryParams = {
-        name: tdSwitch.name,
-        id: tdSwitch.uuid,
-        deviceId: tdSwitch.id,
-        manufacturer: tdSwitch.manufacturer,
-        model: tdSwitch.model,
-        modelType: tdSwitch.modelType,
-        firmware: 'ID-' + tdSwitch.id,
-        state: tdSwitch.state,
-        category: tdSwitch.category,
-        delay: tdSwitch.delay,
-        random: tdSwitch.random,
-        lightbulb: tdSwitch.lightbulb,
-      };
-      this.debug(
-        'Processing %s %s, State: [%s]',
-        switchParams.modelType,
-        switchParams.name,
-        stateToText(switchParams.state),
-      );
-      const switchAccessory = new TdSwitchAccessory(this, switchParams);
-      this.setStateCache(tdSwitch);
-      assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
-      jobs.push(once(switchAccessory, 'initialised'));
-      // this.switchAccessories[tdSwitch] = switchAccessory;
-    }
-
-    for (const tdSensor of validSensors) {
-      const sensorParams: SensorAccessoryParams = {
-        name: tdSensor.name,
-        sensorId: tdSensor.id,
-        id: tdSensor.uuid,
-        manufacturer: tdSensor.manufacturer,
-        model: tdSensor.model,
-        temperatureSensor: tdSensor.temperatureSensor,
-        humiditySensor: tdSensor.humiditySensor,
-        rainSensor: tdSensor.rainSensor,
-        windSensor: tdSensor.windSensor,
-        configHeartrate: tdSensor.configHeartrate,
-        randomize: tdSensor.randomize,
-        firmware: `ID-${tdSensor.id}`,
-        category: tdSensor.category,
-      };
-      this.debug('Processing sensor', sensorParams.name);
-      const sensorAccessory = new TdSensorAccessory(this, sensorParams);
-      jobs.push(once(sensorAccessory, 'initialised'));
-      // this.sensorAccessories[tdSensor] = sensorAccessory;
-    }
-
-    for (const job of jobs) {
-      await job;
-    }
-
-    this.initialised = true;
-    this.debug('initialised');
-    this.emit('initialised');
   }
 
   // Check the state of all Telldus devices and cache the result
@@ -549,8 +559,8 @@ class TdPlatform extends Platform<TdPlatform> {
     if (state === FULL_COMMANDS.DIM) {
       state = FULL_COMMANDS.TURNON;
     }
-    let success = this.stateCache.set('td' + key, state);
-    success = success && this.stateCache.set('pi' + key, state);
+    let success = this.stateCache.set(`td${key}`, state);
+    success = success && this.stateCache.set(`pi${key}`, state);
     if (success) {
       this.debug('Stored Telldus state [%s] for key %s', stateToText(device.state), key);
     } else {
@@ -559,14 +569,14 @@ class TdPlatform extends Platform<TdPlatform> {
   }
 
   updateStateCache(device: SwitchConfigTypes) {
-    const key = 'ID' + device.id;
+    const key = `ID${device.id}`;
     let state = device.state;
     if (state === FULL_COMMANDS.DIM) {
       state = FULL_COMMANDS.TURNON;
     }
-    const cachedValue = this.stateCache.get('td' + key);
+    const cachedValue = this.stateCache.get(`td${key}`);
     if (cachedValue !== state) {
-      const success = this.stateCache.set('td' + key, state);
+      const success = this.stateCache.set(`td${key}`, state);
       if (success) {
         this.debug('Updated Telldus state to [%s] for key %s', stateToText(state), key);
       } else {
