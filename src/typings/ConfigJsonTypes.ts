@@ -1,3 +1,6 @@
+// Types for Config.json
+// This file defines the structure of the configuration JSON file for the Homebridge plugin.
+
 export interface ConfigJson {
   name: string;
   platform?: string;

@@ -16,9 +16,9 @@ export default function checkSensorType(sensorInfo: SensorInfoType): SensorModel
   if (sensorInfo.data[0] && sensorInfo.data[0].name === 'temp') {
     sensorType = 'temperature';
     if (sensorInfo.data[1] && sensorInfo.data[1].name === 'humidity') {
-      sensorType = sensorType + 'humidity';
+      sensorType = 'temperaturehumidity';
     }
-    return sensorType as SensorModelType;
+    return sensorType;
   }
   // Check for wind sensor
   const windTypes = [

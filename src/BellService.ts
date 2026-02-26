@@ -9,8 +9,9 @@ import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdSwitchAccessory from './TdSwitchAccessory.js';
 import type { SwitchServiceParams } from './typings/SwitchTypes.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
+import handleError from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
-import { getErrorMessage, wait } from './utils/utils.js';
+import { wait } from './utils/utils.js';
 
 type BellServiceValues = {
   bell: boolean;
@@ -30,6 +31,7 @@ class BellService extends ServiceDelegate<BellServiceValues> {
   timerActive: boolean;
   activeTimeout: NodeJS.Timeout | null;
   bellOn: boolean = false;
+  handleError: typeof handleError;
 
   constructor(switchAccessory: TdSwitchAccessory, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
@@ -42,6 +44,7 @@ class BellService extends ServiceDelegate<BellServiceValues> {
     this.heartrate = switchAccessory.heartrate;
     this.td = switchAccessory.td;
     this.telldusApi = switchAccessory.telldusApi;
+    this.handleError = handleError;
 
     this.addCharacteristicDelegate({
       key: 'bell',
@@ -102,15 +105,16 @@ class BellService extends ServiceDelegate<BellServiceValues> {
         const response = await this.telldusApi.bellDevice(this.deviceId);
         if (response.ok && noResponseError(response, this.error)) {
           this.values.lastActivation = toEveDate(getTimestamp());
-          wait(500);
+          await wait(500);
           this.values.bell = false;
         } else {
           throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
         }
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error getting bell command response from device ID:', this.deviceId);
-        this.warn('Error message:', errorMessage);
+        this.handleError({
+          error,
+          reason: `Error getting bell command response from device ID ${this.deviceId}`,
+        });
       }
     }
   }

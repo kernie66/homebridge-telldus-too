@@ -13,8 +13,9 @@ import type {
   SystemInfoType,
 } from '../api/TelldusApi.types.js';
 import { COMMANDS } from '../TdConstants.js';
+import { getErrorMessage } from '../utils/getErrorMessage.js';
 // import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
-import { getErrorMessage, setSupportedMethods } from '../utils/utils.js';
+import { setSupportedMethods } from '../utils/utils.js';
 import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
 function setPath(

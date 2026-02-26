@@ -11,13 +11,12 @@ import RainSensorService from './RainSensorService.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
 import { HumidityService, TemperatureService } from './TempSensorService.js';
-// import type { History } from './typings/homebridge-lib/History.js';
 import type { SensorAccessoryParams } from './typings/SensorTypes.js';
 import noResponseError from './utils/noResponseError.js';
-import { getErrorMessage } from './utils/utils.js';
 import WindSensorService from './WindSensorService.js';
 import 'homebridge-lib/ServiceDelegate/History';
 import type { History } from 'homebridge-lib/ServiceDelegate/History';
+import handleError from './utils/handleError.js';
 
 class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   // name: string;
@@ -37,6 +36,7 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   windSensorService!: WindSensorService;
   tempSensorService!: TemperatureService;
   humiditySensorService!: HumidityService;
+  handleError: typeof handleError;
 
   constructor(platform: TdPlatform, params: SensorAccessoryParams) {
     super(platform, params);
@@ -53,7 +53,7 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
     this.randomize = params.randomize || false;
     this.td = platform.td;
     this.telldusApi = platform.telldusApi;
-    // this.stateCache = platform.stateCache;
+    this.handleError = handleError;
 
     try {
       // Check if we have a temperature sensor
@@ -88,6 +88,7 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
       }
 
       this.debug('Accessory initialised');
+
       this.heartbeatEnabled = true;
       setImmediate(() => {
         this.emit('initialised');
@@ -105,9 +106,12 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
         this.log('Identifying sensor with ID %s', this.sensorId);
       });
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      this.error(`Sensor Accessory error: (${errorMessage})`);
-      throw new Error(`Sensor Accessory error: (${errorMessage})`);
+      this.handleError({
+        header: 'Sensor Error',
+        error,
+        reason: `Error initializing sensor accessory for sensor ID ${this.sensorId}, check the error message and fix the issue`,
+      });
+      throw new Error(`Sensor Accessory Error`);
       // return;
     }
   }
@@ -116,18 +120,25 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
   }
 
   async heartbeat(beat: number) {
-    let heartrate = 300;
-    if (this.temperatureSensor) {
-      heartrate = this.tempSensorService.values.heartrate;
-    } else if (this.rainSensor) {
-      heartrate = this.rainSensorService.values.heartrate;
-    } else if (this.windSensor) {
-      heartrate = this.windSensorService.values.heartrate;
-    }
+    try {
+      let heartrate = 300;
+      if (this.temperatureSensor) {
+        heartrate = this.tempSensorService.values.heartrate;
+      } else if (this.rainSensor) {
+        heartrate = this.rainSensorService.values.heartrate;
+      } else if (this.windSensor) {
+        heartrate = this.windSensorService.values.heartrate;
+      }
 
-    if (beat % heartrate === 0) {
-      this.getSensorData();
-      //      this.checkState()
+      if (beat % heartrate === 0) {
+        this.getSensorData();
+        //      this.checkState()
+      }
+    } catch (error) {
+      this.handleError({
+        error,
+        reason: `Error during heartbeat for sensor ID ${this.sensorId}, will retry next cycle...`,
+      });
     }
   }
 
@@ -153,9 +164,10 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
         throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
       }
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      this.warn('Error getting sensor data from sensor ID:', this.sensorId);
-      this.warn('Error message:', errorMessage);
+      this.handleError({
+        error,
+        reason: `Error getting sensor data from sensor ID ${this.sensorId}`,
+      });
     }
   }
 }

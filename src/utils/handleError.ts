@@ -1,26 +1,30 @@
 import { setTimeout } from 'node:timers/promises';
 import figlet from 'figlet';
 import type { Delegate } from 'homebridge-lib/Delegate';
-import { getErrorMessage } from './utils.js';
+import { getErrorMessage } from './getErrorMessage.js';
 
-interface WaitForParams {
+interface HandleErrorParams {
   waitMinutes?: number;
   header?: string;
   error?: unknown;
   reason?: string;
 }
 
+// Error handler for catch blocks.
 // Waits for a specified number of minutes before retrying an operation,
 // with optional logging of a header, error message, and reason for the retry.
 // If waitMinutes is set to 0, it will log the messages without waiting before retrying.
-export default async function waitFor(this: Delegate, { waitMinutes = 1, header, error, reason }: WaitForParams = {}) {
+export default async function handleError(
+  this: Delegate,
+  { waitMinutes = 0, header, error, reason }: HandleErrorParams = {},
+) {
   if (header) {
     this.error(`\n${figlet.textSync(header)}`);
   }
   if (error) {
     const errorMessage = getErrorMessage(error);
     this.log(errorMessage);
-    await setTimeout(100); // Small delay to ensure the error message is logged before the retry message is displayed
+    await setTimeout(100); // Small delay to ensure the error message is logged before the reason message is displayed
   }
   if (reason) {
     this.warn(reason);

@@ -3,6 +3,7 @@
 //
 // Homebridge plugin for Telldus switches.
 
+import { setTimeout } from 'node:timers';
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import colors from 'yoctocolors';
 import type TelldusApi from './api/TelldusApi.js';
@@ -11,8 +12,9 @@ import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdSwitchAccessory from './TdSwitchAccessory.js';
 import type { SwitchServiceParams } from './typings/SwitchTypes.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
+import handleError from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
-import { getErrorMessage, stateToText, wait } from './utils/utils.js';
+import { stateToText, wait } from './utils/utils.js';
 
 type SwitchServiceValues = {
   on: boolean;
@@ -58,6 +60,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   timerActive: boolean;
   activeTimeout: NodeJS.Timeout | null;
   endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' = 'Not activated' as const;
+  handleError: typeof handleError;
 
   constructor(switchAccessory: TdSwitchAccessory, params: SwitchServiceParams) {
     params.name = switchAccessory.name;
@@ -92,6 +95,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     this.acRepeatActive = false;
     this.acDim = new AbortController();
     this.acDimSignal = this.acDim.signal;
+    this.handleError = handleError;
 
     this.addCharacteristicDelegate({
       key: 'on',
@@ -191,8 +195,9 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         this.switchOn = false;
         this.setOn(switchAccessory);
       } else {
-        wait(200);
-        this.values.disabled = false;
+        setTimeout(() => {
+          this.values.disabled = false;
+        }, 200);
       }
     });
 
@@ -206,8 +211,9 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         this.switchOn = true;
         this.setOn(switchAccessory);
       } else {
-        wait(200);
-        this.values.enabled = false;
+        setTimeout(() => {
+          this.values.enabled = false;
+        }, 200);
       }
     });
 
@@ -285,8 +291,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         this.debug('Aborting the delay timer before time is up');
         this.acDelay.abort();
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error when aborting delay timer: %s', errorMessage);
+        this.handleError({
+          error,
+          reason: 'Error when aborting delay timer',
+        });
       }
       this.acDelayActive = false;
     }
@@ -296,8 +304,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         this.debug('Aborting the repeat timer before time is up');
         this.acRepeat.abort();
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error when aborting repeat timer: %s', errorMessage);
+        this.handleError({
+          error,
+          reason: 'Error when aborting repeat timer',
+        });
       }
       this.acRepeatActive = false;
     }
@@ -322,8 +332,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       try {
         await wait(delay, this.acDelaySignal);
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.debug('Delay timer aborted:', errorMessage);
+        await this.handleError({
+          error,
+          reason: 'Delay timer aborted before time was up',
+        });
         return;
       }
       this.acDelayActive = false;
@@ -348,9 +360,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
         }
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.warn('Error setting switch state for device ID:', this.deviceId);
-        this.warn('Error message:', errorMessage);
+        this.handleError({
+          error,
+          reason: `Error setting switch state for device ID ${this.deviceId}`,
+        });
       }
 
       repetition += 1;
@@ -365,8 +378,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         try {
           await wait(2000 + this.values.repetition * 1000, this.acRepeatSignal);
         } catch (error) {
-          const errorMessage = getErrorMessage(error);
-          this.debug('Repeat timer aborted:', errorMessage);
+          await this.handleError({
+            error,
+            reason: 'Repeat timer aborted before time was up',
+          });
           return;
         }
         this.acRepeatActive = false;
@@ -423,13 +438,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
       }
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-
-      if (!errorMessage) {
-        this.log('The current timer was stopped');
-      } else {
-        this.warn('Error setting dim level: %s', errorMessage);
-      }
+      this.handleError({
+        error,
+        reason: `Error setting dim level for device ID ${switchAccessory.deviceId}`,
+      });
       this.acDimActive = false;
     }
   }

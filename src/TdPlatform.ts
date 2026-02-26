@@ -4,7 +4,6 @@
 // Homebridge plugin for Telldus.
 
 import EventEmitter, { once } from 'node:events';
-import figlet from 'figlet';
 import type { API, Logger } from 'homebridge';
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
@@ -23,10 +22,10 @@ import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorT
 import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import { getTimestamp, isoDateTimeToEveDate } from './utils/dateTimeHelpers.js';
+import handleError from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
-import { getErrorMessage, stateToText } from './utils/utils.js';
+import { stateToText } from './utils/utils.js';
 import uuid from './utils/uuid.js';
-import waitFor from './utils/waitFor.js';
 
 const configRegExp = {
   ip: /(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)/,
@@ -65,7 +64,7 @@ class TdPlatform extends Platform<TdPlatform> {
   };
   tellstick!: TdTellstickAccessory;
   telldusApi!: TelldusApi;
-  waitFor: typeof waitFor;
+  handleError: typeof handleError;
 
   constructor(log: Logger, configJson: ConfigJson, homebridge: API) {
     super(log, configJson, homebridge);
@@ -79,7 +78,7 @@ class TdPlatform extends Platform<TdPlatform> {
     this.platformBeatRate = 30;
     this.stateCache = new NodeCache();
     this.td = new TdMyCustomTypes(homebridge);
-    this.waitFor = waitFor;
+    this.handleError = handleError;
 
     this.vdebug('Characteristics: %o', this.td.Characteristics);
 
@@ -133,11 +132,11 @@ class TdPlatform extends Platform<TdPlatform> {
         await this.platformBeat(beat);
       });
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      this.error(`\n${figlet.textSync('Config Error')}`);
-      this.log(errorMessage);
-      this.warn('Check the config file and restart Homebridge');
-      this.warn('The plugin aborts the initialization');
+      this.handleError({
+        header: 'Config Error',
+        error,
+        reason: 'Check the config file and restart Homebridge, the plugin aborts the initialization',
+      });
       return;
     }
     this.on('shutdown', async () => {
@@ -195,7 +194,7 @@ class TdPlatform extends Platform<TdPlatform> {
           if (attempts < 10) {
             attempts++;
           }
-          await this.waitFor({
+          await this.handleError({
             waitMinutes: attempts,
             header: 'No Connection',
             error,
@@ -222,7 +221,7 @@ class TdPlatform extends Platform<TdPlatform> {
           } catch (error) {
             if (attempts < 10) {
               attempts++;
-              await this.waitFor({
+              await this.handleError({
                 waitMinutes: 1,
                 header: 'Device Error',
                 error,
@@ -262,7 +261,7 @@ class TdPlatform extends Platform<TdPlatform> {
           } catch (error) {
             if (attempts < 10) {
               attempts++;
-              await this.waitFor({
+              await this.handleError({
                 waitMinutes: 1,
                 header: 'Sensor Error',
                 error,
@@ -287,7 +286,7 @@ class TdPlatform extends Platform<TdPlatform> {
         }
         // this.sensorArray = sensorArray;
       } catch (error) {
-        await this.waitFor({
+        await this.handleError({
           waitMinutes: 0,
           header: 'Telldus Error',
           error,
@@ -326,9 +325,10 @@ class TdPlatform extends Platform<TdPlatform> {
             continue;
           }
         } catch (error) {
-          const errorMessage = getErrorMessage(error);
-          this.warn('Error getting device info, skipping device ID:', id);
-          this.warn('Error message:', errorMessage);
+          this.handleError({
+            error,
+            reason: `Error getting device info for device ID ${id}, skipping this device`,
+          });
           continue;
         }
         switchConfig.id = deviceInfo.id;
@@ -405,9 +405,10 @@ class TdPlatform extends Platform<TdPlatform> {
             continue;
           }
         } catch (error) {
-          const errorMessage = getErrorMessage(error);
-          this.warn('Error getting sensor info, skipping sensor ID:', id);
-          this.warn('Error message:', errorMessage);
+          this.handleError({
+            error,
+            reason: `Error getting sensor info for sensor ID ${id}, skipping this sensor`,
+          });
           continue;
         }
         if (!sensorInfo.name && this.config.ignoreUnnamedSensors) {
@@ -509,8 +510,7 @@ class TdPlatform extends Platform<TdPlatform> {
       this.debug('Initialised');
       this.emit('initialised');
     } catch (error) {
-      await this.waitFor({
-        waitMinutes: 0,
+      await this.handleError({
         header: 'Initialization Error',
         error,
         reason: 'Error during platform initialization, plug-in suspended...',
@@ -546,15 +546,16 @@ class TdPlatform extends Platform<TdPlatform> {
           // this.tellstick.getNewAccessToken();
         }
       } catch (error) {
-        const errorMessage = getErrorMessage(error);
-        this.error('Error getting device state from Telldus, will retry next cycle...');
-        this.error('Error message:', errorMessage);
+        this.handleError({
+          error,
+          reason: 'Error getting device state from Telldus, will retry next cycle...',
+        });
       }
     }
   }
 
   setStateCache(device: SwitchConfigTypes) {
-    const key = 'ID' + device.id;
+    const key = `ID${device.id}`;
     let state = device.state;
     if (state === FULL_COMMANDS.DIM) {
       state = FULL_COMMANDS.TURNON;

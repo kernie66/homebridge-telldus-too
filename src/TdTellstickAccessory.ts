@@ -12,7 +12,7 @@ import type TdPlatform from './TdPlatform.js';
 import TellstickService from './TellstickService.js';
 import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
-import { getErrorMessage } from './utils/utils.js';
+import handleError from './utils/handleError.js';
 import uuid from './utils/uuid.js';
 
 type TellstickAccessoryValues = {
@@ -31,6 +31,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
   lastRefresh!: number;
   accessTokenExpires!: number;
   nextRefresh!: number;
+  handleError: typeof handleError;
 
   constructor(
     platform: TdPlatform,
@@ -56,7 +57,9 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
     this.givenAccessToken = params.config.accessToken;
     this.locale = params.config.locale;
     this.td = platform.td;
+    this.handleError = handleError;
     // this.name = params.config.name;
+
     console.log('this.logLevel:', this.logLevel);
     this.debug('Initializing Tellstick accessory with name:', colors.green(this.name));
     // Persisted storage of the current access token
@@ -106,10 +109,12 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       });
       this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      this.error('Error initialising the plug-in, suspending...');
-      this.error('Error message:', errorMessage);
-      // sleep(Math.pow(2, 25));
+      this.handleError({
+        header: 'Tellstick Error',
+        error,
+        reason: `Error initializing the Tellstick gateway, check the error message and fix the issue`,
+      });
+      throw new Error(`Tellstick Accessory Error`);
     }
 
     this.debug('Accessory initialised');
