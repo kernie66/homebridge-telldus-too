@@ -336,7 +336,7 @@ class TdPlatform extends Platform<TdPlatform> {
           this.log('Ignoring unnamed switch with ID:', deviceInfo.id);
           continue;
         }
-        switchConfig.name = deviceInfo.name || 'Device ' + switchConfig.id;
+        switchConfig.name = deviceInfo.name || `Device ${switchConfig.id}`;
         switchConfig.uuid = uuid(switchConfig.name + switchConfig.id);
         // Split manufacturer and model
         const modelSplit = (deviceInfo.model || '').split(':');
@@ -416,7 +416,7 @@ class TdPlatform extends Platform<TdPlatform> {
           continue;
         }
         sensorConfig.id = sensorInfo.id;
-        sensorConfig.name = sensorInfo.name || 'Sensor ' + sensorInfo.id;
+        sensorConfig.name = sensorInfo.name || `Sensor ${sensorInfo.id}`;
         sensorConfig.uuid = uuid(sensorConfig.name + sensorConfig.id);
         const sensorType = checkSensorType(sensorInfo);
         if (sensorType !== 'unknown') {
@@ -460,7 +460,7 @@ class TdPlatform extends Platform<TdPlatform> {
           manufacturer: tdSwitch.manufacturer,
           model: tdSwitch.model,
           modelType: tdSwitch.modelType,
-          firmware: 'ID-' + tdSwitch.id,
+          firmware: `ID-${tdSwitch.id}`,
           state: tdSwitch.state,
           category: tdSwitch.category,
           delay: tdSwitch.delay,

@@ -20,7 +20,7 @@ type RainSensorServiceValues = {
 
 class RainSensorService extends ServiceDelegate<RainSensorServiceValues> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
-    params.name = sensorAccessory.name + ' Rain';
+    params.name = `${sensorAccessory.name} Rain`;
     params.Service = sensorAccessory.Services.my.Resource;
     super(sensorAccessory, params);
 
@@ -72,7 +72,7 @@ class RainSensorService extends ServiceDelegate<RainSensorServiceValues> {
         if (data.name === 'rrate') {
           const rainRate = Math.round(data.value * 10) / 10;
           this.values.rain1h = rainRate;
-          this.values.rain = rainRate > 0.2 ? true : false;
+          this.values.rain = rainRate > 0.2;
         }
       }
       this.values.observationTime = toEveDate(observation.lastUpdated);

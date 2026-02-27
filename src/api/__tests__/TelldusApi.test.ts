@@ -14,7 +14,7 @@ describe('Test API functions', () => {
   it('gets system info', async () => {
     const testApi = new TelldusApi(host, accessToken);
     const systemInfo = await testApi.getSystemInfo();
-    expect(systemInfo.request.headers.authorization).toBe('Bearer ' + accessToken);
+    expect(systemInfo.request.headers.authorization).toBe(`Bearer ${accessToken}`);
     expect(systemInfo.body.product).toBe(testSystemInfo.product);
   });
 

@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { COMMANDS, TELLDUS_STATES } from '../../TdConstants.js';
 import { getErrorMessage } from '../getErrorMessage.js';
 
 describe('Test the error message converter', () => {

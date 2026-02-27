@@ -132,7 +132,7 @@ type HumidityServiceValues = {
 
 class HumidityService extends ServiceDelegate<HumidityServiceValues> {
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
-    params.name = sensorAccessory.name + ' Humidity';
+    params.name = `${sensorAccessory.name} Humidity`;
     params.Service = sensorAccessory.Services.hap.HumiditySensor;
     super(sensorAccessory, params);
 

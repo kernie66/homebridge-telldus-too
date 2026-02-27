@@ -1,9 +1,4 @@
-import type { API } from 'homebridge';
-
-import { describe, expect, it, vi } from 'vitest';
-
-import registerPlatform from './index.js';
-import TdPlatform from './TdPlatform.js';
+import { describe, it } from 'vitest';
 
 describe('Load Platform', () => {
   it('should load and register the platform with homebridge', () => {

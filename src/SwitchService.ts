@@ -389,8 +389,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     } while (repetition <= this.values.repeats);
 
     // Update the state cache with the new value
-    const key = 'ID' + switchAccessory.deviceId;
-    const success = switchAccessory.stateCache.set('pi' + key, telldusState);
+    const key = `ID${switchAccessory.deviceId}`;
+    const success = switchAccessory.stateCache.set(`pi${key}`, telldusState);
     if (success) {
       this.debug('Plug-in state cache updated for %s with value [%s]', key, stateToText(telldusState));
     } else {
