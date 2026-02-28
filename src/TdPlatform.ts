@@ -185,7 +185,7 @@ class TdPlatform extends Platform<TdPlatform> {
             this.log('Telldus system version:', colors.green(sysInfo.body.version));
             this.tellstick.firmware = sysInfo.body.version;
             this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
-            // this.tellstick.getNewAccessToken();
+            this.tellstick.getNewAccessToken();
             connected = true;
           } else {
             throw new Error('No response from Telldus, check if the host address is correct and restart');
@@ -543,7 +543,7 @@ class TdPlatform extends Platform<TdPlatform> {
         }
         // Check if the access token needs to be refreshed
         if (getTimestamp() > this.tellstick.values.nextRefresh) {
-          // this.tellstick.getNewAccessToken();
+          this.tellstick.getNewAccessToken();
         }
       } catch (error) {
         this.handleError({
