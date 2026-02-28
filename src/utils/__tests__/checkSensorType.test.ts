@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { testSensorInfo } from '../../api/__tests__/telldusApiFakeData';
+import { testSensorInfo } from '../../api/__tests__/TelldusApiFakeData';
 import checkSensorType from '../checkSensorType';
 
 describe('Test Telldus sensor type checker', () => {
