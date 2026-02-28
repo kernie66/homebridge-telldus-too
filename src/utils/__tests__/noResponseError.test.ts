@@ -24,7 +24,7 @@ describe('Test Telldus API status code checker', () => {
       },
     };
     const logger = (message: string) => {
-      console.log('Logger message:', message);
+      // console.log('Logger message:', message);
       expect(message).toBe('Telldus replies with error:');
     };
     const checkedResponse = noResponseError(response, logger);
@@ -38,7 +38,7 @@ describe('Test Telldus API status code checker', () => {
       body: {},
     };
     const logger = (message: string) => {
-      console.log('Logger message:', message);
+      // console.log('Logger message:', message);
       expect(message).toBe('Access denied, check if the access token is valid');
     };
     const checkedResponse = noResponseError(response, logger);

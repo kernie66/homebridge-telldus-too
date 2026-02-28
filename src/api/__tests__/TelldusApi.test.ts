@@ -59,8 +59,8 @@ describe('Test API functions', () => {
 
     // Test temp/humidity sensor
     const tempHumSensorInfo = await testApi.getSensorInfo(105);
-    console.log('Sensor info:', tempHumSensorInfo.body);
-    console.log('🚀 ~ tempHumSensorInfo:', tempHumSensorInfo);
+    // console.log('Sensor info:', tempHumSensorInfo.body);
+    // console.log('🚀 ~ tempHumSensorInfo:', tempHumSensorInfo);
 
     const params = URL.parse(tempHumSensorInfo.request.url);
     const id = params?.searchParams.get('id');
@@ -71,7 +71,7 @@ describe('Test API functions', () => {
 
     // Test missing sensor ID
     const undefinedSensor = await testApi.getSensorInfo(1);
-    console.log('Sensor info:', undefinedSensor.body);
+    // console.log('Sensor info:', undefinedSensor.body);
 
     expect(undefinedSensor.ok).toBeFalsy();
     expect(undefinedSensor.body.error).toBeDefined();
@@ -81,7 +81,7 @@ describe('Test API functions', () => {
   it('turns switch on/off', async () => {
     const testApi = new TelldusApi(host, accessToken);
     const switchOnResponse = await testApi.onOffDevice(4, true);
-    console.log('🚀 ~ switchOnResponse:', switchOnResponse);
+    // console.log('🚀 ~ switchOnResponse:', switchOnResponse);
     expect(switchOnResponse.ok).toBeTruthy();
     expect(switchOnResponse.body.status).toBe('success');
 
@@ -93,7 +93,7 @@ describe('Test API functions', () => {
   it('refreshes access token', async () => {
     const testApi = new TelldusApi(host, accessToken);
     const newToken = await testApi.refreshAccessToken();
-    console.log('newToken', newToken);
+    // console.log('newToken', newToken);
     expect(newToken.expires).toBeDefined();
     expect(newToken.token).toBeDefined();
 

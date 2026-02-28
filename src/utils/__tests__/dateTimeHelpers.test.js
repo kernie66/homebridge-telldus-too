@@ -35,7 +35,7 @@ describe('Test the DateTime helper functions', () => {
   it('gets the timestamp in Eve display format', () => {
     const testTimestampInSeconds = getTestTimestamp();
     const eveDate = toEveDate(testTimestampInSeconds);
-    console.log('eveDate', eveDate);
+    // console.log('eveDate', eveDate);
     expect(eveDate).toBe(testEveDate);
   });
 
@@ -43,16 +43,16 @@ describe('Test the DateTime helper functions', () => {
     // Test without param, should default to current time
     const defaultEveDate = isoDateTimeToEveDate();
     expect(defaultEveDate).toBe(testEveDate);
-    console.log('isoDateTime', defaultEveDate);
+    // console.log('isoDateTime', defaultEveDate);
 
     // Test with correct ISO string
     const isoEveDate = isoDateTimeToEveDate(isoString);
-    console.log('isoEveDate', isoEveDate);
+    // console.log('isoEveDate', isoEveDate);
     expect(isoEveDate).toBe(testIsoEveDate);
 
     // Test with ISO string without time zone
     const isoEveDateNoTZ = isoDateTimeToEveDate(isoString.slice(0, -1));
-    console.log('isoEveDate', isoEveDateNoTZ);
+    // console.log('isoEveDate', isoEveDateNoTZ);
     expect(isoEveDateNoTZ).toBe(testIsoEveDate);
   });
 });

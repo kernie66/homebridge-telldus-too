@@ -5,9 +5,9 @@ import { setSupportedMethods, stateToText } from '../utils.js';
 describe('Test the different util functions', () => {
   it('sets the sum of all commands', () => {
     const sumOfCommands = setSupportedMethods(COMMANDS);
-    console.log({
-      sumOfCommands,
-    });
+    // console.log({
+    //   sumOfCommands,
+    // });
     expect(sumOfCommands).toBe(1023);
   });
 
