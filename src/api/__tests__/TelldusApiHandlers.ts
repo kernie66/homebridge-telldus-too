@@ -7,7 +7,7 @@ import {
   testSensorList,
   testSuccessMessage,
   testSystemInfo,
-} from './telldusApiFakeData.js';
+} from './TelldusApiFakeData.js';
 
 let counter = 0;
 export const telldusApiHandlers = [

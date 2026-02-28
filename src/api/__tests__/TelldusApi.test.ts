@@ -4,7 +4,7 @@
 import { URL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import TelldusApi from '../TelldusApi.js';
-import { testDeviceInfo, testSystemInfo } from './telldusApiFakeData.js';
+import { testDeviceInfo, testSystemInfo } from './TelldusApiFakeData.js';
 
 const host = '192.168.1.254';
 const accessToken =
