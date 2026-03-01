@@ -86,8 +86,8 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
 
   async heartbeat(beat: number) {
     if (this.modelType !== 'Bell') {
-      this.checkState();
       if (beat % this.switchService.values.heartrate === 0) {
+        this.checkState();
         this.vdebug('Switch accessory heartbeat');
       }
     }
@@ -143,7 +143,7 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
         this.switchService.values.on = tdCachedValue;
       }
     } else {
-      this.debug('Cache not updated due to switch updating');
+      this.vdebug('Cache not updated due to switch updating');
     }
   }
 }

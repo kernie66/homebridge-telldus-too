@@ -172,7 +172,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
     );
 
     this.createCharacteristicClass(
-      'TdEnabled',
+      'Enabled',
       uuid('Enabled'),
       {
         format: this.Formats.BOOL,
@@ -186,7 +186,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
     );
 
     this.createCharacteristicClass(
-      'TdStatus',
+      'Status',
       uuid('Status'),
       {
         format: this.Formats.STRING,
