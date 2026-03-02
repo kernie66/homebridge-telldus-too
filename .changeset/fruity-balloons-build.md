@@ -3,7 +3,7 @@
 ---
 
 Converted to ESM and TypeScript.
-Checked compatibility with NodeJS versions and Homebridge 2.0.
+Checked compatibility with NodeJS versions 20, 22, 24 and Homebridge 2.0.
 Corrected minor bugs found during conversion.
 Added copying of access token to clipboard when identifying the Telldus gateway.
 Using Biome as formatter and linter.
