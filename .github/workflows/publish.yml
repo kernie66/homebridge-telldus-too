@@ -47,7 +47,7 @@ jobs:
     if: github.repository == 'kernie66/homebridge-telldus-too'
     permissions:
       id-token: write
-      contents: read
+      contents: write
       pull-requests: write
 
     name: Release
