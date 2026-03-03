@@ -58,8 +58,7 @@
     "watch": "npm run build && npm link && nodemon",
     "test": "vitest run",
     "local-release": "changeset version && changeset publish",
-    "publish": "npm run build && changeset publish",
-    "prepublishOnly": "npm run ci"
+    "publish": "changeset publish"
   },
   "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
   "author": "Kenneth Jagenheim, rewritten from plugin by John Lemón"
