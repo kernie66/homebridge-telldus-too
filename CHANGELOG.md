@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.2
+
+### Patch Changes
+
+- 6f6f5b4: Warning! Do not install v1.2.x, connection to Apple Homekit broken.
+
 ## 1.2.1
 
 ### Patch Changes
