@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1
+
+### Patch Changes
+
+- be0d5a1: Corrected distribution files in NPM package, #7
+
 ## 1.2.0
 
 ### Minor Changes
