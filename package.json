@@ -58,7 +58,6 @@
     "watch": "npm run build && npm link && nodemon",
     "test": "vitest run",
     "local-release": "changeset version && changeset publish",
-    "prepare": "npm run build",
     "publish": "changeset publish"
   },
   "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
