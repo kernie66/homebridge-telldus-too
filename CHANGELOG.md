@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+### Minor Changes
+
+- 6152973: New try, tested to work in Apple Home several ways. No changes from revoked v1.2.2.
+
 ## 1.2.2
 
 ### Patch Changes
