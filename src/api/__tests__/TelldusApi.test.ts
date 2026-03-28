@@ -3,6 +3,7 @@
 
 import { URL } from 'node:url';
 import { describe, expect, it } from 'vitest';
+
 import TelldusApi from '../TelldusApi.js';
 import { testDeviceInfo, testSystemInfo } from './TelldusApiFakeData.js';
 

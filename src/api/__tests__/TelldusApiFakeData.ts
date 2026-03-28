@@ -1,3 +1,5 @@
+import type { SensorModelType } from '../../typings/SensorTypes';
+
 export const testSystemInfo = {
   product: 'tellstick-znet-lite-v2',
   time: '2026-01-07T21:04:36.558663',
@@ -136,7 +138,7 @@ export const testSensorInfo = [
     ],
     id: 105,
     lastUpdated: 1693258519,
-    model: 'temperaturehumidity',
+    model: 'temperaturehumidity' as SensorModelType,
     name: 'Bedroom',
     protocol: 'fineoffset',
     sensorId: 105,
@@ -159,7 +161,7 @@ export const testSensorInfo = [
     ],
     id: 168,
     lastUpdated: 1722272816,
-    model: 'F824',
+    model: 'F824' as SensorModelType,
     name: 'Inside',
     protocol: 'oregon',
     sensorId: 168,
@@ -188,7 +190,7 @@ export const testSensorInfo = [
     ],
     id: 167,
     lastUpdated: 1722272815,
-    model: '1984',
+    model: '1984' as SensorModelType,
     name: 'Wind',
     protocol: 'oregon',
     sensorId: 167,
@@ -211,7 +213,7 @@ export const testSensorInfo = [
     ],
     id: 169,
     lastUpdated: 1722272640,
-    model: '2914',
+    model: '2914' as SensorModelType,
     name: 'Rain',
     protocol: 'oregon',
     sensorId: 169,

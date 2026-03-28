@@ -1,4 +1,5 @@
-import { describe, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import noResponseError from '../noResponseError';
 
 describe('Test Telldus API status code checker', () => {

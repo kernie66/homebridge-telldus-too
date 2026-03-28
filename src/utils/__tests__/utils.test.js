@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { COMMANDS, TELLDUS_STATES } from '../../TdConstants.js';
 import { setSupportedMethods, stateToText } from '../utils.js';
 
