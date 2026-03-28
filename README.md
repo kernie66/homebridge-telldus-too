@@ -111,7 +111,7 @@ The access token is also stored in the Tellstick accessory to be able to determi
 
 All accessories supports the `Identify/ID` command, found in Eve and Controller for Homekit. Pressing this for a sensor or switch will print the ID of the accessory in the log.
 
-In the Tellstick accessory, it will print the current access token in the log and also copy it to the clipboard. This can be useful, e.g., to update the config file with a new access token as a backup before the old expires or if moving Homebridge to a new installation.
+In the Tellstick accessory, it will print the current access token in the log. This can be useful, e.g., to update the config file with a new access token as a backup before the old expires or if moving Homebridge to a new installation.
 
 ## Supported devices
 

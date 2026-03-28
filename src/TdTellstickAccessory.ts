@@ -3,7 +3,7 @@
 //
 // Homebridge plugin for Telldus.
 
-import clipboard from 'clipboardy';
+import figlet from 'figlet';
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import colors from 'yoctocolors';
 import TelldusApi from './api/TelldusApi.js';
@@ -123,9 +123,16 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       this.emit('initialised');
     });
     this.on('identify', async () => {
-      this.warn(colors.yellow('Identifying Tellstick'));
-      this.warn('Current access token:', colors.green(this.values.accessToken));
-      clipboard.writeSync(this.values.accessToken);
+      try {
+        this.warn(colors.yellow('Identifying Tellstick'));
+        this.log(`\n${figlet.textSync('Access Token')}`);
+        this.warn('Current access token:', colors.green(this.values.accessToken));
+      } catch (error) {
+        this.handleError({
+          error,
+          reason: 'Error identifying the Tellstick accessory',
+        });
+      }
     });
   }
 

@@ -16,7 +16,6 @@
   ],
   "type": "module",
   "dependencies": {
-    "clipboardy": "^5.3.1",
     "figlet": "^1.10.0",
     "homebridge-lib": "^7.3.1",
     "node-cache": "^5.1.2",
@@ -61,5 +60,6 @@
     "release": "changeset publish"
   },
   "homepage": "http://github.com/kernie66/homebridge-telldus-too#readme",
-  "author": "Kenneth Jagenheim, rewritten from plugin by John Lemón"
+  "author": "Kenneth Jagenheim, rewritten from plugin by John Lemón",
+  "packageManager": "npm@11.12.1"
 }
