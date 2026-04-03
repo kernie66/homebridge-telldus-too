@@ -4,8 +4,8 @@
 // Homebridge plugin for Telldus.
 
 import type { API } from 'homebridge';
-import packageJson from '../package.json' with { type: 'json' };
 
+import packageJson from '../package.json' with { type: 'json' };
 import TdPlatform from './TdPlatform.js';
 
 export default function (homebridge: API) {

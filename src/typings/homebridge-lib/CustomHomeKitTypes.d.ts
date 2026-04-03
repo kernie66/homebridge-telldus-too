@@ -88,12 +88,7 @@ declare module 'homebridge-lib/CustomHomeKitTypes' {
         minStep?: number;
         maxLen?: number;
         validValues?: Array<string | number | boolean>;
-        validValueRanges?: Array<
-          [
-            number,
-            number,
-          ]
-        >;
+        validValueRanges?: Array<[number, number]>;
         defaultValue?: string | number | boolean;
         description?: string;
         manufacturerDescription?: string;

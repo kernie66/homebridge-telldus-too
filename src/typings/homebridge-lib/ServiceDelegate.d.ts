@@ -3,6 +3,7 @@
 
 declare module 'homebridge-lib/ServiceDelegate' {
   import type { History } from 'homebridge-lib/ServiceDelegate/History';
+
   // import { History } from './History.js';
   import { Delegate } from 'homebridge-lib/Delegate';
 
@@ -47,6 +48,8 @@ declare module 'homebridge-lib/ServiceDelegate' {
       value?: unknown;
       silent?: boolean;
       props?: Record<string, unknown>;
+      setter?: (value: boolean | number | string) => Promise<void>;
+      getter?: () => Promise<unknown>;
     }): CharacteristicDelegate;
 
     characteristicDelegate(key: string): CharacteristicDelegate;

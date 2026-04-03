@@ -5,7 +5,10 @@ declare module 'homebridge-lib/ServiceDelegate/History' {
   import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
   class History extends ServiceDelegate<null> {
     constructor(accessoryDelegate: unknown, params = {});
-    addLastOnDelegate(onDelegate: CharacteristicDelegate, lastOnDelegate: CharacteristicDelegate): void;
+    addLastOnDelegate(
+      onDelegate: CharacteristicDelegate,
+      lastOnDelegate: CharacteristicDelegate,
+    ): void;
     /** Return current time as # seconds since NodeJS epoch.
      * @returns {integer} # seconds since NodeJS epoch.
      */

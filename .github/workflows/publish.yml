@@ -83,4 +83,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
-          NPM_TOKEN: "" # Workaround. See https://github.com/changesets/changesets/issues/1152#issuecomment-3190884868
+          NPM_TOKEN: '' # Workaround. See https://github.com/changesets/changesets/issues/1152#issuecomment-3190884868

@@ -1,4 +1,5 @@
 import { HttpResponse, http } from 'msw';
+
 import {
   testDeviceInfo,
   testDeviceList,
@@ -21,6 +22,9 @@ export const telldusApiHandlers = [
 
   http.get('http://192.168.1.254/api/device/info', ({ request }) => {
     const params = URL.parse(request.url);
+    if (!params) {
+      return HttpResponse.json(testDeviceInfo[1]);
+    }
     const id = params.searchParams.get('id');
     const index = id === '4' ? 0 : 1;
     return HttpResponse.json(testDeviceInfo[index]);
@@ -32,6 +36,9 @@ export const telldusApiHandlers = [
 
   http.get('http://192.168.1.254/api/sensor/info', ({ request }) => {
     const params = URL.parse(request.url);
+    if (!params) {
+      return HttpResponse.json(testSensorInfo[6]);
+    }
     const id = params.searchParams.get('id');
     switch (id) {
       case '105':

@@ -4,12 +4,15 @@
 // Homebridge plugin for Telldus bell switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import { assert, is } from 'tsafe';
+
 import type TelldusApi from './api/TelldusApi.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdSwitchAccessory from './TdSwitchAccessory.js';
 import type { SwitchServiceParams } from './typings/SwitchTypes.js';
+
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
-import handleError from './utils/handleError.js';
+import { handleError } from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
 import { wait } from './utils/utils.js';
 
@@ -50,14 +53,24 @@ class BellService extends ServiceDelegate<BellServiceValues> {
       key: 'bell',
       Characteristic: this.Characteristics.hap.On,
       value: false,
-    }).on('didSet', (value: boolean) => {
-      if (!this.values.disabled) {
-        this.bellOn = value;
-        this.setBell();
-      } else {
-        this.log('Bell disabled, enable it to be able to turn it on!');
-      }
+      setter: async (value) => {
+        assert(is<boolean>(value));
+        if (!this.values.disabled) {
+          this.bellOn = value;
+          await this.setBell();
+        } else {
+          this.log('Bell disabled, enable it to be able to turn it on!');
+        }
+      },
     });
+    //   .on('didSet', (value: boolean) => {
+    //   if (!this.values.disabled) {
+    //     this.bellOn = value;
+    //     this.setBell();
+    //   } else {
+    //     this.log('Bell disabled, enable it to be able to turn it on!');
+    //   }
+    // });
 
     this.addCharacteristicDelegate({
       key: 'disabled',
@@ -99,11 +112,12 @@ class BellService extends ServiceDelegate<BellServiceValues> {
   }
 
   async setBell() {
+    const logger = this.error.bind(this);
     if (this.bellOn) {
       try {
         // Send bell command to device if switch activated
         const response = await this.telldusApi.bellDevice(this.deviceId);
-        if (response.ok && noResponseError(response, this.error)) {
+        if (response.ok && noResponseError(response, logger)) {
           this.values.lastActivation = toEveDate(getTimestamp());
           await wait(500);
           this.values.bell = false;
@@ -111,7 +125,7 @@ class BellService extends ServiceDelegate<BellServiceValues> {
           throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
         }
       } catch (error) {
-        this.handleError({
+        await this.handleError({
           error,
           reason: `Error getting bell command response from device ID ${this.deviceId}`,
         });

@@ -3,6 +3,7 @@
 //
 
 import type { COMMANDS } from '../TdConstants.js';
+
 import { TELLDUS_STATES, WIND_DIRECTIONS, WIND_DIRECTIONS_SE } from '../TdConstants.js';
 
 export function windDirection(degrees: number) {

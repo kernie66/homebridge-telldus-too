@@ -4,6 +4,7 @@
 
 import { HttpClient } from 'homebridge-lib/HttpClient';
 import queryString from 'query-string';
+
 import type {
   DeviceInfoType,
   DeviceListType,
@@ -12,11 +13,12 @@ import type {
   SensorListType,
   SystemInfoType,
 } from '../api/TelldusApi.types.js';
+import type { RefreshTokenResponse } from './TelldusApi.types.js';
+
 import { COMMANDS } from '../TdConstants.js';
 import { getErrorMessage } from '../utils/getErrorMessage.js';
 // import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
 import { setSupportedMethods } from '../utils/utils.js';
-import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
 function setPath(
   path: string,
@@ -64,12 +66,7 @@ class TelldusApi extends HttpClient {
         keepAlive: false,
         path: '/api/',
         timeout: 15, //this.config.timeout,
-        validStatusCodes: [
-          200,
-          401,
-          403,
-          404,
-        ],
+        validStatusCodes: [200, 401, 403, 404],
       });
       this.apiClient
         .on('error', (error: HttpError) => {
@@ -130,19 +127,28 @@ class TelldusApi extends HttpClient {
     return this.lastError;
   }
 
-  checkResponseOk<T>(response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>) {
-    const ok = (response.statusCode >= 200 && response.statusCode <= 299 && !response.body.error) || false;
+  checkResponseOk<T>(
+    response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>,
+  ) {
+    const ok =
+      (response.statusCode >= 200 && response.statusCode <= 299 && !response.body.error) || false;
     return ok;
   }
 
   async getSystemInfo() {
-    const response: HttpResponse<SystemInfoType> = await this.apiClient.get('system/info', this.headers);
+    const response: HttpResponse<SystemInfoType> = await this.apiClient.get(
+      'system/info',
+      this.headers,
+    );
     response.ok = this.checkResponseOk<SystemInfoType>(response);
     return response;
   }
 
   async listSensors() {
-    const response: HttpResponse<SensorListType> = await this.apiClient.get('sensors/list', this.headers);
+    const response: HttpResponse<SensorListType> = await this.apiClient.get(
+      'sensors/list',
+      this.headers,
+    );
     response.ok = this.checkResponseOk<SensorListType>(response);
     return response;
   }

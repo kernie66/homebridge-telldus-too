@@ -4,7 +4,9 @@
 // Homebridge plugin for Telldus.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+
 import type TdTellstickAccessory from './TdTellstickAccessory.js';
+
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
 
 interface TellstickServiceParams {

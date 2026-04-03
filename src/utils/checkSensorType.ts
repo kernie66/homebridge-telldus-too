@@ -21,19 +21,12 @@ export default function checkSensorType(sensorInfo: SensorInfoType): SensorModel
     return sensorType;
   }
   // Check for wind sensor
-  const windTypes = [
-    'wdir',
-    'wavg',
-    'wgust',
-  ];
+  const windTypes = ['wdir', 'wavg', 'wgust'];
   if (sensorInfo.data[0] && windTypes.includes(sensorInfo.data[0].name)) {
     return 'wind';
   }
   // Check for rain sensor
-  const rainTypes = [
-    'rrate',
-    'rtot',
-  ];
+  const rainTypes = ['rrate', 'rtot'];
   if (sensorInfo.data[0] && rainTypes.includes(sensorInfo.data[0].name)) {
     return 'rain';
   }

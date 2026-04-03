@@ -8,10 +8,7 @@
     "target": "es2022", // Specifies the ECMAScript target version
     "module": "nodenext", // Sets the module system to use (commonjs, nodenext, esnext)
     "moduleResolution": "nodenext",
-    "lib": [
-      "DOM",
-      "ES2022"
-    ], // Specifies the library files to be included in the compilation.
+    "lib": ["DOM", "ES2022"], // Specifies the library files to be included in the compilation.
     "sourceMap": true, // Generates source maps for debugging
     "skipLibCheck": true, // Skips type checking of declaration files
     "noUnusedParameters": false, // Do not allow unused parameters in functions.
@@ -29,11 +26,6 @@
     "allowSyntheticDefaultImports": true,
     "useUnknownInCatchVariables": true
   },
-  "include": [
-    "homebridge-ui",
-    "src"
-  ],
-  "exclude": [
-    "**/__tests__/*"
-  ]
+  "include": ["homebridge-ui", "src"],
+  "exclude": ["**/__tests__/*"]
 }

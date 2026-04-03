@@ -6,13 +6,15 @@
 import figlet from 'figlet';
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import colors from 'yoctocolors';
-import TelldusApi from './api/TelldusApi.js';
+
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
+
+import TelldusApi from './api/TelldusApi.js';
 import TellstickService from './TellstickService.js';
 import { errorHandler, requestHandler, responseHandler } from './utils/apiHandlers.js';
 import { getTimestamp, toEveDate } from './utils/dateTimeHelpers.js';
-import handleError from './utils/handleError.js';
+import { handleErrorSync } from './utils/handleError.js';
 import uuid from './utils/uuid.js';
 
 type TellstickAccessoryValues = {
@@ -31,7 +33,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
   lastRefresh!: number;
   accessTokenExpires!: number;
   nextRefresh!: number;
-  handleError: typeof handleError;
+  handleErrorSync: typeof handleErrorSync;
 
   constructor(
     platform: TdPlatform,
@@ -57,7 +59,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
     this.givenAccessToken = params.config.accessToken;
     this.locale = params.config.locale;
     this.td = platform.td;
-    this.handleError = handleError;
+    this.handleErrorSync = handleErrorSync;
     // this.name = params.config.name;
 
     console.log('this.logLevel:', this.logLevel);
@@ -109,7 +111,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       });
       this.manageLogLevel(this.service.characteristicDelegate('logLevel'), true);
     } catch (error) {
-      this.handleError({
+      this.handleErrorSync({
         header: 'Tellstick Error',
         error,
         reason: `Error initializing the Tellstick gateway, check the error message and fix the issue`,
@@ -128,7 +130,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
         this.log(`\n${figlet.textSync('Access Token')}`);
         this.warn('Current access token:', colors.green(this.values.accessToken));
       } catch (error) {
-        this.handleError({
+        this.handleErrorSync({
           error,
           reason: 'Error identifying the Tellstick accessory',
         });

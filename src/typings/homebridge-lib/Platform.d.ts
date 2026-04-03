@@ -2,10 +2,12 @@
 
 /** biome-ignore-all lint/suspicious/noExplicitAny: Use any initially */
 declare module 'homebridge-lib/Platform' {
+  import type { API, HomebridgeAPI, Logger } from 'homebridge';
+
+  import { Delegate } from 'homebridge-lib/Delegate';
+
   import type TdPlatform from '../../TdPlatform.ts';
   import type { ConfigJson } from '../ConfigJsonTypes.ts';
-  import { Delegate } from 'homebridge-lib/Delegate';
-  import type { API, HomebridgeAPI, Logger } from 'homebridge';
 
   /** Homebridge dynamic platform plugin.
    * <br>See {@link Platform}.
@@ -41,7 +43,12 @@ declare module 'homebridge-lib/Platform' {
      * in Homebridge's `config.json`.
      * @param {!Platform} Platform - The constructor of the platform plugin.
      */
-    static loadPlatform(homebridge: HomebridgeAPI, packageJson: any, platformName: string, Platform: TdPlatform): void;
+    static loadPlatform(
+      homebridge: HomebridgeAPI,
+      packageJson: any,
+      platformName: string,
+      Platform: TdPlatform,
+    ): void;
     get Accessory(): HomebridgeAPI.hap.Accessory;
     get Services(): HomebridgeAPI.hap.Services;
     get Characteristic(): HomebridgeAPI.hap.Characteristic;

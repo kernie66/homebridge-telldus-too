@@ -3,6 +3,7 @@ import { defineConfig } from 'vite-plus';
 export default defineConfig({
   fmt: {
     singleQuote: true,
+    jsPlugins: ['eslint-plugin-unused-imports'],
     sortImports: {
       groups: [
         'type-import',

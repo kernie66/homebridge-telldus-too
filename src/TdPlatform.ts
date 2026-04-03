@@ -3,26 +3,34 @@
 //
 // Homebridge plugin for Telldus.
 
-import EventEmitter, { once } from 'node:events';
 import type { API, Logger } from 'homebridge';
+
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
+import EventEmitter, { once } from 'node:events';
 import { assert } from 'tsafe';
 import colors from 'yoctocolors';
+
 import type TelldusApi from './api/TelldusApi.js';
-import type { DeviceInfoType, DeviceListType, SensorInfoType, SensorListType } from './api/TelldusApi.types.js';
+import type {
+  DeviceInfoType,
+  DeviceListType,
+  SensorInfoType,
+  SensorListType,
+} from './api/TelldusApi.types.js';
+import type { ConfigJson } from './typings/ConfigJsonTypes.js';
+import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorTypes.js';
+import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
+
 import { FULL_COMMANDS } from './TdConstants.js';
 import TdMyCustomTypes from './TdMyCustomTypes.js';
 import TdSensorAccessory from './TdSensorAccessory.js';
 import TdSwitchAccessory from './TdSwitchAccessory.js';
 import TdTellstickAccessory from './TdTellstickAccessory.js';
-import type { ConfigJson } from './typings/ConfigJsonTypes.js';
-import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorTypes.js';
-import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
 import checkSensorType from './utils/checkSensorType.js';
 import { getTimestamp, isoDateTimeToEveDate } from './utils/dateTimeHelpers.js';
-import handleError from './utils/handleError.js';
+import { handleError, handleErrorSync } from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
 import { stateToText } from './utils/utils.js';
 import uuid from './utils/uuid.js';
@@ -65,6 +73,7 @@ class TdPlatform extends Platform<TdPlatform> {
   tellstick!: TdTellstickAccessory;
   telldusApi!: TelldusApi;
   handleError: typeof handleError;
+  handleErrorSync: typeof handleErrorSync;
 
   constructor(log: Logger, configJson: ConfigJson, homebridge: API) {
     super(log, configJson, homebridge);
@@ -79,6 +88,7 @@ class TdPlatform extends Platform<TdPlatform> {
     this.stateCache = new NodeCache();
     this.td = new TdMyCustomTypes(homebridge);
     this.handleError = handleError;
+    this.handleErrorSync = handleErrorSync;
 
     this.vdebug('Characteristics: %o', this.td.Characteristics);
 
@@ -108,7 +118,10 @@ class TdPlatform extends Platform<TdPlatform> {
       if (!this.config.ipAddress) {
         throw new Error('IP address missing in config file');
       }
-      if (!configRegExp.ip.test(this.config.ipAddress) && !configRegExp.host.test(this.config.ipAddress)) {
+      if (
+        !configRegExp.ip.test(this.config.ipAddress) &&
+        !configRegExp.host.test(this.config.ipAddress)
+      ) {
         throw new Error(`IP address ${this.config.ipAddress} is not a valid value`);
       }
       if (!this.config.accessToken) {
@@ -126,16 +139,17 @@ class TdPlatform extends Platform<TdPlatform> {
         this.log('Found %s IDs to be ignored', this.config.ignoreIds.length, this.config.ignore);
       }
 
-      this.once('heartbeat', this.init);
+      this.once('heartbeat', () => this.init());
 
       this.on('heartbeat', async (beat: number) => {
         await this.platformBeat(beat);
       });
     } catch (error) {
-      this.handleError({
+      this.handleErrorSync({
         header: 'Config Error',
         error,
-        reason: 'Check the config file and restart Homebridge, the plugin aborts the initialization',
+        reason:
+          'Check the config file and restart Homebridge, the plugin aborts the initialization',
       });
       return;
     }
@@ -147,6 +161,7 @@ class TdPlatform extends Platform<TdPlatform> {
   async init() {
     const deviceArray: number[] = [];
     const sensorArray: number[] = [];
+    const errorLogger = this.error.bind(this);
 
     this.debug('Initializing platform');
     try {
@@ -176,7 +191,7 @@ class TdPlatform extends Platform<TdPlatform> {
         // Check that Telldus is responding to the defined request parameters
         try {
           const sysInfo = await this.telldusApi.getSystemInfo();
-          if (sysInfo.ok && noResponseError(sysInfo, this.error)) {
+          if (sysInfo.ok && noResponseError(sysInfo, errorLogger)) {
             assert(sysInfo.body.product, 'Telldus product information missing in response');
             assert(sysInfo.body.version, 'Telldus version information missing in response');
             assert(sysInfo.body.time, 'Telldus time information missing in response');
@@ -185,10 +200,12 @@ class TdPlatform extends Platform<TdPlatform> {
             this.log('Telldus system version:', colors.green(sysInfo.body.version));
             this.tellstick.firmware = sysInfo.body.version;
             this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
-            this.tellstick.getNewAccessToken();
+            await this.tellstick.getNewAccessToken();
             connected = true;
           } else {
-            throw new Error('No response from Telldus, check if the host address is correct and restart');
+            throw new Error(
+              'No response from Telldus, check if the host address is correct and restart',
+            );
           }
         } catch (error) {
           if (attempts < 10) {
@@ -213,7 +230,7 @@ class TdPlatform extends Platform<TdPlatform> {
         while (retry) {
           try {
             deviceResponse = await this.telldusApi.listDevices();
-            if (deviceResponse.ok && noResponseError(deviceResponse, this.error)) {
+            if (deviceResponse.ok && noResponseError(deviceResponse, errorLogger)) {
               retry = false;
             } else {
               throw new Error('No response from Telldus');
@@ -253,7 +270,7 @@ class TdPlatform extends Platform<TdPlatform> {
         while (retry) {
           try {
             sensorResponse = await this.telldusApi.listSensors();
-            if (sensorResponse.ok && noResponseError(sensorResponse, this.error)) {
+            if (sensorResponse.ok && noResponseError(sensorResponse, errorLogger)) {
               retry = false;
             } else {
               throw new Error('No response from Telldus');
@@ -318,14 +335,14 @@ class TdPlatform extends Platform<TdPlatform> {
         let deviceInfo: DeviceInfoType;
         try {
           const infoResponse = await this.telldusApi.getDeviceInfo(id);
-          if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
+          if (infoResponse.ok && noResponseError(infoResponse, errorLogger)) {
             deviceInfo = infoResponse.body;
           } else {
             this.warn('No info from Telldus when parsing, skipping device ID:', id);
             continue;
           }
         } catch (error) {
-          this.handleError({
+          await this.handleError({
             error,
             reason: `Error getting device info for device ID ${id}, skipping this device`,
           });
@@ -366,9 +383,19 @@ class TdPlatform extends Platform<TdPlatform> {
           switchConfig.category = this.Accessory.Categories.Switch;
         }
         if (this.config.ignoreIds?.includes(switchConfig.id)) {
-          this.log('Ignoring %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
+          this.log(
+            'Ignoring %s: %s, ID: %s',
+            switchConfig.modelType,
+            switchConfig.name,
+            switchConfig.id,
+          );
         } else {
-          this.log('Found %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
+          this.log(
+            'Found %s: %s, ID: %s',
+            switchConfig.modelType,
+            switchConfig.name,
+            switchConfig.id,
+          );
           validSwitches.push(switchConfig);
         }
       }
@@ -398,14 +425,14 @@ class TdPlatform extends Platform<TdPlatform> {
         let sensorInfo: SensorInfoType;
         try {
           const infoResponse = await this.telldusApi.getSensorInfo(id);
-          if (infoResponse.ok && noResponseError(infoResponse, this.error)) {
+          if (infoResponse.ok && noResponseError(infoResponse, errorLogger)) {
             sensorInfo = infoResponse.body;
           } else {
             this.warn('No info from Telldus when parsing, skipping sensor ID: %d...', id);
             continue;
           }
         } catch (error) {
-          this.handleError({
+          await this.handleError({
             error,
             reason: `Error getting sensor info for sensor ID ${id}, skipping this sensor`,
           });
@@ -475,7 +502,10 @@ class TdPlatform extends Platform<TdPlatform> {
         );
         const switchAccessory = new TdSwitchAccessory(this, switchParams);
         this.setStateCache(tdSwitch);
-        assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
+        assert(
+          switchAccessory instanceof EventEmitter,
+          'Expected switchAccessory to be an instance of EventEmitter',
+        );
         jobs.push(once(switchAccessory, 'initialised'));
         // this.switchAccessories[tdSwitch] = switchAccessory;
       }
@@ -522,12 +552,13 @@ class TdPlatform extends Platform<TdPlatform> {
   // Check the state of all Telldus devices and cache the result
   // This minimises the number of accesses to the Telldus gateway
   async platformBeat(beat: number) {
+    const errorLogger = this.error.bind(this);
     if (beat % this.platformBeatRate === 0 && this.initialised) {
       this.debug('Platform heartbeat...');
       try {
         // Get states of all devices from Telldus
         const deviceResponse = await this.telldusApi.listDevices();
-        if (deviceResponse.ok && noResponseError(deviceResponse, this.error)) {
+        if (deviceResponse.ok && noResponseError(deviceResponse, errorLogger)) {
           const devices = deviceResponse.body.device;
           this.numberOfDevices = devices.length;
           if (this.numberOfDevices) {
@@ -543,10 +574,10 @@ class TdPlatform extends Platform<TdPlatform> {
         }
         // Check if the access token needs to be refreshed
         if (getTimestamp() > this.tellstick.values.nextRefresh) {
-          this.tellstick.getNewAccessToken();
+          await this.tellstick.getNewAccessToken();
         }
       } catch (error) {
-        this.handleError({
+        await this.handleError({
           error,
           reason: 'Error getting device state from Telldus, will retry next cycle...',
         });

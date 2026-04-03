@@ -3,16 +3,19 @@
 //
 // Homebridge plugin for Telldus switch devices.
 
-import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import type NodeCache from 'node-cache';
+
+import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
 import { assert, is } from 'tsafe';
+
 import type TelldusApi from './api/TelldusApi.js';
-import BellService from './BellService.js';
-import SwitchService from './SwitchService.js';
-import { FULL_COMMANDS } from './TdConstants.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
 import type { SwitchAccessoryParams } from './typings/SwitchTypes.js';
+
+import BellService from './BellService.js';
+import SwitchService from './SwitchService.js';
+import { FULL_COMMANDS } from './TdConstants.js';
 import { stateToText } from './utils/utils.js';
 
 class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
@@ -66,8 +69,8 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
     setImmediate(() => {
       this.emit('initialised');
     });
-    this.on('initialised', async () => {
-      await this.checkState();
+    this.on('initialised', () => {
+      this.checkState();
     });
     this.on('heartbeat', async (beat: number) => {
       await this.heartbeat(beat);

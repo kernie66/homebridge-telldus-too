@@ -4,9 +4,11 @@
 // Homebridge plugin for Telldus sensors.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+
 import type { SensorInfoType } from './api/TelldusApi.types.js';
 import type TdSensorAccessory from './TdSensorAccessory.js';
 import type { SensorServiceParams } from './typings/SensorTypes.js';
+
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 type RainSensorServiceValues = {

@@ -1,15 +1,13 @@
 {
   "folders": [
     {
-      "path": "."
-    }
+      "path": ".",
+    },
   ],
   "settings": {
     "autoHide.autoHidePanel": false,
     "remote.extensionKind": {
-      "alefragnani.project-manager": [
-        "workspace"
-      ]
+      "alefragnani.project-manager": ["workspace"],
     },
     "typescript.validate.enable": false,
     "javascript.validate.enable": false,
@@ -29,16 +27,16 @@
         "editor.background": "#1a1a2e",
         "activityBar.background": "#16213e",
         "statusBar.background": "#1e1e2e",
-        "titleBar.activeBackground": "#181825"
+        "titleBar.activeBackground": "#181825",
       },
       "activityBar.background": "#02342F",
       "titleBar.activeBackground": "#034942",
-      "titleBar.activeForeground": "#E9FEFC"
+      "titleBar.activeForeground": "#E9FEFC",
     },
-    "typescript.tsdk": "node_modules/typescript/lib"
+    "typescript.tsdk": "node_modules/typescript/lib",
   },
   "launch": {
     "version": "0.2.0",
-    "configurations": []
-  }
+    "configurations": [],
+  },
 }

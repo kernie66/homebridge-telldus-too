@@ -6,10 +6,7 @@
     "pin": "031-45-154"
   },
   "description": "HomeBridge HTTP Status Control",
-  "plugins": [
-    "homebridge-telldus-too",
-    "homebridge-config-ui-x"
-  ],
+  "plugins": ["homebridge-telldus-too", "homebridge-config-ui-x"],
   "platforms": [
     {
       "name": "Config",

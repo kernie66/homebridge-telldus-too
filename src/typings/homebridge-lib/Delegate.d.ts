@@ -1,7 +1,8 @@
 /** biome-ignore-all lint/style/useExportType: Export as in real file */
 declare module 'homebridge-lib/Delegate' {
-  import type TdPlatform from '../../TdPlatform.ts';
   import { EventEmitter } from 'node:events';
+
+  import type TdPlatform from '../../TdPlatform.ts';
   /** Abstract superclass for {@link Platform}, {@link AccessoryDelegate},
    * {@link ServiceDelegate}, and {@link CharacteristicDelegate}.
    * <br>See {@link Delegate}.

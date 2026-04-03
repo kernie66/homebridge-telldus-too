@@ -4,7 +4,9 @@
 // Custom HomeKit Characteristics and common functions.
 
 import type { API } from 'homebridge';
+
 import { CustomHomeKitTypes } from 'homebridge-lib/CustomHomeKitTypes';
+
 import uuid from './utils/uuid.js';
 
 class TdMyCustomTypes extends CustomHomeKitTypes {
@@ -42,11 +44,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
         unit: this.Units.SECONDS,
         minValue: 0,
         maxValue: 300,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Delay time',
     );
@@ -58,12 +56,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
         format: this.Formats.UINT32,
         unit: this.Units.SECONDS,
         minValue: 0,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-          this.Perms.HIDDEN,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE, this.Perms.HIDDEN],
       },
       'Delay time (minimum)',
     );
@@ -76,10 +69,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
         unit: this.Units.SECONDS,
         minValue: 0,
         //      maxValue: 3600,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Current timeout value',
     );
@@ -91,11 +81,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
         format: this.Formats.INT8,
         minValue: 0,
         maxValue: 10,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Repetitions (total)',
     );
@@ -107,10 +93,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
         format: this.Formats.UINT8,
         minValue: 0,
         maxValue: 10,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Repetition (current)',
     );
@@ -120,11 +103,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('0A9'),
       {
         format: this.Formats.BOOL,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Random enabled',
     );
@@ -134,11 +113,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('EnableRandomOnce'),
       {
         format: this.Formats.BOOL,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Enable random once',
     );
@@ -148,11 +123,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('DisableRandomOnce'),
       {
         format: this.Formats.BOOL,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Disable random once',
     );
@@ -162,11 +133,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('Disabled'),
       {
         format: this.Formats.BOOL,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Disabled',
     );
@@ -176,11 +143,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('Enabled'),
       {
         format: this.Formats.BOOL,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-          this.Perms.WRITE,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],
       },
       'Enabled',
     );
@@ -190,10 +153,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('Status'),
       {
         format: this.Formats.STRING,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Status',
     );
@@ -203,10 +163,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('LastActivation'),
       {
         format: this.Formats.STRING,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Last activation',
     );
@@ -216,10 +173,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('TokenExpires'),
       {
         format: this.Formats.STRING,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Token Expires',
     );
@@ -229,10 +183,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('NextRefresh'),
       {
         format: this.Formats.STRING,
-        perms: [
-          this.Perms.READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.READ, this.Perms.NOTIFY],
       },
       'Next Refresh',
     );
@@ -242,10 +193,7 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
       uuid('LastUpdated'),
       {
         format: this.Formats.STRING,
-        perms: [
-          this.Perms.PAIRED_READ,
-          this.Perms.NOTIFY,
-        ],
+        perms: [this.Perms.PAIRED_READ, this.Perms.NOTIFY],
       },
       'Last Updated',
     );
