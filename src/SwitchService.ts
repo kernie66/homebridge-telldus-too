@@ -4,8 +4,8 @@
 // Homebridge plugin for Telldus switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
+import NodeCache from 'node-cache';
 import { setTimeout } from 'node:timers';
-import { assert, is } from 'tsafe';
 import colors from 'yoctocolors';
 
 import type TelldusApi from './api/TelldusApi.js';
@@ -46,7 +46,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   heartrate: number;
   td: TdMyCustomTypes;
   state: number;
-  stateCache: unknown;
+  stateCache: NodeCache;
   telldusApi: TelldusApi;
   switchMuteTime: number;
   switchOn: boolean = false;
@@ -104,39 +104,43 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       key: 'on',
       Characteristic: this.Characteristics.hap.On,
       value: this.state === FULL_COMMANDS.TURNON,
-      setter: async (value) => {
-        assert(is<boolean>(value));
-        this.values.repetition = 0;
-        if (!this.values.disabled && !this.values.enabled) {
-          this.switchOn = value;
-          await this.setOn(switchAccessory);
-        } else {
-          this.log(
-            'Switch constantly disabled/enabled,',
-            colors.green('deactivate it to turn it on/off!'),
-          );
-        }
-      },
-    })
-      // .on('didSet', (value: boolean) => {
+      // setter: async (value) => {
+      //   assert(is<boolean>(value));
       //   this.values.repetition = 0;
       //   if (!this.values.disabled && !this.values.enabled) {
       //     this.switchOn = value;
-      //     this.setOn(switchAccessory);
+      //     await this.setOn(switchAccessory);
       //   } else {
       //     this.log(
       //       'Switch constantly disabled/enabled,',
       //       colors.green('deactivate it to turn it on/off!'),
       //     );
       //   }
-      // })
+      // },
+    })
+      .on('didSet', (value: boolean) => {
+        this.values.repetition = 0;
+        if (!this.values.disabled && !this.values.enabled) {
+          this.switchOn = value;
+          void (async () => {
+            await this.setOn(switchAccessory);
+          })();
+        } else {
+          this.log(
+            'Switch constantly disabled/enabled,',
+            colors.green('deactivate it to turn it on/off!'),
+          );
+        }
+      })
       .on('didTouch', (value: boolean) => {
         this.values.repetition = 0;
         if (!this.values.disabled && !this.values.enabled) {
           if (this.modelType !== 'dimmer') {
             this.switchOn = value;
             this.log("Repeat 'setOn' with value %s", this.switchOn);
-            // this.setOn(switchAccessory);
+            void (async () => {
+              await this.setOn(switchAccessory);
+            })();
           } else {
             this.log("Skipping repeat 'setOn' for dimmer");
           }
@@ -156,16 +160,17 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         value: 100,
         unit: '%',
         Characteristic: this.Characteristics.hap.Brightness,
-        setter: async (value) => {
-          assert(is<number>(value));
-          this.debug('Brightness value', value);
+        // setter: async (value) => {
+        //   assert(is<number>(value));
+        //   this.debug('Brightness value', value);
+        //   await this.setDimmerLevel(switchAccessory, value);
+        // },
+      }).on('didSet', (value: number) => {
+        this.debug('Brightness value', value);
+        void (async () => {
           await this.setDimmerLevel(switchAccessory, value);
-        },
+        })();
       });
-      //   .on('didSet', (value: number) => {
-      //   this.debug('Brightness value', value);
-      //   this.setDimmerLevel(switchAccessory, value);
-      // });
     }
 
     this.addCharacteristicDelegate({
@@ -217,57 +222,59 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       key: 'disabled',
       value: false,
       Characteristic: this.td.Characteristics.Disabled,
-      setter: async (value) => {
-        if (value && !this.values.enabled) {
-          this.values.on = false;
-          this.switchOn = false;
+      // setter: async (value) => {
+      //   if (value && !this.values.enabled) {
+      //     this.values.on = false;
+      //     this.switchOn = false;
+      //     await this.setOn(switchAccessory);
+      //   } else {
+      //     setTimeout(() => {
+      //       this.values.disabled = false;
+      //     }, 200);
+      //   }
+      // },
+    }).on('didSet', (value: boolean) => {
+      if (value && !this.values.enabled) {
+        this.values.on = false;
+        this.switchOn = false;
+        void (async () => {
           await this.setOn(switchAccessory);
-        } else {
-          setTimeout(() => {
-            this.values.disabled = false;
-          }, 200);
-        }
-      },
+        })();
+      } else {
+        setTimeout(() => {
+          this.values.disabled = false;
+        }, 200);
+      }
     });
-    // .on('didSet', (value: boolean) => {
-    // if (value && !this.values.enabled) {
-    //   this.values.on = false;
-    //   this.switchOn = false;
-    //   this.setOn(switchAccessory);
-    // } else {
-    //   setTimeout(() => {
-    //     this.values.disabled = false;
-    //   }, 200);
-    // }
-    //});
 
     this.addCharacteristicDelegate({
       key: 'enabled',
       value: false,
       Characteristic: this.td.Characteristics.Enabled,
-      setter: async (value) => {
-        if (value && !this.values.disabled) {
-          this.values.on = true;
-          this.switchOn = true;
+      // setter: async (value) => {
+      //   if (value && !this.values.disabled) {
+      //     this.values.on = true;
+      //     this.switchOn = true;
+      //     await this.setOn(switchAccessory);
+      //   } else {
+      //     setTimeout(() => {
+      //       this.values.enabled = false;
+      //     }, 200);
+      //   }
+      // },
+    }).on('didSet', (value: boolean) => {
+      if (value && !this.values.disabled) {
+        this.values.on = true;
+        this.switchOn = true;
+        void (async () => {
           await this.setOn(switchAccessory);
-        } else {
-          setTimeout(() => {
-            this.values.enabled = false;
-          }, 200);
-        }
-      },
+        })();
+      } else {
+        setTimeout(() => {
+          this.values.enabled = false;
+        }, 200);
+      }
     });
-    //   .on('didSet', (value: boolean) => {
-    //   if (value && !this.values.disabled) {
-    //     this.values.on = true;
-    //     this.switchOn = true;
-    //     this.setOn(switchAccessory);
-    //   } else {
-    //     setTimeout(() => {
-    //       this.values.enabled = false;
-    //     }, 200);
-    //   }
-    // });
 
     this.addCharacteristicDelegate({
       key: 'status',

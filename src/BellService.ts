@@ -4,7 +4,6 @@
 // Homebridge plugin for Telldus bell switches.
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
-import { assert, is } from 'tsafe';
 
 import type TelldusApi from './api/TelldusApi.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
@@ -53,24 +52,25 @@ class BellService extends ServiceDelegate<BellServiceValues> {
       key: 'bell',
       Characteristic: this.Characteristics.hap.On,
       value: false,
-      setter: async (value) => {
-        assert(is<boolean>(value));
-        if (!this.values.disabled) {
-          this.bellOn = value;
+      // setter: async (value) => {
+      //   assert(is<boolean>(value));
+      //   if (!this.values.disabled) {
+      //     this.bellOn = value;
+      //     await this.setBell();
+      //   } else {
+      //     this.log('Bell disabled, enable it to be able to turn it on!');
+      //   }
+      // },
+    }).on('didSet', (value: boolean) => {
+      if (!this.values.disabled) {
+        this.bellOn = value;
+        void (async () => {
           await this.setBell();
-        } else {
-          this.log('Bell disabled, enable it to be able to turn it on!');
-        }
-      },
+        })();
+      } else {
+        this.log('Bell disabled, enable it to be able to turn it on!');
+      }
     });
-    //   .on('didSet', (value: boolean) => {
-    //   if (!this.values.disabled) {
-    //     this.bellOn = value;
-    //     this.setBell();
-    //   } else {
-    //     this.log('Bell disabled, enable it to be able to turn it on!');
-    //   }
-    // });
 
     this.addCharacteristicDelegate({
       key: 'disabled',
