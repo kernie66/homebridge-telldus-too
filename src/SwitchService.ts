@@ -6,6 +6,7 @@
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import NodeCache from 'node-cache';
 import { setTimeout } from 'node:timers';
+import { assert, is } from 'tsafe';
 import colors from 'yoctocolors';
 
 import type TelldusApi from './api/TelldusApi.js';
@@ -62,7 +63,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   acDimActive: boolean = false;
   timerActive: boolean;
   activeTimeout: NodeJS.Timeout | null;
-  endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' = 'Not activated' as const;
+  endStatus: 'Not activated' | 'Manually controlled' | 'Automation done' | 'Updated by Telldus' =
+    'Not activated' as const;
   handleError: typeof handleError;
 
   constructor(switchAccessory: TdSwitchAccessory, params: SwitchServiceParams) {
@@ -104,33 +106,51 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       key: 'on',
       Characteristic: this.Characteristics.hap.On,
       value: this.state === FULL_COMMANDS.TURNON,
-      // setter: async (value) => {
-      //   assert(is<boolean>(value));
-      //   this.values.repetition = 0;
-      //   if (!this.values.disabled && !this.values.enabled) {
-      //     this.switchOn = value;
-      //     await this.setOn(switchAccessory);
-      //   } else {
-      //     this.log(
-      //       'Switch constantly disabled/enabled,',
-      //       colors.green('deactivate it to turn it on/off!'),
-      //     );
-      //   }
-      // },
-    })
-      .on('didSet', (value: boolean) => {
+      setter: async (value) => {
+        assert(is<boolean>(value));
+        console.log('Switch setter to %s', value);
+        this.log('Enabled: %s, Disabled: %s', this.values.enabled, this.values.disabled);
         this.values.repetition = 0;
         if (!this.values.disabled && !this.values.enabled) {
           this.switchOn = value;
-          void (async () => {
-            await this.setOn(switchAccessory);
-          })();
+          await this.setOn(switchAccessory);
+          return value;
         } else {
+          this.values.on = this.values.enabled;
           this.log(
             'Switch constantly disabled/enabled,',
             colors.green('deactivate it to turn it on/off!'),
           );
+          return Promise.reject(
+            'Switch constantly disabled/enabled, deactivate it to turn it on/off!',
+          );
         }
+      },
+      getter: async () => {
+        this.debug('Getting on value, current state is %s', stateToText(this.state));
+        if (!this.values.disabled && !this.values.enabled) {
+          return this.values.on;
+        } else {
+          this.log('Switch constantly disabled/enabled, deactivate it to turn it on/off!');
+          return this.values.enabled;
+        }
+      },
+    })
+      .on('didSet', (value: boolean) => {
+        this.log('Switch didSet to %s', value);
+        //   this.values.repetition = 0;
+        //   if (!this.values.disabled && !this.values.enabled) {
+        //     this.switchOn = value;
+        //     void (async () => {
+        //       await this.setOn(switchAccessory);
+        //     })();
+        //   } else {
+        //     this.log(
+        //       'Switch constantly disabled/enabled,',
+        //       colors.green('deactivate it to turn it on/off!'),
+        //     );
+        //     this.values.on = this.values.enabled;
+        //   }
       })
       .on('didTouch', (value: boolean) => {
         this.values.repetition = 0;
@@ -222,30 +242,32 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       key: 'disabled',
       value: false,
       Characteristic: this.td.Characteristics.Disabled,
-      // setter: async (value) => {
-      //   if (value && !this.values.enabled) {
-      //     this.values.on = false;
-      //     this.switchOn = false;
-      //     await this.setOn(switchAccessory);
-      //   } else {
-      //     setTimeout(() => {
-      //       this.values.disabled = false;
-      //     }, 200);
-      //   }
-      // },
-    }).on('didSet', (value: boolean) => {
-      if (value && !this.values.enabled) {
-        this.values.on = false;
-        this.switchOn = false;
-        void (async () => {
+      setter: async (value) => {
+        assert(is<boolean>(value));
+        if (value && !this.values.enabled) {
+          this.values.on = false;
+          this.switchOn = false;
           await this.setOn(switchAccessory);
-        })();
-      } else {
-        setTimeout(() => {
-          this.values.disabled = false;
-        }, 200);
-      }
+        } else {
+          setTimeout(() => {
+            this.values.disabled = false;
+          }, 200);
+        }
+      },
     });
+    //   .on('didSet', (value: boolean) => {
+    //   if (value && !this.values.enabled) {
+    //     this.values.on = false;
+    //     this.switchOn = false;
+    //     void (async () => {
+    //       await this.setOn(switchAccessory);
+    //     })();
+    //   } else {
+    //     setTimeout(() => {
+    //       this.values.disabled = false;
+    //     }, 200);
+    //   }
+    // });
 
     this.addCharacteristicDelegate({
       key: 'enabled',
@@ -321,160 +343,176 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   }
 
   async setOn(this: SwitchService, switchAccessory: TdSwitchAccessory) {
-    const newValue = this.switchOn !== this.lastSwitchOn;
-    this.lastSwitchOn = this.switchOn;
+    const key = `ID${switchAccessory.deviceId}`;
     const logger = this.error.bind(this);
-    // If active update and new value, we assume that it is user controlled
-    const userControl = switchAccessory.onUpdating ? newValue : false;
-    switchAccessory.onUpdating = true;
 
-    // Wait to let other values settle
-    await wait(50);
-    let randomDelay = this.values.random;
-    randomDelay = this.values.enableRandomOnce ? true : randomDelay;
-    randomDelay = this.values.disableRandomOnce ? false : randomDelay;
+    try {
+      const telldusState = this.switchOn ? FULL_COMMANDS.TURNON : FULL_COMMANDS.TURNOFF;
+      const tdCacheValue = switchAccessory.stateCache.get(`td${key}`);
+      const newValue = this.switchOn !== this.lastSwitchOn;
+      this.lastSwitchOn = this.switchOn;
+      // If the new value is the same as the Telldus state cache value, then it is likely
+      // that the update is from Telldus state update, so we update directly
+      const tdControl = tdCacheValue === telldusState;
+      // If active update and new value, we assume that it is user controlled
+      const userControl = switchAccessory.onUpdating ? newValue : false;
+      switchAccessory.onUpdating = true;
 
-    // Reset single activation controls
-    this.values.enableRandomOnce = false;
-    this.values.disableRandomOnce = false;
-
-    // Check if the switch was recently activated
-    if (this.activeTimeout) {
-      clearTimeout(this.activeTimeout);
-      this.activeTimeout = null;
-      this.debug('Switch mute aborted');
-    }
-
-    // Check if the delay abort controller is active
-    if (this.acDelayActive) {
-      try {
-        this.debug('Aborting the delay timer before time is up');
-        this.acDelay.abort();
-      } catch (error) {
-        await this.handleError({
-          error,
-          reason: 'Error when aborting delay timer',
-        });
-      }
-      this.acDelayActive = false;
-    }
-    // Check if the repeat abort controller is defined
-    if (this.acRepeatActive) {
-      try {
-        this.debug('Aborting the repeat timer before time is up');
-        this.acRepeat.abort();
-      } catch (error) {
-        await this.handleError({
-          error,
-          reason: 'Error when aborting repeat timer',
-        });
-      }
-      this.acRepeatActive = false;
-    }
-
-    // Check if this is assumed to be a user controlled action
-    if (userControl) {
-      this.values.repetition = 0;
-      this.endStatus = 'Manually controlled';
+      // Wait to let other values settle
       await wait(50);
-    } else {
-      this.values.status = 'Delaying';
-      this.endStatus = 'Automation done';
-      const minDelay = this.values.delay * 0.2;
-      const delayRange = this.values.delay - minDelay;
-      let delay = 100;
-      if (randomDelay) {
-        delay = Math.floor(minDelay + Math.random() * delayRange) * 1000;
-      }
-      this.log('Waiting for %d seconds', delay / 1000);
-      // Prepare abort controller
-      this.acDelayActive = true;
-      try {
-        await wait(delay, this.acDelaySignal);
-      } catch (error) {
-        await this.handleError({
-          error,
-          reason: 'Delay timer aborted before time was up',
-        });
-        return;
-      }
-      this.acDelayActive = false;
-      this.log('Delay performed');
-    }
+      let randomDelay = this.values.random;
+      randomDelay = this.values.enableRandomOnce ? true : randomDelay;
+      randomDelay = this.values.disableRandomOnce ? false : randomDelay;
 
-    const telldusState = this.switchOn ? FULL_COMMANDS.TURNON : FULL_COMMANDS.TURNOFF;
+      // Reset single activation controls
+      this.values.enableRandomOnce = false;
+      this.values.disableRandomOnce = false;
 
-    let repetition = 0;
-    do {
-      // Control Telldus switch on/off
-      try {
-        const response = await this.telldusApi.onOffDevice(switchAccessory.deviceId, this.switchOn);
-        if (response.ok && noResponseError(response, logger)) {
-          this.log('Switch set to', stateToText(telldusState));
-          this.values.lastActivation = toEveDate(getTimestamp());
-          // If it is a dimmer and it is on, then send the current brightness value
-          if (this.modelType === 'dimmer' && this.switchOn) {
-            await this.setDimmerLevel(switchAccessory, this.values.brightness, true);
-          }
-        } else {
-          throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
-        }
-      } catch (error) {
-        await this.handleError({
-          error,
-          reason: `Error setting switch state for device ID ${this.deviceId}`,
-        });
+      // Check if the switch was recently activated
+      if (this.activeTimeout) {
+        clearTimeout(this.activeTimeout);
+        this.activeTimeout = null;
+        this.debug('Switch mute aborted');
       }
 
-      repetition += 1;
-      // Check if the switch activation shall be repeated
-      if (this.values.repetition < this.values.repeats) {
-        this.values.status = 'Repeating';
-        this.values.repetition = repetition;
-        this.log(
-          'Repeat command, repetition number: %d of %d',
-          this.values.repetition,
-          this.values.repeats,
-        );
-        // Prepare abort controller
-        this.acRepeatActive = true;
-        // Wait 2 seconds + 1 second/repetition between repeats
+      // Check if the delay abort controller is active
+      if (this.acDelayActive) {
         try {
-          await wait(2000 + this.values.repetition * 1000, this.acRepeatSignal);
+          this.debug('Aborting the delay timer before time is up');
+          this.acDelay.abort();
         } catch (error) {
           await this.handleError({
             error,
-            reason: 'Repeat timer aborted before time was up',
+            reason: 'Error when aborting delay timer',
           });
-          return;
+        }
+        this.acDelayActive = false;
+      }
+      // Check if the repeat abort controller is defined
+      if (this.acRepeatActive) {
+        try {
+          this.debug('Aborting the repeat timer before time is up');
+          this.acRepeat.abort();
+        } catch (error) {
+          await this.handleError({
+            error,
+            reason: 'Error when aborting repeat timer',
+          });
         }
         this.acRepeatActive = false;
       }
-    } while (repetition <= this.values.repeats);
 
-    // Update the state cache with the new value
-    const key = `ID${switchAccessory.deviceId}`;
-    const success = switchAccessory.stateCache.set(`pi${key}`, telldusState);
-    if (success) {
-      this.debug(
-        'Plug-in state cache updated for %s with value [%s]',
-        key,
-        stateToText(telldusState),
-      );
-    } else {
-      this.warn("Plug-in cache couldn't be updated for", key);
+      // Check if this is assumed to be a user controlled action
+      if (userControl || tdControl) {
+        this.values.repetition = 0;
+        this.endStatus = userControl ? 'Manually controlled' : 'Updated by Telldus';
+        await wait(50);
+      } else {
+        this.values.status = 'Delaying';
+        this.endStatus = 'Automation done';
+        const minDelay = this.values.delay * 0.2;
+        const delayRange = this.values.delay - minDelay;
+        let delay = 100;
+        if (randomDelay) {
+          delay = Math.floor(minDelay + Math.random() * delayRange) * 1000;
+        }
+        this.log('Waiting for %d seconds', delay / 1000);
+        // Prepare abort controller
+        this.acDelayActive = true;
+        try {
+          await wait(delay, this.acDelaySignal);
+        } catch (error) {
+          await this.handleError({
+            error,
+            reason: 'Delay timer aborted before time was up',
+          });
+          return;
+        }
+        this.acDelayActive = false;
+        this.log('Delay performed');
+      }
+
+      let repetition = 0;
+      do {
+        // Control Telldus switch on/off
+        try {
+          const response = await this.telldusApi.onOffDevice(
+            switchAccessory.deviceId,
+            this.switchOn,
+          );
+          if (response.ok && noResponseError(response, logger)) {
+            this.log('Switch set to', stateToText(telldusState));
+            this.values.lastActivation = toEveDate(getTimestamp());
+            // If it is a dimmer and it is on, then send the current brightness value
+            if (this.modelType === 'dimmer' && this.switchOn) {
+              await this.setDimmerLevel(switchAccessory, this.values.brightness, true);
+            }
+          } else {
+            throw new Error(`Response error (${response.statusCode}) ${response.statusMessage}`);
+          }
+        } catch (error) {
+          await this.handleError({
+            error,
+            reason: `Error setting switch state for device ID ${this.deviceId}`,
+          });
+        }
+
+        repetition += 1;
+        // Check if the switch activation shall be repeated
+        if (this.values.repetition < this.values.repeats) {
+          this.values.status = 'Repeating';
+          this.values.repetition = repetition;
+          this.log(
+            'Repeat command, repetition number: %d of %d',
+            this.values.repetition,
+            this.values.repeats,
+          );
+          // Prepare abort controller
+          this.acRepeatActive = true;
+          // Wait 2 seconds + 1 second/repetition between repeats
+          try {
+            await wait(2000 + this.values.repetition * 1000, this.acRepeatSignal);
+          } catch (error) {
+            await this.handleError({
+              error,
+              reason: 'Repeat timer aborted before time was up',
+            });
+            return;
+          }
+          this.acRepeatActive = false;
+        }
+      } while (repetition <= this.values.repeats);
+
+      // Update the state cache with the new value
+      const success = switchAccessory.stateCache.set(`pi${key}`, telldusState);
+      if (success) {
+        this.debug(
+          'Plug-in state cache updated for %s with value [%s]',
+          key,
+          stateToText(telldusState),
+        );
+      } else {
+        this.warn("Plug-in cache couldn't be updated for", key);
+      }
+
+      this.values.repetition = 0;
+      this.values.status = this.endStatus;
+
+      // Wait 2 times the platform beat rate to ensure that the platform has updated
+      // the Telldus state before allowing update from cache after switch set
+      this.activeTimeout = setTimeout(() => {
+        switchAccessory.onUpdating = false;
+        this.activeTimeout = null;
+        this.debug('Switch mute ends');
+      }, this.switchMuteTime * 1000);
+    } catch (error) {
+      await this.handleError({
+        error,
+        reason: `Error in setOn function for device ID ${this.deviceId}`,
+      });
+      this.values.repetition = 0;
+      this.values.status = 'Error, see log';
     }
-
-    this.values.repetition = 0;
-    this.values.status = this.endStatus;
-
-    // Wait 2 times the platform beat rate to ensure that the platform has updated
-    // the Telldus state before allowing update from cache after switch set
-    this.activeTimeout = setTimeout(() => {
-      switchAccessory.onUpdating = false;
-      this.activeTimeout = null;
-      this.debug('Switch mute ends');
-    }, this.switchMuteTime * 1000);
   }
 
   // Function to set a new dim level. The function will wait 1 second

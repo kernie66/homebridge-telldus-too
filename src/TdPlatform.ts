@@ -594,7 +594,12 @@ class TdPlatform extends Platform<TdPlatform> {
     let success = this.stateCache.set(`td${key}`, state);
     success = success && this.stateCache.set(`pi${key}`, state);
     if (success) {
-      this.debug('Stored Telldus state [%s] for key %s', stateToText(device.state), key);
+      this.debug(
+        'Stored Telldus state [%s] for key %s (%s)',
+        stateToText(device.state),
+        key,
+        device.name,
+      );
     } else {
       this.warn("Couldn't set initial cache state for Telldus devices");
     }
@@ -610,7 +615,12 @@ class TdPlatform extends Platform<TdPlatform> {
     if (cachedValue !== state) {
       const success = this.stateCache.set(`td${key}`, state);
       if (success) {
-        this.debug('Updated Telldus state to [%s] for key %s', stateToText(state), key);
+        this.debug(
+          'Updated Telldus state to [%s] for key %s (%s)',
+          stateToText(state),
+          key,
+          device.name,
+        );
       } else {
         this.warn("Couldn't update cache state for Telldus devices, will try again");
       }

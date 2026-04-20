@@ -48,7 +48,7 @@ declare module 'homebridge-lib/ServiceDelegate' {
       value?: unknown;
       silent?: boolean;
       props?: Record<string, unknown>;
-      setter?: (value: boolean | number | string) => Promise<void>;
+      setter?: (value: boolean | number | string) => Promise<void | boolean | number | string>;
       getter?: () => Promise<unknown>;
     }): CharacteristicDelegate;
 

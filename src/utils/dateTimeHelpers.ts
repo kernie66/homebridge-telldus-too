@@ -20,7 +20,6 @@ export function isoDateTimeToEveDate(isoDateTime?: string) {
   }
   if (!isoDateTime.includes('Z')) {
     isoDateTime = `${isoDateTime}Z`;
-    console.log('isoDateTimeToEveDate: Adding time zone "Z" to ISO string');
   }
   return String(new Date(isoDateTime)).slice(0, 24);
 }
