@@ -116,8 +116,6 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
         tdCachedValue = true;
       } else if (tdState === FULL_COMMANDS.TURNOFF) {
         tdCachedValue = false;
-      } else if (tdState === FULL_COMMANDS.BELL) {
-        tdCachedValue = false;
       }
 
       const piState: number | undefined = this.stateCache.get(`pi${key}`);
@@ -131,19 +129,37 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
         piCachedValue = true;
       } else if (piState === FULL_COMMANDS.TURNOFF) {
         piCachedValue = false;
-      } else if (piState === FULL_COMMANDS.BELL) {
-        piCachedValue = false;
       }
 
       this.vdebug('Cached Telldus state is [%s] for %s', stateToText(tdState), key);
       this.vdebug('Cached Plug-in state is [%s] for %s', stateToText(piState), key);
       if (tdCachedValue !== piCachedValue) {
         this.log(
-          'Current state [%s] from Telldus is not the same as the set value [%s], updating',
+          'Enabled: %s, Disabled: %s',
+          this.switchService.values.enabled,
+          this.switchService.values.disabled,
+        );
+        this.log(
+          'Current state [%s] from Telldus is not the same as the set value [%s]',
           tdCachedValue,
           piCachedValue,
         );
-        this.switchService.values.on = tdCachedValue;
+        if (this.switchService.values.enabled) {
+          this.switchService.values.on = true;
+          this.switchService.switchOn = true;
+          this.switchService.updateImmediately = true;
+          void this.switchService.setOn(this);
+          this.warn('Switch constantly enabled, restored [ON] state');
+        } else if (this.switchService.values.disabled) {
+          this.switchService.values.on = false;
+          this.switchService.switchOn = false;
+          this.switchService.updateImmediately = true;
+          void this.switchService.setOn(this);
+          this.warn('Switch constantly disabled, restored [OFF] state');
+        } else {
+          this.switchService.values.on = tdCachedValue;
+          this.log('Switch state updated to [%s] based on cached value', tdCachedValue);
+        }
       }
     } else {
       this.vdebug('Cache not updated due to switch updating');

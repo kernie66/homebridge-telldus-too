@@ -52,6 +52,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   switchMuteTime: number;
   switchOn: boolean = false;
   lastSwitchOn: boolean = false;
+  handledBySetter: boolean = false;
+  updateImmediately: boolean = false;
   acDelay: AbortController;
   acDelaySignal: AbortSignal;
   acDelayActive: boolean;
@@ -108,19 +110,16 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       value: this.state === FULL_COMMANDS.TURNON,
       setter: async (value) => {
         assert(is<boolean>(value));
-        console.log('Switch setter to %s', value);
+        this.log('Switch setter to %s', value);
         this.log('Enabled: %s, Disabled: %s', this.values.enabled, this.values.disabled);
         this.values.repetition = 0;
+        this.handledBySetter = true;
         if (!this.values.disabled && !this.values.enabled) {
           this.switchOn = value;
           await this.setOn(switchAccessory);
           return value;
         } else {
           this.values.on = this.values.enabled;
-          this.log(
-            'Switch constantly disabled/enabled,',
-            colors.green('deactivate it to turn it on/off!'),
-          );
           return Promise.reject(
             'Switch constantly disabled/enabled, deactivate it to turn it on/off!',
           );
@@ -138,19 +137,24 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     })
       .on('didSet', (value: boolean) => {
         this.log('Switch didSet to %s', value);
-        //   this.values.repetition = 0;
-        //   if (!this.values.disabled && !this.values.enabled) {
-        //     this.switchOn = value;
-        //     void (async () => {
-        //       await this.setOn(switchAccessory);
-        //     })();
-        //   } else {
-        //     this.log(
-        //       'Switch constantly disabled/enabled,',
-        //       colors.green('deactivate it to turn it on/off!'),
-        //     );
-        //     this.values.on = this.values.enabled;
-        //   }
+        this.log('Handled by setter: %s', this.handledBySetter);
+        if (!this.handledBySetter) {
+          this.values.repetition = 0;
+          if (!this.values.disabled && !this.values.enabled) {
+            this.updateImmediately = true;
+            this.switchOn = value;
+            void (async () => {
+              await this.setOn(switchAccessory);
+            })();
+          } else {
+            this.log(
+              'Switch constantly disabled/enabled,',
+              colors.green('deactivate it to turn it on/off!'),
+            );
+            this.values.on = this.values.enabled;
+          }
+        }
+        this.handledBySetter = false;
       })
       .on('didTouch', (value: boolean) => {
         this.values.repetition = 0;
@@ -248,10 +252,11 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           this.values.on = false;
           this.switchOn = false;
           await this.setOn(switchAccessory);
-        } else {
+        } else if (this.values.enabled) {
           setTimeout(() => {
             this.values.disabled = false;
           }, 200);
+          return Promise.reject('Switch constantly enabled, deactivate it to disable the switch!');
         }
       },
     });
@@ -353,10 +358,18 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       this.lastSwitchOn = this.switchOn;
       // If the new value is the same as the Telldus state cache value, then it is likely
       // that the update is from Telldus state update, so we update directly
-      const tdControl = tdCacheValue === telldusState;
+      const tdControl = tdCacheValue === telldusState || this.updateImmediately;
       // If active update and new value, we assume that it is user controlled
       const userControl = switchAccessory.onUpdating ? newValue : false;
       switchAccessory.onUpdating = true;
+
+      this.log(
+        'setOn called with value %s for device ID %d, and updateImmediately is %s',
+        this.switchOn,
+        switchAccessory.deviceId,
+        this.updateImmediately,
+      );
+      this.updateImmediately = false;
 
       // Wait to let other values settle
       await wait(50);
@@ -511,6 +524,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         reason: `Error in setOn function for device ID ${this.deviceId}`,
       });
       this.values.repetition = 0;
+      this.updateImmediately = false;
       this.values.status = 'Error, see log';
     }
   }
