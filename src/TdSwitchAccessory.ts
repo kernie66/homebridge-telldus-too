@@ -138,35 +138,35 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
           stateToText(tdState),
           stateToText(piState),
         );
+        let newOnValue: boolean = tdCachedValue;
         if (this.switchService.values.enabled) {
-          // Call setOn to update the switch, the value of on is already set to "true" in the service,
-          // so it will just update the state without changing the value
-          this.switchService.switchOn = true;
-          this.switchService.updateImmediately = true;
+          newOnValue = true;
           this.switchService.endStatus = 'Forced enabled';
-          await this.switchService.setOn(this);
-          // Set the "on" value just to ensure that it is correct, even if it gets out of sync
-          this.switchService.values.on = true;
           this.warn('Switch constantly enabled, restored [ON] state');
         } else if (this.switchService.values.disabled) {
-          // Call setOn to update the switch, the value of on is already set to "false" in the service,
-          // so it will just update the state without changing the value
-          this.switchService.switchOn = false;
-          this.switchService.updateImmediately = true;
+          newOnValue = false;
           this.switchService.endStatus = 'Forced disabled';
-          await this.switchService.setOn(this);
-          // Set the "on" value just to ensure that it is correct, even if it gets out of sync
-          this.switchService.values.on = false;
           this.warn('Switch constantly disabled, restored [OFF] state');
         } else {
-          // Update the "on" value, as this will trigger the didSet event to update the state
-          // and handle the switch update logic in one place
-          this.switchService.updateImmediately = true;
           this.switchService.endStatus = 'Updated by Telldus';
-          this.switchService.values.on = tdCachedValue;
           this.log(
             'Switch state updated to [%s] based on cached Telldus value',
             stateToText(tdState),
+          );
+        }
+        this.switchService.updateImmediately = true;
+        if (this.switchService.values.on === newOnValue) {
+          // Call setOn to update the switch when the value of "on" is already set to the same in the service,
+          // as this would not trigger the didSet event to update the state
+          this.switchService.switchOn = newOnValue;
+          await this.switchService.setOn(this);
+          this.debug('setOn called to update the switch state to [%s]', newOnValue ? 'ON' : 'OFF');
+        } else {
+          // When the value of "on" is not the same in the service, just set the value to trigger a didSet event
+          this.switchService.values.on = newOnValue;
+          this.debug(
+            'didSet triggered to update the switch state to [%s]',
+            newOnValue ? 'ON' : 'OFF',
           );
         }
       }

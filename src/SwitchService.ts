@@ -119,6 +119,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         this.debug('Switch setter called with value %s', value);
         this.values.repetition = 0;
         this.handledBySetter = true;
+        // Wait to let other values settle
+        await wait(50);
         if (!this.values.disabled && !this.values.enabled) {
           this.switchOn = value;
           this.updateImmediately = false;
@@ -157,7 +159,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
             void (async () => {
               await this.setOn(switchAccessory);
             })();
-            this.log('Switch state updated to [%s] based on didSet value', value ? 'ON' : 'OFF');
+            this.vdebug('Switch state updated to [%s] based on didSet value', value ? 'ON' : 'OFF');
           } else {
             this.log(
               'Switch constantly %s, deactivate it to turn it %s!',
