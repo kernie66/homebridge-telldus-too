@@ -69,8 +69,8 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
     setImmediate(() => {
       this.emit('initialised');
     });
-    this.on('initialised', () => {
-      this.checkState();
+    this.on('initialised', async () => {
+      await this.checkState();
     });
     this.on('heartbeat', async (beat: number) => {
       await this.heartbeat(beat);
@@ -89,15 +89,16 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
 
   async heartbeat(beat: number) {
     if (this.modelType !== 'Bell') {
+      // Check the state each heartbeat to ensure that the state is correct in case of missed updates from Telldus
+      await this.checkState();
       if (beat % this.switchService.values.heartrate === 0) {
-        this.checkState();
         this.vdebug('Switch accessory heartbeat');
       }
     }
   }
 
   // Check the state of the switch devices using the cached values from the platform
-  checkState() {
+  async checkState() {
     // Only called for switches, not bells
     assert(is<SwitchService>(this.switchService));
     if (!this.onUpdating) {
@@ -131,34 +132,42 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
         piCachedValue = false;
       }
 
-      this.vdebug('Cached Telldus state is [%s] for %s', stateToText(tdState), key);
-      this.vdebug('Cached Plug-in state is [%s] for %s', stateToText(piState), key);
       if (tdCachedValue !== piCachedValue) {
         this.log(
-          'Enabled: %s, Disabled: %s',
-          this.switchService.values.enabled,
-          this.switchService.values.disabled,
-        );
-        this.log(
           'Current state [%s] from Telldus is not the same as the set value [%s]',
-          tdCachedValue,
-          piCachedValue,
+          stateToText(tdState),
+          stateToText(piState),
         );
         if (this.switchService.values.enabled) {
-          this.switchService.values.on = true;
+          // Call setOn to update the switch, the value of on is already set to "true" in the service,
+          // so it will just update the state without changing the value
           this.switchService.switchOn = true;
           this.switchService.updateImmediately = true;
-          void this.switchService.setOn(this);
+          this.switchService.endStatus = 'Forced enabled';
+          await this.switchService.setOn(this);
+          // Set the "on" value just to ensure that it is correct, even if it gets out of sync
+          this.switchService.values.on = true;
           this.warn('Switch constantly enabled, restored [ON] state');
         } else if (this.switchService.values.disabled) {
-          this.switchService.values.on = false;
+          // Call setOn to update the switch, the value of on is already set to "false" in the service,
+          // so it will just update the state without changing the value
           this.switchService.switchOn = false;
           this.switchService.updateImmediately = true;
-          void this.switchService.setOn(this);
+          this.switchService.endStatus = 'Forced disabled';
+          await this.switchService.setOn(this);
+          // Set the "on" value just to ensure that it is correct, even if it gets out of sync
+          this.switchService.values.on = false;
           this.warn('Switch constantly disabled, restored [OFF] state');
         } else {
+          // Update the "on" value, as this will trigger the didSet event to update the state
+          // and handle the switch update logic in one place
+          this.switchService.updateImmediately = true;
+          this.switchService.endStatus = 'Updated by Telldus';
           this.switchService.values.on = tdCachedValue;
-          this.log('Switch state updated to [%s] based on cached value', tdCachedValue);
+          this.log(
+            'Switch state updated to [%s] based on cached Telldus value',
+            stateToText(tdState),
+          );
         }
       }
     } else {
