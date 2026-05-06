@@ -34,6 +34,7 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
   td: TdMyCustomTypes;
   platformBeatRate: number;
   onUpdating: boolean;
+  switchMuteCountdown: number;
   switchService: BellService | SwitchService;
 
   constructor(platform: TdPlatform, params: SwitchAccessoryParams) {
@@ -53,6 +54,7 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
     this.stateCache = platform.stateCache;
     this.platformBeatRate = platform.platformBeatRate;
     this.onUpdating = false;
+    this.switchMuteCountdown = 0;
     if (this.modelType === 'Bell') {
       this.switchService = new BellService(this, {
         primaryService: true,
@@ -89,9 +91,22 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
 
   async heartbeat(beat: number) {
     if (this.modelType !== 'Bell') {
-      // Check the state each heartbeat to ensure that the state is correct in case of missed updates from Telldus
-      await this.checkState();
+      // Only called for switches, not bells
+      assert(is<SwitchService>(this.switchService));
+      // Perform switch mute countdown every heartbeat
+      if (this.switchMuteCountdown > 0) {
+        this.switchMuteCountdown--;
+        if (this.switchMuteCountdown === 0) {
+          this.onUpdating = false;
+          this.debug('Switch mute ended');
+        }
+      } else {
+        // Check the state each unmuted heartbeat to ensure that the state is correct in case of
+        // missed updates from Telldus
+        await this.checkState();
+      }
       if (beat % this.switchService.values.heartrate === 0) {
+        this.switchService.handledBySetter = false;
         this.vdebug('Switch accessory heartbeat');
       }
     }
@@ -102,8 +117,8 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
     // Only called for switches, not bells
     assert(is<SwitchService>(this.switchService));
     if (!this.onUpdating) {
-      let tdCachedValue: boolean = false,
-        piCachedValue: boolean = false;
+      let tdCachedValue: boolean = false;
+      let piCachedValue: boolean = false;
       const key = `ID${this.deviceId}`;
 
       const tdState: number | undefined = this.stateCache.get(`td${key}`);

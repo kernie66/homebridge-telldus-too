@@ -5,7 +5,7 @@
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import NodeCache from 'node-cache';
-import { setTimeout } from 'node:timers';
+// import { setTimeout } from 'node:timers';
 import { assert, is } from 'tsafe';
 import colors from 'yoctocolors';
 
@@ -49,10 +49,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   state: number;
   stateCache: NodeCache;
   telldusApi: TelldusApi;
-  switchMuteTime: number;
+  //switchMuteTime: number;
   switchOn: boolean = false;
   lastSwitchOn: boolean | null = null;
-  handledBySetter: boolean = false;
+  handledBySetter: boolean;
   updateImmediately: boolean = false;
   acDelay: AbortController;
   acDelaySignal: AbortSignal;
@@ -95,11 +95,12 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     this.state = switchAccessory.state;
     this.stateCache = switchAccessory.stateCache;
     this.telldusApi = switchAccessory.telldusApi;
-    this.switchMuteTime = switchAccessory.platformBeatRate * 2;
+    // this.switchMuteTime = switchAccessory.platformBeatRate * 2;
     this.log = switchAccessory.log.bind(switchAccessory);
     this.debug = switchAccessory.debug.bind(switchAccessory);
     this.warn = switchAccessory.warn.bind(switchAccessory);
     this.error = switchAccessory.error.bind(switchAccessory);
+    this.handledBySetter = false;
     this.acDelay = new AbortController();
     this.acDelaySignal = this.acDelay.signal;
     this.acDelayActive = false;
@@ -116,17 +117,16 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       value: this.state === FULL_COMMANDS.TURNON,
       setter: async (value) => {
         assert(is<boolean>(value));
+        // Wait to let disabled and enabled values settle
+        await wait(100);
         this.debug('Switch setter called with value %s', value);
         this.values.repetition = 0;
-        this.handledBySetter = true;
-        // Wait to let other values settle
-        await wait(50);
         if (!this.values.disabled && !this.values.enabled) {
+          this.handledBySetter = true;
           this.switchOn = value;
           this.updateImmediately = false;
           // Call setOn to initiate the switch update, but do not await it here
           void this.setOn(switchAccessory);
-          return value;
         } else {
           this.values.on = this.values.enabled;
           const controlText = this.values.enabled ? 'enabled' : 'disabled';
@@ -135,6 +135,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
             `Switch constantly ${controlText}, deactivate it to turn it ${valueText}!`,
           );
         }
+        return value;
       },
       getter: async () => {
         this.debug('Getting on value, current state is %s', stateToText(this.state));
@@ -161,11 +162,9 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
             })();
             this.vdebug('Switch state updated to [%s] based on didSet value', value ? 'ON' : 'OFF');
           } else {
-            this.log(
-              'Switch constantly %s, deactivate it to turn it %s!',
-              this.values.enabled ? 'enabled' : 'disabled',
-              value ? 'ON' : 'OFF',
-            );
+            const controlText = this.values.enabled ? 'enabled' : 'disabled';
+            const valueText = value ? 'ON' : 'OFF';
+            this.log('Switch constantly %s, deactivate it to turn it %s!', controlText, valueText);
             this.values.on = this.values.enabled;
           }
         }
@@ -269,9 +268,9 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           // Let on.didSet handle the switch update logic
           this.values.on = false;
         } else if (this.values.enabled) {
-          setTimeout(() => {
-            this.values.disabled = false;
-          }, 200);
+          // setTimeout(() => {
+          //   this.values.disabled = false;
+          // }, 200);
           return Promise.reject('Switch constantly enabled, deactivate it to disable the switch!');
         }
         return value;
@@ -284,6 +283,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       Characteristic: this.td.Characteristics.Enabled,
       setter: async (value) => {
         assert(is<boolean>(value));
+        // Wait to let disabled value settle, but before the on value is set
+        await wait(50);
         if (value && !this.values.disabled) {
           this.updateImmediately = true;
           this.endStatus = 'Forced enabled';
@@ -344,9 +345,8 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     const key = `ID${switchAccessory.deviceId}`;
     const logger = this.error.bind(this);
     this.log(
-      'setOn called with value %s and end status %s for device ID %d',
+      'setOn called with value %s for device ID %d',
       this.switchOn,
-      this.endStatus,
       switchAccessory.deviceId,
     );
 
@@ -385,13 +385,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       // Reset single activation controls
       this.values.enableRandomOnce = false;
       this.values.disableRandomOnce = false;
-
-      // Check if the switch was recently activated
-      if (this.activeTimeout) {
-        clearTimeout(this.activeTimeout);
-        this.activeTimeout = null;
-        this.debug('Switch mute aborted');
-      }
 
       // Check if the delay abort controller is active
       if (this.acDelayActive) {
@@ -518,13 +511,10 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       this.values.repetition = 0;
       this.values.status = this.endStatus;
 
-      // Wait 2 times the platform beat rate to ensure that the platform has updated
+      // Wait 15 platform beats to ensure that the platform has updated
       // the Telldus state before allowing update from cache after switch set
-      this.activeTimeout = setTimeout(() => {
-        switchAccessory.onUpdating = false;
-        this.activeTimeout = null;
-        this.debug('Switch mute ends');
-      }, this.switchMuteTime * 1000);
+      switchAccessory.switchMuteCountdown = 16;
+      this.debug('Switch mute countdown set to 15 seconds after switch set');
 
       // Error handling for the whole function, to catch any unexpected errors and ensure that
       // the switch is not left in an updating state
@@ -536,9 +526,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       this.values.repetition = 0;
       this.updateImmediately = false;
       this.handledBySetter = false;
-      if (!this.activeTimeout) {
-        switchAccessory.onUpdating = false;
-      }
+      switchAccessory.switchMuteCountdown = 10;
       this.values.status = 'Error, see log';
     }
   }
