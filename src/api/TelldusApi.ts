@@ -36,7 +36,9 @@ const checkFunction = <T>(handler: T): T | false => {
   }
   return false;
 };
-// HttpClient.setMaxListeners(50);
+// Set the maximum number of listeners for HttpClient to prevent memory leak warnings when multiple accessories
+// are used. The default is 10, which is too low for this plugin when multiple accessories are used.
+HttpClient.setMaxListeners(50);
 class TelldusApi extends HttpClient {
   apiClient: HttpClient;
   headers: {
