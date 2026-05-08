@@ -119,7 +119,7 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       throw new Error(`Tellstick Accessory Error`);
     }
 
-    this.debug('Accessory initialised');
+    this.debug('Tellstick accessory initialised');
     this.heartbeatEnabled = true;
     setImmediate(() => {
       this.emit('initialised');

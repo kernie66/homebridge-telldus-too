@@ -36,7 +36,7 @@ const checkFunction = <T>(handler: T): T | false => {
   }
   return false;
 };
-
+// HttpClient.setMaxListeners(50);
 class TelldusApi extends HttpClient {
   apiClient: HttpClient;
   headers: {
@@ -69,23 +69,9 @@ class TelldusApi extends HttpClient {
         validStatusCodes: [200, 401, 403, 404],
       });
       this.apiClient
-        .on('error', (error: HttpError) => {
-          this.lastError = error;
-          if (this.errorHandler) {
-            this.errorHandler(error);
-          }
-        })
-        .on('request', (request: HttpRequest) => {
-          if (this.requestHandler) {
-            this.requestHandler(request);
-          }
-        })
-        .on('response', (response: HttpResponse<ResponseBodyError>) => {
-          this.lastResponse = response;
-          if (this.responseHandler) {
-            this.responseHandler(response);
-          }
-        });
+        .on('error', this.onErrorHandler)
+        .on('request', this.onRequestHandler)
+        .on('response', this.onResponseHandler);
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       throw new Error(`TelldusAPI: Error initialising API client (${errorMessage})`);
@@ -99,6 +85,26 @@ class TelldusApi extends HttpClient {
   get getExpires() {
     return this.expires;
   }
+
+  onErrorHandler = (error: HttpError) => {
+    this.lastError = error;
+    if (this.errorHandler) {
+      this.errorHandler(error);
+    }
+  };
+
+  onRequestHandler = (request: HttpRequest) => {
+    if (this.requestHandler) {
+      this.requestHandler(request);
+    }
+  };
+
+  onResponseHandler = (response: HttpResponse<ResponseBodyError>) => {
+    this.lastResponse = response;
+    if (this.responseHandler) {
+      this.responseHandler(response);
+    }
+  };
 
   setRequestHandler(handler: (request: HttpRequest) => void) {
     this.requestHandler = checkFunction(handler);
