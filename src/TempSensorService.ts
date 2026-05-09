@@ -11,30 +11,6 @@ import type { SensorServiceParams } from './typings/SensorTypes.js';
 
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
-/*
-class TempSensorService<T> extends ServiceDelegate<T> {
-  constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
-    super(sensorAccessory, params);
-  }
-
-  static get Temperature() {
-    return TemperatureService;
-  }
-
-  static get Humidity() {
-    return HumidityService;
-  }
-
-  static get Settings() {
-    return Settings;
-  }
-
-  checkObservation(_observation: SensorInfoType) {
-    throw new Error('Method not implemented.');
-  }
-}
-*/
-
 type TemperatureServiceValues = {
   temperature?: number;
   temperatureUnit?: number;
