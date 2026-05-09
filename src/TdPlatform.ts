@@ -10,7 +10,6 @@ import { Platform } from 'homebridge-lib/Platform';
 import { default as NodeCache } from 'node-cache';
 import EventEmitter, { once } from 'node:events';
 import { assert } from 'tsafe';
-import colors from 'yoctocolors';
 
 import type TelldusApi from './api/TelldusApi.js';
 import type {
@@ -60,8 +59,6 @@ class TdPlatform extends Platform<TdPlatform> {
   platformBeatRate: number;
   stateCache: NodeCache;
   td: TdMyCustomTypes;
-  // deviceArray!: number[];
-  // sensorArray!: number[];
   numberOfDevices!: number;
   numberOfSensors!: number;
   switchAccessories!: {
@@ -131,7 +128,7 @@ class TdPlatform extends Platform<TdPlatform> {
         throw new Error('Given access token not a valid value');
       }
 
-      this.debug('Found access token for IP:', colors.green(this.config.ipAddress));
+      this.debug('Found access token for IP:', this.config.ipAddress);
 
       this.config.ignoreIds = [];
       if (this.config.ignore) {
@@ -195,11 +192,11 @@ class TdPlatform extends Platform<TdPlatform> {
             assert(sysInfo.body.product, 'Telldus product information missing in response');
             assert(sysInfo.body.version, 'Telldus version information missing in response');
             assert(sysInfo.body.time, 'Telldus time information missing in response');
-            this.log('Connected to Telldus gateway at', colors.green(this.telldusApi.getUrl));
-            this.log('Telldus system type:', colors.green(sysInfo.body.product));
-            this.log('Telldus system version:', colors.green(sysInfo.body.version));
+            this.log('Connected to Telldus gateway at', this.telldusApi.getUrl);
+            this.log('Telldus system type:', sysInfo.body.product);
+            this.log('Telldus system version:', sysInfo.body.version);
             this.tellstick.firmware = sysInfo.body.version;
-            this.log('Telldus system time:', colors.green(isoDateTimeToEveDate(sysInfo.body.time)));
+            this.log('Telldus system time:', isoDateTimeToEveDate(sysInfo.body.time));
             await this.tellstick.getNewAccessToken();
             connected = true;
           } else {
@@ -261,7 +258,6 @@ class TdPlatform extends Platform<TdPlatform> {
         } else {
           this.warn('No Telldus devices found!');
         }
-        // this.deviceArray = deviceArray;
 
         retry = true;
         attempts = 0;
@@ -301,7 +297,6 @@ class TdPlatform extends Platform<TdPlatform> {
         } else {
           this.warn('No Telldus sensors found!');
         }
-        // this.sensorArray = sensorArray;
       } catch (error) {
         await this.handleError({
           waitMinutes: 0,
@@ -373,7 +368,6 @@ class TdPlatform extends Platform<TdPlatform> {
         switchConfig.methods = deviceInfo.methods;
         switchConfig.protocol = deviceInfo.protocol;
         switchConfig.state = deviceInfo.state;
-        // switchConfig.type = info.type; // Not used currently
         switchConfig.delay = this.config.delay || 0;
         switchConfig.random = this.config.random || false;
         switchConfig.lightbulb = this.config.lightbulb || false;
@@ -507,7 +501,6 @@ class TdPlatform extends Platform<TdPlatform> {
           'Expected switchAccessory to be an instance of EventEmitter',
         );
         jobs.push(once(switchAccessory, 'initialised'));
-        // this.switchAccessories[tdSwitch] = switchAccessory;
       }
 
       for (const tdSensor of validSensors) {
@@ -529,7 +522,6 @@ class TdPlatform extends Platform<TdPlatform> {
         this.debug('Processing sensor', sensorParams.name);
         const sensorAccessory = new TdSensorAccessory(this, sensorParams);
         jobs.push(once(sensorAccessory, 'initialised'));
-        // this.sensorAccessories[tdSensor] = sensorAccessory;
       }
 
       for (const job of jobs) {

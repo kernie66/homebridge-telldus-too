@@ -5,7 +5,6 @@
 
 import figlet from 'figlet';
 import { AccessoryDelegate } from 'homebridge-lib/AccessoryDelegate';
-import colors from 'yoctocolors';
 
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
 import type TdPlatform from './TdPlatform.js';
@@ -60,10 +59,8 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
     this.locale = params.config.locale;
     this.td = platform.td;
     this.handleErrorSync = handleErrorSync;
-    // this.name = params.config.name;
 
-    console.log('this.logLevel:', this.logLevel);
-    this.debug('Initializing Tellstick accessory with name:', colors.green(this.name));
+    this.debug('Initializing Tellstick accessory with name:', this.name);
     // Persisted storage of the current access token
     this.addPropertyDelegate({
       key: 'accessToken',
@@ -92,14 +89,14 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       silent: true,
     });
 
-    this.debug('IP address:', colors.green(platform.config.ipAddress));
+    this.debug('IP address:', platform.config.ipAddress);
     this.debug('Config access token:', this.values.configAccessToken);
     this.debug('Current access token:', this.values.accessToken);
 
     // Try to initialise the gateway
     try {
       this.telldusApi = new TelldusApi(platform.config.ipAddress, this.values.accessToken);
-      this.log('Telldus API URL:', colors.green(this.telldusApi.getUrl));
+      this.log('Telldus API URL:', this.telldusApi.getUrl);
       this.telldusApi.setRequestHandler(requestHandler.bind(this));
       this.telldusApi.setResponseHandler(responseHandler.bind(this));
       this.telldusApi.setErrorHandler(errorHandler.bind(this));
@@ -126,9 +123,9 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
     });
     this.on('identify', async () => {
       try {
-        this.warn(colors.yellow('Identifying Tellstick'));
+        this.log('Identifying Tellstick');
         this.log(`\n${figlet.textSync('Access Token')}`);
-        this.warn('Current access token:', colors.green(this.values.accessToken));
+        this.log('Current access token:', this.values.accessToken);
       } catch (error) {
         this.handleErrorSync({
           error,
@@ -144,8 +141,8 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
       this.lastRefresh = getTimestamp();
       this.accessTokenExpires = newToken.expires;
       this.nextRefresh = this.lastRefresh + (newToken.expires - this.lastRefresh) * 0.8;
-      this.log('Telldus access token expires:', colors.green(toEveDate(newToken.expires)));
-      this.log('Next scheduled token refresh:', colors.blueBright(toEveDate(this.nextRefresh)));
+      this.log('Telldus access token expires:', toEveDate(newToken.expires));
+      this.log('Next scheduled token refresh:', toEveDate(this.nextRefresh));
       this.values.accessToken = newToken.token;
       this.telldusApi.setAccessToken(newToken.token);
       this.values.tokenExpires = newToken.expires;

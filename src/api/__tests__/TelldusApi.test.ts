@@ -1,7 +1,6 @@
 // import EventEmitter from 'node:events';
 // import { HttpClient } from 'homebridge-lib/HttpClient';
 
-import { URL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import TelldusApi from '../TelldusApi.js';

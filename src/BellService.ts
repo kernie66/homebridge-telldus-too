@@ -30,8 +30,6 @@ class BellService extends ServiceDelegate<BellServiceValues> {
   heartrate: number;
   td: TdMyCustomTypes;
   telldusApi: TelldusApi;
-  timerActive: boolean;
-  activeTimeout: NodeJS.Timeout | null;
   bellOn: boolean = false;
   handleError: typeof handleError;
 
@@ -52,15 +50,6 @@ class BellService extends ServiceDelegate<BellServiceValues> {
       key: 'bell',
       Characteristic: this.Characteristics.hap.On,
       value: false,
-      // setter: async (value) => {
-      //   assert(is<boolean>(value));
-      //   if (!this.values.disabled) {
-      //     this.bellOn = value;
-      //     await this.setBell();
-      //   } else {
-      //     this.log('Bell disabled, enable it to be able to turn it on!');
-      //   }
-      // },
     }).on('didSet', (value: boolean) => {
       if (!this.values.disabled) {
         this.bellOn = value;
@@ -105,10 +94,7 @@ class BellService extends ServiceDelegate<BellServiceValues> {
       Characteristic: this.Characteristics.my.LogLevel,
       value: switchAccessory.logLevel,
     });
-
-    // Make sure we have a clean start, no abort controllers
-    this.timerActive = false;
-    this.activeTimeout = null;
+    this.debug('Bell service initialized');
   }
 
   async setBell() {

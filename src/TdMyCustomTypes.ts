@@ -10,29 +10,6 @@ import { CustomHomeKitTypes } from 'homebridge-lib/CustomHomeKitTypes';
 import uuid from './utils/uuid.js';
 
 class TdMyCustomTypes extends CustomHomeKitTypes {
-  // _Characteristics!: {
-  //   EnableRandomOnce: boolean;
-  //   DisableRandomOnce: boolean;
-  //   Disabled: boolean;
-  //   Enabled: boolean;
-  //   Random: boolean;
-  //   Delay: number;
-  //   MinDelay: number;
-  //   TimeOut: number;
-  //   Repeats: number;
-  //   Repetition: number;
-  //   Status: string;
-  //   Heartrate: number;
-  //   SwitchMuteTime: number;
-  //   LastActivation: string;
-  //   TokenExpires: string;
-  //   NextRefresh: string;
-  //   LastUpdated: string;
-  // };
-  // _hapCharacteristics: {
-  //   StatusActive: boolean;
-  // };
-
   constructor(homebridge: API) {
     super(homebridge);
 

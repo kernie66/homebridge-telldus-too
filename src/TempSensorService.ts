@@ -45,11 +45,9 @@ type TemperatureServiceValues = {
 };
 
 class TemperatureService extends ServiceDelegate<TemperatureServiceValues> {
-  // name: string;
   randomize: boolean;
   configHeartrate: number;
   newHeartrate!: number;
-  // Service: Function;
 
   constructor(sensorAccessory: TdSensorAccessory, params: SensorServiceParams) {
     params.name = `${sensorAccessory.name} Temperature`;

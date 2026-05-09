@@ -17,7 +17,6 @@ import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
 import { COMMANDS } from '../TdConstants.js';
 import { getErrorMessage } from '../utils/getErrorMessage.js';
-// import type { HttpError, HttpRequest, HttpResponse } from '../typings/HttpClientTypes.js';
 import { setSupportedMethods } from '../utils/utils.js';
 
 function setPath(
@@ -29,7 +28,6 @@ function setPath(
   return qs ? `${path}?${queryString.stringify(qs)}` : path;
 }
 
-// type Checker<T> = (handler: T) => T | false;
 const checkFunction = <T>(handler: T): T | false => {
   if (handler && typeof handler === 'function') {
     return handler;
@@ -62,7 +60,6 @@ class TelldusApi extends HttpClient {
       this.apiClient = new HttpClient({
         https: false,
         host: this.host,
-        // headers: this.headers,
         json: true,
         maxSockets: 1,
         keepAlive: false,

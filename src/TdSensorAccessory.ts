@@ -22,7 +22,6 @@ import noResponseError from './utils/noResponseError.js';
 import WindSensorService from './WindSensorService.js';
 
 class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
-  // name: string;
   id: string;
   sensorId: number;
   model: string;
@@ -44,7 +43,6 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
 
   constructor(platform: TdPlatform, params: SensorAccessoryParams) {
     super(platform, params);
-    //    this.delay = params.delay
     this.name = params.name;
     this.id = params.id;
     this.sensorId = params.sensorId;
@@ -119,7 +117,6 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
         reason: `Error initializing sensor accessory for sensor ID ${this.sensorId}, check the error message and fix the issue`,
       });
       throw new Error(`Sensor Accessory Error`);
-      // return;
     }
   }
   async shutdown() {
@@ -139,7 +136,6 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
 
       if (beat % heartrate === 0) {
         await this.getSensorData();
-        //      this.checkState()
       }
     } catch (error) {
       await this.handleError({

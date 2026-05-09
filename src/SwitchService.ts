@@ -5,9 +5,7 @@
 
 import { ServiceDelegate } from 'homebridge-lib/ServiceDelegate';
 import NodeCache from 'node-cache';
-// import { setTimeout } from 'node:timers';
 import { assert, is } from 'tsafe';
-import colors from 'yoctocolors';
 
 import type TelldusApi from './api/TelldusApi.js';
 import type TdMyCustomTypes from './TdMyCustomTypes.js';
@@ -49,7 +47,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   state: number;
   stateCache: NodeCache;
   telldusApi: TelldusApi;
-  //switchMuteTime: number;
   switchOn: boolean = false;
   lastSwitchOn: boolean | null = null;
   handledBySetter: boolean;
@@ -63,8 +60,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   acDim: AbortController;
   acDimSignal: AbortSignal;
   acDimActive: boolean = false;
-  timerActive: boolean;
-  activeTimeout: NodeJS.Timeout | null;
   endStatus:
     | 'Not activated'
     | 'Directly set'
@@ -95,7 +90,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     this.state = switchAccessory.state;
     this.stateCache = switchAccessory.stateCache;
     this.telldusApi = switchAccessory.telldusApi;
-    // this.switchMuteTime = switchAccessory.platformBeatRate * 2;
     this.log = switchAccessory.log.bind(switchAccessory);
     this.debug = switchAccessory.debug.bind(switchAccessory);
     this.warn = switchAccessory.warn.bind(switchAccessory);
@@ -183,10 +177,14 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
             this.log("Skipping repeat 'setOn' for dimmer");
           }
         } else {
+          const controlText = this.values.enabled ? 'enabled' : 'disabled';
+          const valueText = value ? 'ON' : 'OFF';
           this.log(
-            'Switch constantly disabled/enabled (touched),',
-            colors.green('deactivate it to turn it on/off!'),
+            'Switch constantly %s (touched), deactivate it to turn it %s!',
+            controlText,
+            valueText,
           );
+          this.values.on = this.values.enabled;
         }
       });
 
@@ -198,11 +196,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         value: 100,
         unit: '%',
         Characteristic: this.Characteristics.hap.Brightness,
-        // setter: async (value) => {
-        //   assert(is<number>(value));
-        //   this.debug('Brightness value', value);
-        //   await this.setDimmerLevel(switchAccessory, value);
-        // },
       }).on('didSet', (value: number) => {
         this.debug('Brightness value', value);
         void (async () => {
@@ -268,9 +261,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           // Let on.didSet handle the switch update logic
           this.values.on = false;
         } else if (this.values.enabled) {
-          // setTimeout(() => {
-          //   this.values.disabled = false;
-          // }, 200);
           return Promise.reject('Switch constantly enabled, deactivate it to disable the switch!');
         }
         return value;
@@ -326,10 +316,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       Characteristic: this.Characteristics.my.LogLevel,
       value: switchAccessory.logLevel,
     });
-
-    // Make sure we have a clean start, no abort controllers
-    this.timerActive = false;
-    this.activeTimeout = null;
   }
 
   async setConfigValues() {
@@ -338,7 +324,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     this.values.repeats = this.repeats;
     this.values.heartrate = this.heartrate;
     await wait(500);
-    // this.values.setDefault = false;
   }
 
   async setOn(this: SwitchService, switchAccessory: TdSwitchAccessory) {
@@ -352,7 +337,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
 
     try {
       const telldusState = this.switchOn ? FULL_COMMANDS.TURNON : FULL_COMMANDS.TURNOFF;
-      //const tdCacheValue = switchAccessory.stateCache.get(`td${key}`);
       const newValue = this.lastSwitchOn !== null ? this.switchOn !== this.lastSwitchOn : false;
       this.log(
         'New value is %s, last value was %s, new value is %s the same as last value',
@@ -361,9 +345,6 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         newValue ? 'NOT' : '',
       );
       this.lastSwitchOn = this.switchOn;
-      // If the new value is the same as the Telldus state cache value, then it is likely
-      // that the update is from Telldus state update, so we update directly
-      // const tdControl = tdCacheValue === telldusState || this.updateImmediately;
       // If active update and new value, we assume that it is user controlled
       const userControl = switchAccessory.onUpdating ? newValue : false;
       switchAccessory.onUpdating = true;
