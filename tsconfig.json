@@ -24,8 +24,8 @@
     "noErrorTruncation": true, // When enabled, this option prevents TypeScript from truncating error messages, providing full details about the error.
     "declaration": true, // Generates corresponding .d.ts file
     "allowSyntheticDefaultImports": true,
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+    "types": ["node"]
   },
-  "include": ["homebridge-ui", "src"],
-  "exclude": ["**/__tests__/*"]
+  "include": ["homebridge-ui", "src"]
 }

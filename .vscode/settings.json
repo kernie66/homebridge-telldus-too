@@ -7,16 +7,21 @@
   "js/ts.validate.enabled": false,
   "files.eol": "\n",
   "editor.rulers": [120],
-  "eslint.enable": false,
   "oxc.enable": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "oxc.fmt.configPath": "./vite.config.ts",
+  "oxc.fmt.configPath": "./.oxfmtrc.json",
   "editor.formatOnSave": false,
+  "editor.formatOnSaveMode": "file",
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
   "editor.codeActionsOnSave": {
     "source.format.oxc": "always",
     "source.fixAll.oxc": "always"
   },
-  "editor.formatOnSaveMode": "file",
   "js/ts.preferences.quoteStyle": "single",
   "turboConsoleLog.quote": "'"
 }

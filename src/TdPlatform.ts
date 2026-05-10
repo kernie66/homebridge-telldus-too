@@ -12,12 +12,7 @@ import EventEmitter, { once } from 'node:events';
 import { assert } from 'tsafe';
 
 import type TelldusApi from './api/TelldusApi.js';
-import type {
-  DeviceInfoType,
-  DeviceListType,
-  SensorInfoType,
-  SensorListType,
-} from './api/TelldusApi.types.js';
+import type { DeviceInfoType, DeviceListType, SensorInfoType, SensorListType } from './api/TelldusApi.types.js';
 import type { ConfigJson } from './typings/ConfigJsonTypes.js';
 import type { SensorAccessoryParams, SensorConfigTypes } from './typings/SensorTypes.js';
 import type { SwitchAccessoryParams, SwitchConfigTypes } from './typings/SwitchTypes.js';
@@ -115,10 +110,7 @@ class TdPlatform extends Platform<TdPlatform> {
       if (!this.config.ipAddress) {
         throw new Error('IP address missing in config file');
       }
-      if (
-        !configRegExp.ip.test(this.config.ipAddress) &&
-        !configRegExp.host.test(this.config.ipAddress)
-      ) {
+      if (!configRegExp.ip.test(this.config.ipAddress) && !configRegExp.host.test(this.config.ipAddress)) {
         throw new Error(`IP address ${this.config.ipAddress} is not a valid value`);
       }
       if (!this.config.accessToken) {
@@ -145,8 +137,7 @@ class TdPlatform extends Platform<TdPlatform> {
       this.handleErrorSync({
         header: 'Config Error',
         error,
-        reason:
-          'Check the config file and restart Homebridge, the plugin aborts the initialization',
+        reason: 'Check the config file and restart Homebridge, the plugin aborts the initialization',
       });
       return;
     }
@@ -200,9 +191,7 @@ class TdPlatform extends Platform<TdPlatform> {
             await this.tellstick.getNewAccessToken();
             connected = true;
           } else {
-            throw new Error(
-              'No response from Telldus, check if the host address is correct and restart',
-            );
+            throw new Error('No response from Telldus, check if the host address is correct and restart');
           }
         } catch (error) {
           if (attempts < 10) {
@@ -377,19 +366,9 @@ class TdPlatform extends Platform<TdPlatform> {
           switchConfig.category = this.Accessory.Categories.Switch;
         }
         if (this.config.ignoreIds?.includes(switchConfig.id)) {
-          this.log(
-            'Ignoring %s: %s, ID: %s',
-            switchConfig.modelType,
-            switchConfig.name,
-            switchConfig.id,
-          );
+          this.log('Ignoring %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
         } else {
-          this.log(
-            'Found %s: %s, ID: %s',
-            switchConfig.modelType,
-            switchConfig.name,
-            switchConfig.id,
-          );
+          this.log('Found %s: %s, ID: %s', switchConfig.modelType, switchConfig.name, switchConfig.id);
           validSwitches.push(switchConfig);
         }
       }
@@ -496,10 +475,7 @@ class TdPlatform extends Platform<TdPlatform> {
         );
         const switchAccessory = new TdSwitchAccessory(this, switchParams);
         this.setStateCache(tdSwitch);
-        assert(
-          switchAccessory instanceof EventEmitter,
-          'Expected switchAccessory to be an instance of EventEmitter',
-        );
+        assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
         jobs.push(once(switchAccessory, 'initialised'));
       }
 
@@ -586,12 +562,7 @@ class TdPlatform extends Platform<TdPlatform> {
     let success = this.stateCache.set(`td${key}`, state);
     success = success && this.stateCache.set(`pi${key}`, state);
     if (success) {
-      this.debug(
-        'Stored Telldus state [%s] for key %s (%s)',
-        stateToText(device.state),
-        key,
-        device.name,
-      );
+      this.debug('Stored Telldus state [%s] for key %s (%s)', stateToText(device.state), key, device.name);
     } else {
       this.warn("Couldn't set initial cache state for Telldus devices");
     }
@@ -607,12 +578,7 @@ class TdPlatform extends Platform<TdPlatform> {
     if (cachedValue !== state) {
       const success = this.stateCache.set(`td${key}`, state);
       if (success) {
-        this.debug(
-          'Updated Telldus state to [%s] for key %s (%s)',
-          stateToText(state),
-          key,
-          device.name,
-        );
+        this.debug('Updated Telldus state to [%s] for key %s (%s)', stateToText(state), key, device.name);
       } else {
         this.warn("Couldn't update cache state for Telldus devices, will try again");
       }
