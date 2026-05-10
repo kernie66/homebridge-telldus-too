@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite-plus';
+import { configDefaults, defineConfig } from 'vite-plus';
 
 export default defineConfig({
   fmt: {
@@ -22,5 +22,14 @@ export default defineConfig({
   },
   staged: {
     '*': 'vp check --fix',
+  },
+  test: {
+    globals: true,
+    exclude: [...configDefaults.exclude, 'dist/*'],
+    setupFiles: './test/vitest.setup.ts',
+    coverage: {
+      include: ['src/**/*.{ts,js}'],
+      exclude: ['**/__tests__/**'],
+    },
   },
 });

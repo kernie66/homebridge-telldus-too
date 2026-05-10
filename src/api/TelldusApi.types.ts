@@ -63,6 +63,10 @@ export interface SystemInfoType extends ResponseBodyError {
   version?: string;
 }
 
+export interface TurnOnOffType extends ResponseBodyError {
+  status: string;
+}
+
 export interface ResponseBodySuccess {
   reply: string;
 }

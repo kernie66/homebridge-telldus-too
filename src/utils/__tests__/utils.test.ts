@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { COMMANDS, TELLDUS_STATES } from '../../TdConstants.js';
 import { setSupportedMethods, stateToText } from '../utils.js';

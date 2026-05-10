@@ -1,7 +1,7 @@
 // import EventEmitter from 'node:events';
 // import { HttpClient } from 'homebridge-lib/HttpClient';
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import TelldusApi from '../TelldusApi.js';
 import { testDeviceInfo, testSystemInfo } from './TelldusApiFakeData.js';
@@ -81,11 +81,12 @@ describe('Test API functions', () => {
   it('turns switch on/off', async () => {
     const testApi = new TelldusApi(host, accessToken);
     const switchOnResponse = await testApi.onOffDevice(4, true);
-    // console.log('🚀 ~ switchOnResponse:', switchOnResponse);
+    // console.log("🚀 ~ switchOnResponse:", switchOnResponse);
     expect(switchOnResponse.ok).toBeTruthy();
     expect(switchOnResponse.body.status).toBe('success');
 
     const switchOffResponse = await testApi.onOffDevice(4, false);
+    // console.log("🚀 ~ switchOffResponse:", switchOffResponse);
     expect(switchOffResponse.ok).toBeTruthy();
     expect(switchOffResponse.body.status).toBe('success');
   });

@@ -12,6 +12,7 @@ import type {
   SensorInfoType,
   SensorListType,
   SystemInfoType,
+  TurnOnOffType,
 } from '../api/TelldusApi.types.js';
 import type { RefreshTokenResponse } from './TelldusApi.types.js';
 
@@ -165,7 +166,7 @@ class TelldusApi extends HttpClient {
       }),
       this.headers,
     );
-    response.ok = this.checkResponseOk(response);
+    response.ok = this.checkResponseOk<SensorInfoType>(response);
     return response;
   }
 
@@ -225,7 +226,7 @@ class TelldusApi extends HttpClient {
   }
 
   async onOffDevice(id: number, on: boolean) {
-    const response = await this.apiClient.get(
+    const response: HttpResponse<TurnOnOffType> = await this.apiClient.get(
       setPath(`device/turn${on ? 'On' : 'Off'}`, {
         id,
       }),

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vite-plus/test';
 
 import { testSensorInfo } from '../../api/__tests__/TelldusApiFakeData';
 import checkSensorType from '../checkSensorType';

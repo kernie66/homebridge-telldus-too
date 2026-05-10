@@ -1,4 +1,4 @@
-import { describe, it } from 'vitest';
+import { describe, it } from 'vite-plus/test';
 
 describe('Load Platform', () => {
   it('should load and register the platform with homebridge', () => {

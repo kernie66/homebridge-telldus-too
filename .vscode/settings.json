@@ -4,32 +4,19 @@
     "alefragnani.project-manager": ["workspace"]
   },
   "cSpell.words": ["rrate", "rtot", "selflearning", "Tellstick", "wavg", "wdir", "wgust"],
-  "ts.validate.enable": false,
-  "js.validate.enable": false,
+  "js/ts.validate.enabled": false,
   "files.eol": "\n",
   "editor.rulers": [120],
   "eslint.enable": false,
-  "[javascript]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "[javascriptreact]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "[typescript]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "editor.codeActionsOnSave": {
-    "source.fixAll.oxc": "explicit"
-  },
+  "oxc.enable": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "oxc.fmt.configPath": "./vite.config.ts",
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file"
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {
+    "source.format.oxc": "always",
+    "source.fixAll.oxc": "always"
+  },
+  "editor.formatOnSaveMode": "file",
+  "js/ts.preferences.quoteStyle": "single",
+  "turboConsoleLog.quote": "'"
 }
