@@ -18,6 +18,7 @@ import RainSensorService from './RainSensorService.js';
 import { HumidityService, TemperatureService } from './TempSensorService.js';
 import { handleError, handleErrorSync } from './utils/handleError.js';
 import 'homebridge-lib/ServiceDelegate/History';
+
 import noResponseError from './utils/noResponseError.js';
 import WindSensorService from './WindSensorService.js';
 
@@ -74,9 +75,7 @@ class TdSensorAccessory extends AccessoryDelegate<TdPlatform, object> {
           temperatureDelegate: this.temperatureSensor
             ? this.tempSensorService.characteristicDelegate('temperature')
             : null,
-          humidityDelegate: this.humiditySensor
-            ? this.humiditySensorService.characteristicDelegate('humidity')
-            : null,
+          humidityDelegate: this.humiditySensor ? this.humiditySensorService.characteristicDelegate('humidity') : null,
         });
         this.manageLogLevel(this.tempSensorService.characteristicDelegate('logLevel'), false);
       }

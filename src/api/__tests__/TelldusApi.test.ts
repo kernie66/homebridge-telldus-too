@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import TelldusApi from '../TelldusApi.js';
-import { testDeviceInfo, testSystemInfo } from './TelldusApiFakeData.js';
+import { testDeviceInfoSuccess, testSystemInfo } from './TelldusApiFakeData.js';
 
 const host = '192.168.1.254';
 const accessToken =
@@ -37,7 +37,7 @@ describe('Test API functions', () => {
 
     expect(deviceInfoId4.ok).toBeTruthy();
     expect(id).toBe('4');
-    expect(deviceInfoId4.body.id).toBe(testDeviceInfo[0].id);
+    expect(deviceInfoId4.body.id).toBe(testDeviceInfoSuccess.id);
 
     // Test missing device ID
     const deviceInfoId1 = await testApi.getDeviceInfo(1);

@@ -43,12 +43,7 @@ declare module 'homebridge-lib/Platform' {
      * in Homebridge's `config.json`.
      * @param {!Platform} Platform - The constructor of the platform plugin.
      */
-    static loadPlatform(
-      homebridge: HomebridgeAPI,
-      packageJson: any,
-      platformName: string,
-      Platform: TdPlatform,
-    ): void;
+    static loadPlatform(homebridge: HomebridgeAPI, packageJson: any, platformName: string, Platform: TdPlatform): void;
     get Accessory(): HomebridgeAPI.hap.Accessory;
     get Services(): HomebridgeAPI.hap.Services;
     get Characteristic(): HomebridgeAPI.hap.Characteristic;

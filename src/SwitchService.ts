@@ -20,6 +20,7 @@ import { stateToText, wait } from './utils/utils.js';
 
 type SwitchServiceValues = {
   on: boolean;
+  toggle: boolean;
   brightness: number;
   random: boolean;
   enableRandomOnce: boolean;
@@ -50,6 +51,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   switchOn: boolean = false;
   lastSwitchOn: boolean | null = null;
   handledBySetter: boolean;
+  toggledBySetter: boolean;
   updateImmediately: boolean = false;
   acDelay: AbortController;
   acDelaySignal: AbortSignal;
@@ -63,6 +65,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   endStatus:
     | 'Not activated'
     | 'Directly set'
+    | 'Toggled'
     | 'Manually controlled'
     | 'Automation done'
     | 'Updated by Telldus'
@@ -95,6 +98,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
     this.warn = switchAccessory.warn.bind(switchAccessory);
     this.error = switchAccessory.error.bind(switchAccessory);
     this.handledBySetter = false;
+    this.toggledBySetter = false;
     this.acDelay = new AbortController();
     this.acDelaySignal = this.acDelay.signal;
     this.acDelayActive = false;
@@ -125,9 +129,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           this.values.on = this.values.enabled;
           const controlText = this.values.enabled ? 'enabled' : 'disabled';
           const valueText = value ? 'ON' : 'OFF';
-          return Promise.reject(
-            `Switch constantly ${controlText}, deactivate it to turn it ${valueText}!`,
-          );
+          return Promise.reject(`Switch constantly ${controlText}, deactivate it to turn it ${valueText}!`);
         }
         return value;
       },
@@ -179,11 +181,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         } else {
           const controlText = this.values.enabled ? 'enabled' : 'disabled';
           const valueText = value ? 'ON' : 'OFF';
-          this.log(
-            'Switch constantly %s (touched), deactivate it to turn it %s!',
-            controlText,
-            valueText,
-          );
+          this.log('Switch constantly %s (touched), deactivate it to turn it %s!', controlText, valueText);
           this.values.on = this.values.enabled;
         }
       });
@@ -203,6 +201,56 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         })();
       });
     }
+
+    // Add toggle characteristic
+    this.addCharacteristicDelegate({
+      key: 'toggle',
+      value: false,
+      Characteristic: this.td.Characteristics.Toggle,
+      setter: async (value) => {
+        assert(is<boolean>(value));
+        // Wait to let disabled and enabled values settle
+        await wait(100);
+        this.debug('Switch toggle setter called with value %s', value);
+        this.values.repetition = 0;
+        if (!this.values.disabled && !this.values.enabled) {
+          this.toggledBySetter = true;
+          this.switchOn = true;
+          this.updateImmediately = true;
+          this.endStatus = 'Toggled';
+          // Call setOn to initiate the switch update, but do not await it here
+          await this.setOn(switchAccessory);
+          await wait(1000);
+          this.switchOn = false;
+          await this.setOn(switchAccessory);
+        } else {
+          const controlText = this.values.enabled ? 'enabled' : 'disabled';
+          return Promise.reject(`Switch constantly ${controlText}, deactivate it to toggle it!`);
+        }
+        return false;
+      },
+    }).on('didSet', (value: boolean) => {
+      this.debug('Switch toggle didSet called with value %s', value);
+      this.debug('Toggled by setter: %s', this.toggledBySetter);
+      if (!this.toggledBySetter) {
+        this.values.repetition = 0;
+        if (!this.values.disabled && !this.values.enabled) {
+          this.updateImmediately = true;
+          void (async () => {
+            this.switchOn = true;
+            await this.setOn(switchAccessory);
+            await wait(1000);
+            this.switchOn = false;
+            await this.setOn(switchAccessory);
+          })();
+        } else {
+          const controlText = this.values.enabled ? 'enabled' : 'disabled';
+          this.log('Switch constantly %s, deactivate it to toggle it!', controlText);
+          this.values.toggle = false;
+        }
+      }
+      this.toggledBySetter = false;
+    });
 
     this.addCharacteristicDelegate({
       key: 'random',
@@ -329,11 +377,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
   async setOn(this: SwitchService, switchAccessory: TdSwitchAccessory) {
     const key = `ID${switchAccessory.deviceId}`;
     const logger = this.error.bind(this);
-    this.log(
-      'setOn called with value %s for device ID %d',
-      this.switchOn,
-      switchAccessory.deviceId,
-    );
+    this.log('setOn called with value %s for device ID %d', this.switchOn, switchAccessory.deviceId);
 
     try {
       const telldusState = this.switchOn ? FULL_COMMANDS.TURNON : FULL_COMMANDS.TURNOFF;
@@ -430,10 +474,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       do {
         // Control Telldus switch on/off
         try {
-          const response = await this.telldusApi.onOffDevice(
-            switchAccessory.deviceId,
-            this.switchOn,
-          );
+          const response = await this.telldusApi.onOffDevice(switchAccessory.deviceId, this.switchOn);
           if (response.ok && noResponseError(response, logger)) {
             this.log('Switch set to', stateToText(telldusState));
             this.values.lastActivation = toEveDate(getTimestamp());
@@ -456,11 +497,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
         if (this.values.repetition < this.values.repeats) {
           this.values.status = 'Repeating';
           this.values.repetition = repetition;
-          this.log(
-            'Repeat command, repetition number: %d of %d',
-            this.values.repetition,
-            this.values.repeats,
-          );
+          this.log('Repeat command, repetition number: %d of %d', this.values.repetition, this.values.repeats);
           // Prepare abort controller
           this.acRepeatActive = true;
           // Wait 2 seconds + 1 second/repetition between repeats
@@ -480,11 +517,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       // Update the state cache with the new value
       const success = switchAccessory.stateCache.set(`pi${key}`, telldusState);
       if (success) {
-        this.debug(
-          'Plug-in state cache updated for %s with value [%s]',
-          key,
-          stateToText(telldusState),
-        );
+        this.debug('Plug-in state cache updated for %s with value [%s]', key, stateToText(telldusState));
       } else {
         this.warn("Plug-in cache couldn't be updated for", key);
       }

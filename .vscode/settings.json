@@ -9,8 +9,10 @@
   "editor.rulers": [120],
   "oxc.enable": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
+  "oxc.configPath": "./.oxlintrc.json",
   "oxc.fmt.configPath": "./.oxfmtrc.json",
-  "editor.formatOnSave": false,
+  "oxc.typeAware": true,
+  "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
   "[javascript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
@@ -19,7 +21,7 @@
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
   "editor.codeActionsOnSave": {
-    "source.format.oxc": "always",
+    //   "source.format.oxc": "always",
     "source.fixAll.oxc": "always"
   },
   "js/ts.preferences.quoteStyle": "single",

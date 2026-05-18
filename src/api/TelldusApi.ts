@@ -133,28 +133,19 @@ class TelldusApi extends HttpClient {
     return this.lastError;
   }
 
-  checkResponseOk<T>(
-    response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>,
-  ) {
-    const ok =
-      (response.statusCode >= 200 && response.statusCode <= 299 && !response.body.error) || false;
+  checkResponseOk<T>(response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>) {
+    const ok = (response.statusCode >= 200 && response.statusCode <= 299 && !response.body.error) || false;
     return ok;
   }
 
   async getSystemInfo() {
-    const response: HttpResponse<SystemInfoType> = await this.apiClient.get(
-      'system/info',
-      this.headers,
-    );
+    const response: HttpResponse<SystemInfoType> = await this.apiClient.get('system/info', this.headers);
     response.ok = this.checkResponseOk<SystemInfoType>(response);
     return response;
   }
 
   async listSensors() {
-    const response: HttpResponse<SensorListType> = await this.apiClient.get(
-      'sensors/list',
-      this.headers,
-    );
+    const response: HttpResponse<SensorListType> = await this.apiClient.get('sensors/list', this.headers);
     response.ok = this.checkResponseOk<SensorListType>(response);
     return response;
   }

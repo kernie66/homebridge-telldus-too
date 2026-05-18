@@ -164,10 +164,7 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
           this.warn('Switch constantly disabled, restored [OFF] state');
         } else {
           this.switchService.endStatus = 'Updated by Telldus';
-          this.log(
-            'Switch state updated to [%s] based on cached Telldus value',
-            stateToText(tdState),
-          );
+          this.log('Switch state updated to [%s] based on cached Telldus value', stateToText(tdState));
         }
         this.switchService.updateImmediately = true;
         if (this.switchService.values.on === newOnValue) {
@@ -179,10 +176,7 @@ class TdSwitchAccessory extends AccessoryDelegate<TdPlatform, null> {
         } else {
           // When the value of "on" is not the same in the service, just set the value to trigger a didSet event
           this.switchService.values.on = newOnValue;
-          this.debug(
-            'didSet triggered to update the switch state to [%s]',
-            newOnValue ? 'ON' : 'OFF',
-          );
+          this.debug('didSet triggered to update the switch state to [%s]', newOnValue ? 'ON' : 'OFF');
         }
       }
     } else {

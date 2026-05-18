@@ -1,7 +1,8 @@
 import { HttpResponse, http } from 'msw';
 
 import {
-  testDeviceInfo,
+  testDeviceInfoError,
+  testDeviceInfoSuccess,
   testDeviceList,
   testRefreshToken,
   testSensorInfo,
@@ -23,11 +24,13 @@ export const telldusApiHandlers = [
   http.get('http://192.168.1.254/api/device/info', ({ request }) => {
     const params = URL.parse(request.url);
     if (!params) {
-      return HttpResponse.json(testDeviceInfo[1]);
+      return HttpResponse.json(testDeviceInfoError);
     }
     const id = params.searchParams.get('id');
-    const index = id === '4' ? 0 : 1;
-    return HttpResponse.json(testDeviceInfo[index]);
+    if (id === '4') {
+      return HttpResponse.json(testDeviceInfoSuccess);
+    }
+    return HttpResponse.json(testDeviceInfoError);
   }),
 
   http.get('http://192.168.1.254/api/sensors/list', () => {
@@ -57,7 +60,7 @@ export const telldusApiHandlers = [
         return HttpResponse.json(testSensorInfo[6]);
     }
     // Return error response for unknown IDs
-    return HttpResponse.json(testDeviceInfo[1]);
+    return HttpResponse.json(testDeviceInfoError);
   }),
 
   http.get('http://192.168.1.254/api/device/turnOn', () => {

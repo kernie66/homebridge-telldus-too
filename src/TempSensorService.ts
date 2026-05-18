@@ -94,8 +94,7 @@ class TemperatureService extends ServiceDelegate<TemperatureServiceValues> {
 
   checkObservation(observation: SensorInfoType) {
     if (observation.data[0] && observation.data[0].name === 'temp') {
-      this.values.temperature =
-        Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset || 0;
+      this.values.temperature = Math.round(observation.data[0].value * 10) / 10 + this.values.temperatureOffset || 0;
       this.values.observationTime = toEveDate(observation.data[0].lastUpdated);
     } else {
       this.warn('Temperature data not found for sensor');

@@ -17,13 +17,7 @@ export interface SensorConfigTypes {
   protocol?: string;
 }
 
-export type SensorModelType =
-  | 'temperature'
-  | 'humidity'
-  | 'temperaturehumidity'
-  | 'wind'
-  | 'rain'
-  | 'unknown';
+export type SensorModelType = 'temperature' | 'humidity' | 'temperaturehumidity' | 'wind' | 'rain' | 'unknown';
 
 export interface SensorAccessoryParams extends AccessoryParams {
   sensorId: number;

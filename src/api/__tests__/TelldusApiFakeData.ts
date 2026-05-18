@@ -1,4 +1,6 @@
-import type { SensorModelType } from '../../typings/SensorTypes';
+import type { SensorModelType } from '../../typings/SensorTypes.js';
+
+import { DeviceInfoType, ResponseBodyError, SensorInfoType } from '../TelldusApi.types.js';
 
 export const testSystemInfo = {
   product: 'tellstick-znet-lite-v2',
@@ -35,21 +37,20 @@ export const testDeviceList = {
   ],
 };
 
-export const testDeviceInfo = [
-  {
-    id: 4,
-    methods: 0,
-    model: 'selflearning-switch:proove',
-    name: 'Window',
-    protocol: 'arctech',
-    state: 0,
-    statevalue: '',
-    type: 'device',
-  },
-  {
-    error: 'Device "1" could not be found',
-  },
-];
+export const testDeviceInfoSuccess: DeviceInfoType = {
+  id: 4,
+  methods: 0,
+  model: 'selflearning-switch:proove',
+  name: 'Window',
+  protocol: 'arctech',
+  state: 0,
+  statevalue: '',
+  type: 'device',
+};
+
+export const testDeviceInfoError: ResponseBodyError = {
+  error: 'Device "1" could not be found',
+};
 
 export const testSensorList = {
   sensor: [
@@ -119,7 +120,7 @@ export const testSensorList = {
   ],
 };
 
-export const testSensorInfo = [
+export const testSensorInfo: SensorInfoType[] = [
   {
     battery: 254,
     data: [

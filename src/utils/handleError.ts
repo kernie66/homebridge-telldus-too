@@ -16,10 +16,7 @@ interface HandleErrorParams {
 // Waits for a specified number of minutes before retrying an operation,
 // with optional logging of a header, error message, and reason for the retry.
 // If waitMinutes is set to 0, it will log the messages without waiting before retrying.
-export async function handleError(
-  this: Delegate,
-  { waitMinutes = 0, header, error, reason }: HandleErrorParams = {},
-) {
+export async function handleError(this: Delegate, { waitMinutes = 0, header, error, reason }: HandleErrorParams = {}) {
   if (header) {
     this.error(`\n${figlet.textSync(header)}`);
   }
@@ -38,10 +35,7 @@ export async function handleError(
 }
 
 // Synchronous version with IIFE async wait function
-export function handleErrorSync(
-  this: Delegate,
-  { waitMinutes = 0, header, error, reason }: HandleErrorParams = {},
-) {
+export function handleErrorSync(this: Delegate, { waitMinutes = 0, header, error, reason }: HandleErrorParams = {}) {
   if (header) {
     this.error(`\n${figlet.textSync(header)}`);
   }
