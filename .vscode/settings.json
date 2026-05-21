@@ -7,11 +7,11 @@
   "js/ts.validate.enabled": false,
   "files.eol": "\n",
   "editor.rulers": [120],
-  "oxc.enable": true,
+  // "oxc.enable": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
   "oxc.configPath": "./.oxlintrc.json",
   "oxc.fmt.configPath": "./.oxfmtrc.json",
-  "oxc.typeAware": true,
+  // "oxc.typeAware": true,
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
   "[javascript]": {
@@ -20,10 +20,11 @@
   "[typescript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  "editor.codeActionsOnSave": {
-    //   "source.format.oxc": "always",
-    "source.fixAll.oxc": "always"
-  },
+  // "editor.codeActionsOnSave": {
+  //  "source.format.oxc": "always",
+  //  "source.fixAll.oxc": "always"
+  //},
   "js/ts.preferences.quoteStyle": "single",
-  "turboConsoleLog.quote": "'"
+  "turboConsoleLog.quote": "'",
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

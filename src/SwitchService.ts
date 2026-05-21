@@ -218,7 +218,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           this.switchOn = true;
           this.updateImmediately = true;
           this.endStatus = 'Toggled';
-          // Call setOn to initiate the switch update, but do not await it here
+          // Call setOn to toggle the switch
           await this.setOn(switchAccessory);
           await wait(1000);
           this.switchOn = false;

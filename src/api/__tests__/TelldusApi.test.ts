@@ -57,17 +57,29 @@ describe('Test API functions', () => {
   it('gets sensor info', async () => {
     const testApi = new TelldusApi(host, accessToken);
 
-    // Test temp/humidity sensor
-    const tempHumSensorInfo = await testApi.getSensorInfo(105);
+    // Test normal temp/humidity sensor
+    const tempHumSensorInfo1 = await testApi.getSensorInfo(105);
     // console.log('Sensor info:', tempHumSensorInfo.body);
     // console.log('🚀 ~ tempHumSensorInfo:', tempHumSensorInfo);
 
-    const params = URL.parse(tempHumSensorInfo.request.url);
-    const id = params?.searchParams.get('id');
+    const params1 = URL.parse(tempHumSensorInfo1.request.url);
+    const id1 = params1?.searchParams.get('id');
 
-    expect(id).toBe('105');
-    expect(tempHumSensorInfo.ok).toBeTruthy();
-    expect(tempHumSensorInfo.body.id).toBe(105);
+    expect(id1).toBe('105');
+    expect(tempHumSensorInfo1.ok).toBeTruthy();
+    expect(tempHumSensorInfo1.body.id).toBe(105);
+
+    // Test undefined temp/humidity sensor
+    const tempHumSensorInfo2 = await testApi.getSensorInfo(168);
+    // console.log('Sensor info:', tempHumSensorInfo.body);
+    // console.log('🚀 ~ tempHumSensorInfo:', tempHumSensorInfo);
+
+    const params2 = URL.parse(tempHumSensorInfo2.request.url);
+    const id2 = params2?.searchParams.get('id');
+
+    expect(id2).toBe('168');
+    expect(tempHumSensorInfo2.ok).toBeTruthy();
+    expect(tempHumSensorInfo2.body.id).toBe(168);
 
     // Test missing sensor ID
     const undefinedSensor = await testApi.getSensorInfo(1);
@@ -93,6 +105,7 @@ describe('Test API functions', () => {
 
   it('refreshes access token', async () => {
     const testApi = new TelldusApi(host, accessToken);
+
     const newToken = await testApi.refreshAccessToken();
     // console.log('newToken', newToken);
     expect(newToken.expires).toBeDefined();

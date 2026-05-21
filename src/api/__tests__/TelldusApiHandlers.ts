@@ -46,18 +46,12 @@ export const telldusApiHandlers = [
     switch (id) {
       case '105':
         return HttpResponse.json(testSensorInfo[0]);
-      case '166':
+      case '168':
         return HttpResponse.json(testSensorInfo[1]);
       case '167':
         return HttpResponse.json(testSensorInfo[2]);
-      case '168':
-        return HttpResponse.json(testSensorInfo[3]);
       case '169':
-        return HttpResponse.json(testSensorInfo[4]);
-      case '188':
-        return HttpResponse.json(testSensorInfo[5]);
-      case '247':
-        return HttpResponse.json(testSensorInfo[6]);
+        return HttpResponse.json(testSensorInfo[3]);
     }
     // Return error response for unknown IDs
     return HttpResponse.json(testDeviceInfoError);
