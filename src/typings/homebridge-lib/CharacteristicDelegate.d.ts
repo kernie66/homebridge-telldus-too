@@ -91,18 +91,18 @@ declare class CharacteristicDelegate extends Delegate {
    * @throws {SyntaxError} When a mandatory parameter is missing or an
    * optional parameter is not applicable.
    */
-  constructor(serviceDelegate: any, params?: {});
+  constructor(serviceDelegate: unknown, params?: object);
   /** Destroy characteristic delegate and delete associated HomeKit characteristic.
    * @params {boolean} [delegateOnly=false] - Destroy the delegate, but keep the
    * associated HomeKit characteristic (including context).
    */
   _destroy(delegateOnly?: boolean): void;
-  _hasPerm(perm: any): any;
-  get _canRead(): any;
-  get _canWrite(): any;
-  get _canNotify(): any;
-  get _writeResponse(): any;
-  get _writeOnly(): any;
+  _hasPerm(perm: unknown): unknown;
+  get _canRead(): unknown;
+  get _canWrite(): unknown;
+  get _canNotify(): unknown;
+  get _writeResponse(): unknown;
+  get _writeOnly(): unknown;
   get _notifyOnly(): boolean;
   /** Current log level (of the associated accessory delegate).
    *
@@ -119,21 +119,21 @@ declare class CharacteristicDelegate extends Delegate {
    * @type {!integer}
    * @readonly
    */
-  get logLevel(): any;
-  get displayName(): any;
+  get logLevel(): number;
+  get displayName(): unknown;
   get _namePrefix(): string;
-  validate(value: any): {
-    value: any;
+  validate(value: unknown): {
     s: string;
+    value: unknown;
   };
   /** Value of associated Characteristic.
    */
-  get value(): any;
-  set value(v: any);
+  get value(): unknown;
+  set value(v: unknown);
   /** Set the value of the associated HomeKit characteristic.
    */
-  setValue(value: any): void;
-  _onGet(callback: any): Promise<void>;
-  _onSet(v: any, callback: any): Promise<void>;
+  setValue(value: unknown): void;
+  _onGet(callback: unknown): Promise<void>;
+  _onSet(v: unknown, callback: unknown): Promise<void>;
 }
 export { CharacteristicDelegate };

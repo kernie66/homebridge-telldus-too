@@ -9,7 +9,7 @@
   "editor.rulers": [120],
   // "oxc.enable": true,
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "oxc.configPath": "./.oxlintrc.json",
+  //"oxc.configPath": "./oxlint.config.ts",
   "oxc.fmt.configPath": "./.oxfmtrc.json",
   // "oxc.typeAware": true,
   "editor.formatOnSave": true,
@@ -20,10 +20,10 @@
   "[typescript]": {
     "editor.defaultFormatter": "oxc.oxc-vscode"
   },
-  // "editor.codeActionsOnSave": {
-  //  "source.format.oxc": "always",
-  //  "source.fixAll.oxc": "always"
-  //},
+  "editor.codeActionsOnSave": {
+    //  "source.format.oxc": "always",
+    "source.fixAll.oxc": "always"
+  },
   "js/ts.preferences.quoteStyle": "single",
   "turboConsoleLog.quote": "'",
   "js/ts.tsdk.path": "node_modules/typescript/lib"

@@ -12,12 +12,12 @@ import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 type TemperatureServiceValues = {
-  temperature?: number;
-  temperatureUnit?: number;
-  temperatureOffset: number;
-  observationTime?: string;
   heartrate: number;
   logLevel: number;
+  observationTime?: string;
+  temperature?: number;
+  temperatureOffset: number;
+  temperatureUnit?: number;
 };
 
 class TemperatureService extends ServiceDelegate<TemperatureServiceValues> {

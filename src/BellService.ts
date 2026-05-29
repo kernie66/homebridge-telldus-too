@@ -18,8 +18,8 @@ import { wait } from './utils/utils.js';
 type BellServiceValues = {
   bell: boolean;
   disabled: boolean;
-  lastActivation: string;
   heartrate: number;
+  lastActivation: string;
   logLevel: number;
 };
 

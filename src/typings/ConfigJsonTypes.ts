@@ -17,5 +17,5 @@ export interface ConfigJson {
   configHeartrate?: number;
   randomize?: boolean;
   locale?: string;
-  ignoreIds?: number[];
+  ignoreIds?: Array<number>;
 }

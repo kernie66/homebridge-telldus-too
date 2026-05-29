@@ -18,9 +18,9 @@ interface TellstickServiceParams {
 
 type TellstickServiceValues = {
   lastUpdated: string;
-  tokenExpiration: string;
-  nextRefresh: string;
   logLevel: number;
+  nextRefresh: string;
+  tokenExpiration: string;
 };
 class TellstickService extends ServiceDelegate<TellstickServiceValues> {
   gateway: TdTellstickAccessory;

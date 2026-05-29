@@ -126,8 +126,8 @@ class TdMyCustomTypes extends CustomHomeKitTypes {
     );
 
     this.createCharacteristicClass(
-      'Toggle',
-      uuid('Toggle'),
+      'ToggleSwitch',
+      uuid('ToggleSwitch'),
       {
         format: this.Formats.BOOL,
         perms: [this.Perms.READ, this.Perms.NOTIFY, this.Perms.WRITE],

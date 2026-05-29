@@ -27,22 +27,22 @@ declare module 'homebridge-lib/AccessoryDelegate' {
     readonly Characteristic: object;
     readonly Characteristics: object;
     readonly Services: {
-      hap: {
-        Lightbulb: object;
-        Switch: object;
-        OccupancySensor: object;
-        TemperatureSensor: object;
-        HumiditySensor: object;
-        AirQualitySensor: object;
-      };
       eve: {
-        TemperatureSensor: object;
-        HumiditySensor: object;
         AirQualitySensor: object;
+        HumiditySensor: object;
+        TemperatureSensor: object;
+      };
+      hap: {
+        AirQualitySensor: object;
+        HumiditySensor: object;
+        Lightbulb: object;
+        OccupancySensor: object;
+        Switch: object;
+        TemperatureSensor: object;
       };
       my: {
-        Resource: object;
         DeconzGateway: object;
+        Resource: object;
       };
     };
     /** Create a new instance of a HomeKit accessory delegate.
@@ -99,10 +99,10 @@ declare module 'homebridge-lib/AccessoryDelegate' {
       */
     addPropertyDelegate(params?: {
       key: string;
-      value?: string | number | boolean;
       logLevel?: number;
-      unit?: string;
       silent?: boolean;
+      unit?: string;
+      value?: string | number | boolean;
     }): unknown;
     removePropertyDelegate(key: unknown): void;
     /** Returns the property delegate corresponding to the property key.

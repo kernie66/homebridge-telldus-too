@@ -19,21 +19,21 @@ import noResponseError from './utils/noResponseError.js';
 import { stateToText, wait } from './utils/utils.js';
 
 type SwitchServiceValues = {
-  on: boolean;
-  toggle: boolean;
   brightness: number;
-  random: boolean;
-  enableRandomOnce: boolean;
-  disableRandomOnce: boolean;
   delay: number;
+  disabled: boolean;
+  disableRandomOnce: boolean;
+  enabled: boolean;
+  enableRandomOnce: boolean;
+  heartrate: number;
+  lastActivation: string;
+  logLevel: number;
+  on: boolean;
+  random: boolean;
   repeats: number;
   repetition: number;
-  disabled: boolean;
-  enabled: boolean;
   status: string;
-  lastActivation: string;
-  heartrate: number;
-  logLevel: number;
+  toggleSwitch: boolean;
 };
 
 class SwitchService extends ServiceDelegate<SwitchServiceValues> {
@@ -129,7 +129,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           this.values.on = this.values.enabled;
           const controlText = this.values.enabled ? 'enabled' : 'disabled';
           const valueText = value ? 'ON' : 'OFF';
-          return Promise.reject(`Switch constantly ${controlText}, deactivate it to turn it ${valueText}!`);
+          throw `Switch constantly ${controlText}, deactivate it to turn it ${valueText}!`;
         }
         return value;
       },
@@ -202,55 +202,55 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       });
     }
 
-    // Add toggle characteristic
-    this.addCharacteristicDelegate({
-      key: 'toggle',
-      value: false,
-      Characteristic: this.td.Characteristics.Toggle,
-      setter: async (value) => {
-        assert(is<boolean>(value));
-        // Wait to let disabled and enabled values settle
-        await wait(100);
-        this.debug('Switch toggle setter called with value %s', value);
-        this.values.repetition = 0;
-        if (!this.values.disabled && !this.values.enabled) {
-          this.toggledBySetter = true;
-          this.switchOn = true;
-          this.updateImmediately = true;
-          this.endStatus = 'Toggled';
-          // Call setOn to toggle the switch
-          await this.setOn(switchAccessory);
-          await wait(1000);
-          this.switchOn = false;
-          await this.setOn(switchAccessory);
-        } else {
-          const controlText = this.values.enabled ? 'enabled' : 'disabled';
-          return Promise.reject(`Switch constantly ${controlText}, deactivate it to toggle it!`);
-        }
-        return false;
-      },
-    }).on('didSet', (value: boolean) => {
-      this.debug('Switch toggle didSet called with value %s', value);
-      this.debug('Toggled by setter: %s', this.toggledBySetter);
-      if (!this.toggledBySetter) {
-        this.values.repetition = 0;
-        if (!this.values.disabled && !this.values.enabled) {
-          this.updateImmediately = true;
-          void (async () => {
-            this.switchOn = true;
-            await this.setOn(switchAccessory);
-            await wait(1000);
-            this.switchOn = false;
-            await this.setOn(switchAccessory);
-          })();
-        } else {
-          const controlText = this.values.enabled ? 'enabled' : 'disabled';
-          this.log('Switch constantly %s, deactivate it to toggle it!', controlText);
-          this.values.toggle = false;
-        }
-      }
-      this.toggledBySetter = false;
-    });
+    // Add toggle switch characteristic
+    // this.addCharacteristicDelegate({
+    //   key: 'toggleSwitch',
+    //   value: false,
+    //   Characteristic: this.td.Characteristics.ToggleSwitch,
+    //   // setter: async (value) => {
+    //   //   assert(is<boolean>(value));
+    //   //   // Wait to let disabled and enabled values settle
+    //   //   await wait(100);
+    //   //   this.debug('Switch toggle setter called with value %s', value);
+    //   //   this.values.repetition = 0;
+    //   //   if (!this.values.disabled && !this.values.enabled) {
+    //   //     this.toggledBySetter = true;
+    //   //     this.switchOn = true;
+    //   //     this.updateImmediately = true;
+    //   //     this.endStatus = 'Toggled';
+    //   //     // Call setOn to toggle the switch
+    //   //     await this.setOn(switchAccessory);
+    //   //     await wait(1000);
+    //   //     this.switchOn = false;
+    //   //     await this.setOn(switchAccessory);
+    //   //   } else {
+    //   //     const controlText = this.values.enabled ? 'enabled' : 'disabled';
+    //   //     return Promise.reject(`Switch constantly ${controlText}, deactivate it to toggle it!`);
+    //   //   }
+    //   //   return false;
+    //   // },
+    // }).on('didSet', (value: boolean) => {
+    //   this.debug('Switch toggle didSet called with value %s', value);
+    //   this.debug('Toggled by setter: %s', this.toggledBySetter);
+    //   if (!this.toggledBySetter) {
+    //     this.values.repetition = 0;
+    //     if (!this.values.disabled && !this.values.enabled) {
+    //       this.updateImmediately = true;
+    //       void (async () => {
+    //         this.switchOn = true;
+    //         await this.setOn(switchAccessory);
+    //         await wait(1000);
+    //         this.switchOn = false;
+    //         await this.setOn(switchAccessory);
+    //       })();
+    //     } else {
+    //       const controlText = this.values.enabled ? 'enabled' : 'disabled';
+    //       this.log('Switch constantly %s, deactivate it to toggle it!', controlText);
+    //       this.values.toggleSwitch = false;
+    //     }
+    //   }
+    //   this.toggledBySetter = false;
+    // });
 
     this.addCharacteristicDelegate({
       key: 'random',
@@ -309,7 +309,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           // Let on.didSet handle the switch update logic
           this.values.on = false;
         } else if (this.values.enabled) {
-          return Promise.reject('Switch constantly enabled, deactivate it to disable the switch!');
+          throw 'Switch constantly enabled, deactivate it to disable the switch!';
         }
         return value;
       },
@@ -329,7 +329,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
           // Let on.didSet handle the switch update logic
           this.values.on = true;
         } else if (this.values.disabled) {
-          return Promise.reject('Switch constantly disabled, deactivate it to enable the switch!');
+          throw 'Switch constantly disabled, deactivate it to enable the switch!';
         }
         return value;
       },
@@ -410,6 +410,7 @@ class SwitchService extends ServiceDelegate<SwitchServiceValues> {
       // Reset single activation controls
       this.values.enableRandomOnce = false;
       this.values.disableRandomOnce = false;
+      this.values.toggleSwitch = false;
 
       // Check if the delay abort controller is active
       if (this.acDelayActive) {

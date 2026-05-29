@@ -81,18 +81,18 @@ declare module 'homebridge-lib/CustomHomeKitTypes' {
       key: string,
       uuid: string,
       props: {
-        format: HomebridgeAPI.hap.Characteristic.Format;
-        unit?: HomebridgeAPI.hap.Characteristic.Unit;
-        minValue?: number;
-        maxValue?: number;
-        minStep?: number;
-        maxLen?: number;
-        validValues?: Array<string | number | boolean>;
-        validValueRanges?: Array<[number, number]>;
         defaultValue?: string | number | boolean;
         description?: string;
+        format: HomebridgeAPI.hap.Characteristic.Format;
         manufacturerDescription?: string;
-        perms: HomebridgeAPI.hap.Characteristic.Perm[];
+        maxLen?: number;
+        maxValue?: number;
+        minStep?: number;
+        minValue?: number;
+        perms: Array<HomebridgeAPI.hap.Characteristic.Perm>;
+        unit?: HomebridgeAPI.hap.Characteristic.Unit;
+        validValueRanges?: Array<[number, number]>;
+        validValues?: Array<string | number | boolean>;
       },
       displayName?: string,
     ): {
@@ -121,11 +121,11 @@ declare module 'homebridge-lib/CustomHomeKitTypes' {
     createServiceClass(
       key: string,
       uuid: string,
-      Characteristics: {
-        key: string;
+      Characteristics: Array<{
         characteristic: string | number;
-      }[],
-      OptionalCharacteristics?: never[],
+        key: string;
+      }>,
+      OptionalCharacteristics?: Array<never>,
     ): {
       [key: string]: {
         UUID: string;

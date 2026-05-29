@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import { ResponseBodyError, ResponseBodySuccess } from '../../api/TelldusApi.types.js';
 import noResponseError from '../noResponseError.js';
 
+// oxlint-disable unicorn/consistent-function-scoping
+
 describe('Test Telldus API status code checker', () => {
   it('checks a normal 200 response', () => {
     const response: HttpResponse<ResponseBodySuccess> = {
@@ -14,7 +16,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -37,7 +39,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -61,7 +63,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -85,7 +87,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -109,7 +111,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -133,7 +135,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},
@@ -157,7 +159,7 @@ describe('Test Telldus API status code checker', () => {
       request: {
         name: 'GET',
         url: 'https://api.telldus.com/some-endpoint',
-        id: 12345,
+        id: 12_345,
         method: 'GET',
         resource: '/some-endpoint',
         headers: {},

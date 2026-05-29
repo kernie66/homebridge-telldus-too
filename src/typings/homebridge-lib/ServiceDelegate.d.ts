@@ -42,14 +42,14 @@ declare module 'homebridge-lib/ServiceDelegate' {
     // History: History;
 
     addCharacteristicDelegate(params: {
-      key: string;
       Characteristic: unknown;
-      unit?: string;
-      value?: unknown;
-      silent?: boolean;
+      getter?: () => Promise<unknown>;
+      key: string;
       props?: Record<string, unknown>;
       setter?: (value: boolean | number | string) => Promise<void | boolean | number | string>;
-      getter?: () => Promise<unknown>;
+      silent?: boolean;
+      unit?: string;
+      value?: unknown;
     }): CharacteristicDelegate;
 
     characteristicDelegate(key: string): CharacteristicDelegate;

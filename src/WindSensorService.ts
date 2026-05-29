@@ -13,12 +13,12 @@ import { toEveDate } from './utils/dateTimeHelpers.js';
 import { windDirection } from './utils/utils.js';
 
 type WindSensorServiceValues = {
-  wind?: string;
-  windSpeed?: number;
-  maximumWindSpeed?: number;
-  observationTime?: string;
   heartrate: number;
   logLevel: number;
+  maximumWindSpeed?: number;
+  observationTime?: string;
+  wind?: string;
+  windSpeed?: number;
 };
 
 class WindSensorService extends ServiceDelegate<WindSensorServiceValues> {

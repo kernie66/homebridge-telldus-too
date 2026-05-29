@@ -9,19 +9,19 @@ declare module 'homebridge-lib/HttpClient' {
     static get HttpResponse(): typeof HttpResponse;
 
     constructor(params: {
-      https?: boolean;
-      host?: string;
-      port?: number;
-      path?: string;
-      url?: string;
       headers?: {
         [key: string]: string;
       };
+      host?: string;
+      https?: boolean;
       json?: boolean;
-      timeout?: number;
-      maxSockets?: number;
       keepAlive?: boolean;
-      validStatusCodes?: number[];
+      maxSockets?: number;
+      path?: string;
+      port?: number;
+      timeout?: number;
+      url?: string;
+      validStatusCodes?: Array<number>;
     });
     _setUrl(): void;
     /** Server IP address.

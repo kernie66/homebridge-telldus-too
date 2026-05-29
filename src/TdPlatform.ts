@@ -147,8 +147,8 @@ class TdPlatform extends Platform<TdPlatform> {
   }
 
   async init() {
-    const deviceArray: number[] = [];
-    const sensorArray: number[] = [];
+    const deviceArray: Array<number> = [];
+    const sensorArray: Array<number> = [];
     const errorLogger = this.error.bind(this);
 
     this.debug('Initializing platform');
@@ -297,7 +297,7 @@ class TdPlatform extends Platform<TdPlatform> {
       }
 
       this.switchAccessories = {};
-      const validSwitches: Required<SwitchConfigTypes>[] = [];
+      const validSwitches: Array<Required<SwitchConfigTypes>> = [];
       // Parse the Telldus devices
       for (const id of deviceArray) {
         const switchConfig: Required<SwitchConfigTypes> = {
@@ -475,6 +475,7 @@ class TdPlatform extends Platform<TdPlatform> {
         );
         const switchAccessory = new TdSwitchAccessory(this, switchParams);
         this.setStateCache(tdSwitch);
+        // oxlint-disable-next-line @nkzw/no-instanceof
         assert(switchAccessory instanceof EventEmitter, 'Expected switchAccessory to be an instance of EventEmitter');
         jobs.push(once(switchAccessory, 'initialised'));
       }

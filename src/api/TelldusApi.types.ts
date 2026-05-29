@@ -1,20 +1,20 @@
 import type { SensorModelType } from '../typings/SensorTypes.js';
 
 export type RefreshTokenResponse = {
+  error?: string;
   expires: number;
   token: string;
-  error?: string;
 };
 
 export interface DeviceListType extends ResponseBodyError {
-  device: {
+  device: Array<{
     id: number;
-    name: string;
     methods: number;
+    name: string;
     state: number;
     statevalue: string;
     type: string;
-  }[];
+  }>;
 }
 
 export interface DeviceInfoType extends ResponseBodyError {
@@ -29,15 +29,15 @@ export interface DeviceInfoType extends ResponseBodyError {
 }
 
 export interface SensorListType extends ResponseBodyError {
-  sensor: {
-    id: number;
-    name: string;
-    model: SensorModelType;
-    protocol: string;
-    novalues?: boolean;
-    sensorId: number;
+  sensor: Array<{
     battery: number;
-  }[];
+    id: number;
+    model: SensorModelType;
+    name: string;
+    novalues?: boolean;
+    protocol: string;
+    sensorId: number;
+  }>;
 }
 
 export interface SensorInfoType extends ResponseBodyError {
@@ -49,12 +49,12 @@ export interface SensorInfoType extends ResponseBodyError {
   sensorId: number;
   battery: number;
   lastUpdated: number;
-  data: {
+  data: Array<{
     lastUpdated: number;
     name: string;
-    value: number;
     scale: number;
-  }[];
+    value: number;
+  }>;
 }
 
 export interface SystemInfoType extends ResponseBodyError {

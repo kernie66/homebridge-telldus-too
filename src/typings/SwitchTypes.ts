@@ -32,8 +32,8 @@ export interface SwitchAccessoryParams extends AccessoryParams {
 }
 
 export type SwitchServiceParams = {
-  name?: string;
   lightbulb?: boolean;
-  Service?: unknown;
+  name?: string;
   primaryService?: boolean;
+  Service?: unknown;
 };

@@ -12,12 +12,12 @@ import type { SensorServiceParams } from './typings/SensorTypes.js';
 import { toEveDate } from './utils/dateTimeHelpers.js';
 
 type RainSensorServiceValues = {
+  heartrate: number;
+  logLevel: number;
+  observationTime?: string;
   rain: boolean;
   rain1h: number;
   rain24h: number;
-  observationTime?: string;
-  heartrate: number;
-  logLevel: number;
 };
 
 class RainSensorService extends ServiceDelegate<RainSensorServiceValues> {

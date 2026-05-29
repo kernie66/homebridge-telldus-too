@@ -4,11 +4,13 @@
 
 import type { ResponseBodyError } from '../api/TelldusApi.types.js';
 
+// oxlint-disable no-console
+
 // Function to check the HTTP status code when Telldus responds with an error
 // Return true if no error is identified, else false
 export default function noResponseError<T>(
   response: HttpResponse<T extends ResponseBodyError ? T : T & ResponseBodyError>,
-  logger: (message: string, ...args: unknown[]) => void = console.error,
+  logger: (message: string, ...args: Array<unknown>) => void = console.error,
 ) {
   // Check if it is a normal 200 response but with error instead of reply
   if (response.body.error) {

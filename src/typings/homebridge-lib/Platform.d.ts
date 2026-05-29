@@ -43,7 +43,12 @@ declare module 'homebridge-lib/Platform' {
      * in Homebridge's `config.json`.
      * @param {!Platform} Platform - The constructor of the platform plugin.
      */
-    static loadPlatform(homebridge: HomebridgeAPI, packageJson: any, platformName: string, Platform: TdPlatform): void;
+    static loadPlatform(
+      homebridge: HomebridgeAPI,
+      packageJson: unknown,
+      platformName: string,
+      Platform: TdPlatform,
+    ): void;
     get Accessory(): HomebridgeAPI.hap.Accessory;
     get Services(): HomebridgeAPI.hap.Services;
     get Characteristic(): HomebridgeAPI.hap.Characteristic;
@@ -82,11 +87,11 @@ declare module 'homebridge-lib/Platform' {
      */
     createDumpFile(dumpInfo?: unknown): Promise<void>;
     _flushCachedAccessories(): void;
-    _beat(beat: any): void;
+    _beat(beat: number): void;
     _shutdown(): void;
     _exit(): void;
     _identify(): void;
-    _checkLatest(name: any, version: any): Promise<void>;
+    _checkLatest(name: string, version: string): Promise<void>;
     /** Configure an accessory, after it has been restored from peristent
      * storage.
      *
@@ -96,9 +101,9 @@ declare module 'homebridge-lib/Platform' {
      * @param {!PlatformAccessory} accessory - The restored Homebridge
      * [PlatformAccessory](https://github.com/nfarina/homebridge/blob/master/lib/platformAccessory.js).
      */
-    configureAccessory(accessory: any): void;
-    _getAccessory(delegate: any, params: any): any;
-    _removeAccessory(accessory: any): void;
+    configureAccessory(accessory: unknown): void;
+    _getAccessory(delegate: unknown, params: unknown): unknown;
+    _removeAccessory(accessory: unknown): void;
     /** Configure UPnP discovery.
      *
      * @param {!object} config - ...
@@ -112,7 +117,7 @@ declare module 'homebridge-lib/Platform' {
      * @param {integer} config.timeout - Timeout (in seconds) for UPnP search.
      * Default: `5`.
      */
-    upnpConfig(config: any): void;
+    upnpConfig(config: object): void;
     /** Handler for requests from the Homebridge Plugin UI Server.
      * @function Platform#onUiRequest
      * @async
@@ -123,7 +128,7 @@ declare module 'homebridge-lib/Platform' {
      * @returns {*} - The response body.
      */
     _createUiServer(): Promise<void>;
-    _message(level: any, logLevel: number, namePrefix: any, ...args: any[]): void;
+    _message(level: string, logLevel: number, namePrefix: string, ...args: Array<unknown>): void;
   }
   export { Platform };
 }

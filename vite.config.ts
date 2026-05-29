@@ -1,10 +1,16 @@
+import nkzw from '@nkzw/oxlint-config';
 import { configDefaults, defineConfig } from 'vite-plus';
 
 export default defineConfig({
   fmt: {
-    singleQuote: true,
-    printWidth: 120,
+    arrowParens: 'always',
+    bracketSpacing: true,
     jsPlugins: ['eslint-plugin-unused-imports'],
+    jsxBracketSameLine: false,
+    printWidth: 120,
+    quoteProps: 'as-needed',
+    semi: true,
+    singleQuote: true,
     sortImports: {
       groups: [
         'type-import',
@@ -16,21 +22,41 @@ export default defineConfig({
         'unknown',
       ],
     },
+    tabWidth: 2,
+    trailingComma: 'all',
+    useTabs: false,
   },
   lint: {
+    extends: [nkzw],
     ignorePatterns: ['dist/**'],
-    options: { typeAware: true, typeCheck: true },
+    //options: { typeAware: true, typeCheck: true },
+    rules: {
+      'perfectionist/sort-objects': 'off', // Disable sorting of object properties to maintain logical grouping and readability
+      'perfectionist/sort-object-types': 'off', // Disable sorting of object properties to maintain logical grouping and readability
+      'perfectionist/sort-interfaces': 'off', // Disable sorting of interface members to maintain logical grouping and readability
+      'unicorn/numeric-separators-style': [
+        'error',
+        {
+          onlyIfContainsSeparator: true,
+          minimumDigits: 6,
+          hexadecimal: { groupLength: 4 },
+        },
+      ],
+    },
+    options: {
+      reportUnusedDisableDirectives: 'warn',
+    },
   },
   staged: {
     '*': 'vp check --fix',
   },
   test: {
-    globals: true,
-    exclude: [...configDefaults.exclude, 'dist/*'],
-    setupFiles: './test/vitest.setup.ts',
     coverage: {
-      include: ['src/**/*.{ts,js}'],
       exclude: ['**/__tests__/**'],
+      include: ['src/**/*.{ts,js}'],
     },
+    exclude: [...configDefaults.exclude, 'dist/*'],
+    globals: true,
+    setupFiles: './test/vitest.setup.ts',
   },
 });

@@ -19,8 +19,8 @@ import uuid from './utils/uuid.js';
 type TellstickAccessoryValues = {
   accessToken: string;
   configAccessToken: string;
-  tokenExpires: number;
   nextRefresh: number;
+  tokenExpires: number;
 };
 class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccessoryValues> {
   service!: TellstickService;
@@ -38,10 +38,10 @@ class TdTellstickAccessory extends AccessoryDelegate<TdPlatform, TellstickAccess
     platform: TdPlatform,
     params: {
       config: {
-        name: string;
-        ipAddress: string;
         accessToken?: string;
+        ipAddress: string;
         locale?: string;
+        name: string;
       };
     },
   ) {
