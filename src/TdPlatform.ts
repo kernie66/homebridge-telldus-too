@@ -3,7 +3,7 @@
 //
 // Homebridge plugin for Telldus.
 
-import type { API, Logger } from 'homebridge';
+import type { API, Logger, Perms, PlatformAccessory } from 'homebridge';
 
 import { OptionParser } from 'homebridge-lib/OptionParser';
 import { Platform } from 'homebridge-lib/Platform';
@@ -26,6 +26,7 @@ import checkSensorType from './utils/checkSensorType.js';
 import { getTimestamp, isoDateTimeToEveDate } from './utils/dateTimeHelpers.js';
 import { handleError, handleErrorSync } from './utils/handleError.js';
 import noResponseError from './utils/noResponseError.js';
+import { getExpectedPerms, repairCachedPerms } from './utils/repairCachedPerms.js';
 import { stateToText } from './utils/utils.js';
 import uuid from './utils/uuid.js';
 
@@ -54,6 +55,7 @@ class TdPlatform extends Platform<TdPlatform> {
   platformBeatRate: number;
   stateCache: NodeCache;
   td: TdMyCustomTypes;
+  expectedPerms?: Map<string, Perms[]>;
   numberOfDevices!: number;
   numberOfSensors!: number;
   switchAccessories!: {
@@ -144,6 +146,17 @@ class TdPlatform extends Platform<TdPlatform> {
     this.on('shutdown', async () => {
       return this.shutdown();
     });
+  }
+
+  // Repair invalid permissions in cached accessories before homebridge-lib restores them.
+  override configureAccessory(accessory: PlatformAccessory) {
+    this.expectedPerms ??= getExpectedPerms(this.td.Characteristics);
+    const repaired = repairCachedPerms(accessory, this.expectedPerms);
+    if (repaired.length > 0) {
+      this.log('%s: repaired cached permissions of %d characteristics', accessory.displayName, repaired.length);
+      this.debug('%s: repaired characteristics: %s', accessory.displayName, repaired.join(', '));
+    }
+    super.configureAccessory(accessory);
   }
 
   async init() {
